@@ -1,0 +1,35 @@
+# eSYNAPSE 360 — Exclusiones del repositorio
+
+# Python / Django
+backend/venv/
+backend/db.sqlite3
+__pycache__/
+*.pyc
+
+# Node / React
+frontend/node_modules/
+frontend/dist/
+
+# Entornos y secretos
+.env
+.env.local
+*.log
+
+# Sistema operativo
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# Archivos subidos por usuarios (documentos, evidencias)
+backend/media/
+
+# Certificados digitales y llaves privadas — JAMAS al repositorio
+*.pfx
+*.p12
+*.pem
+*.key
+backend/certificados/
+
+# Respaldos locales de base de datos y archivos
+backend/backups/
+obser.txt

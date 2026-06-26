@@ -1,0 +1,40 @@
+python -m venv venv          → crear el entorno virtual
+pip install -r requirements.txt → instalar Django y dependencias
+python manage.py createsuperuser → crear tu usuario admin
+npm install                  → instalar dependencias del frontend
+---------------------------------------------------------------------
+:: Terminal 1 — backend
+cd "D:\eSYNAPSE 360\backend"
+venv\Scripts\activate
+python manage.py runserver
+
+:: Terminal 2 — frontend
+cd "D:\eSYNAPSE 360\frontend"
+npm run dev
+
+
+===========================================================================
+
+http://127.0.0.1:8000/admin/ ---> núcleo
+
+cd "D:\eSYNAPSE 360\backend"
+python -m venv venv
+venv\Scripts\activate
+pip install -r requirements.txt
+python manage.py migrate
+python manage.py createsuperuser
+python manage.py runserver
+
+Usuario: admin
+Contraseña: @dmin_$6k
+
+===========================================================================
+
+http://localhost:5173 ---> sistema
+
+cd "D:\eSYNAPSE 360\frontend"
+npm install
+npm run dev
+
+Miguel
+metrologo123
