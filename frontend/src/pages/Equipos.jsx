@@ -5,6 +5,7 @@ import {
 import Modal from '../components/Modal.jsx'
 import { api } from '../lib/api.js'
 import { useAuth } from '../context/AuthContext.jsx'
+import { useConfirm } from '../context/ConfirmContext.jsx'
 import { fechaHora } from '../lib/fecha.js'
 
 const MAGNITUDES = [
@@ -70,6 +71,7 @@ function Campo({ label, children }) {
 
 export default function Equipos() {
   const { tienePermiso } = useAuth()
+  const confirmar = useConfirm()
   const [items, setItems] = useState([])
   const [buscar, setBuscar] = useState('')
   const [magnitud, setMagnitud] = useState('')
@@ -143,7 +145,10 @@ export default function Equipos() {
     setRegForm(REG_VACIO); setRegFile(null)
   })
 
-  const eliminarRegistro = (rid) => accion(() => api.equipos.eliminarRegistro(detalle.id, rid))
+  const eliminarRegistro = async (rid) => {
+    if (!await confirmar({ titulo: 'Eliminar registro', mensaje: '¿Eliminar este registro de la bitácora?', textoConfirmar: 'Eliminar', peligro: true })) return
+    accion(() => api.equipos.eliminarRegistro(detalle.id, rid))
+  }
 
   const subirImagen = (file) => accion(async () => {
     const fd = new FormData(); fd.append('imagen', file)
@@ -313,7 +318,7 @@ export default function Equipos() {
                   <button onClick={() => accion(() => api.equipos.reactivar(detalle.id))} className="btn-ghost text-xs"><RotateCcw className="h-3.5 w-3.5" /> Reactivar</button>
                 )}
                 {puedeEliminar && detalle.estado !== 'baja' && (
-                  <button onClick={() => { if (confirm('¿Dar de baja el equipo?')) accion(() => api.equipos.darBaja(detalle.id)) }} className="btn-ghost text-xs text-red-500"><Trash2 className="h-3.5 w-3.5" /> Dar de baja</button>
+                  <button onClick={async () => { if (await confirmar({ titulo: 'Dar de baja', mensaje: '¿Dar de baja el equipo? Esta acción cambia su estado a inactivo.', textoConfirmar: 'Dar de baja', peligro: true })) accion(() => api.equipos.darBaja(detalle.id)) }} className="btn-ghost text-xs text-red-500"><Trash2 className="h-3.5 w-3.5" /> Dar de baja</button>
                 )}
               </div>
             </div>

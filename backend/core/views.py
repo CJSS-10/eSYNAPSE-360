@@ -5,6 +5,7 @@ y log de auditoría en cada acción (vía middleware + señales).
 """
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
+from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.token_blacklist.models import (
@@ -13,12 +14,13 @@ from rest_framework_simplejwt.token_blacklist.models import (
 )
 
 from .constants import MODULOS, OPERACIONES
-from .models import LogAuditoria, Permiso, Rol, RolUsuario, Usuario
+from .models import LogAuditoria, OpcionCatalogo, Permiso, Rol, RolUsuario, Usuario
 from .permissions import PermisoModular, SoloAdministradores
 from .serializers import (
     CambiarPasswordSerializer,
     LogAuditoriaSerializer,
     MeSerializer,
+    OpcionCatalogoSerializer,
     PermisoSerializer,
     RolSerializer,
     RolUsuarioSerializer,
@@ -43,6 +45,7 @@ class UsuarioViewSet(viewsets.ModelViewSet):
     """
     queryset = Usuario.objects.all().order_by('username')
     permission_classes = [PermisoModular]
+    parser_classes = [JSONParser, FormParser, MultiPartParser]
     modulo = 'usuarios'
 
     def get_serializer_class(self):
@@ -193,6 +196,33 @@ class RolUsuarioViewSet(viewsets.ModelViewSet):
     modulo = 'usuarios'
 
 
+class OpcionCatalogoViewSet(viewsets.ModelViewSet):
+    """
+    Catálogo gestionable de Áreas y Laboratorios para los desplegables.
+    Filtros: ?tipo=area | ?tipo=laboratorio · ?incluir_inactivos=1
+    """
+    queryset = OpcionCatalogo.objects.all()
+    serializer_class = OpcionCatalogoSerializer
+    permission_classes = [PermisoModular]
+    modulo = 'usuarios'
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        tipo = self.request.query_params.get('tipo')
+        if tipo:
+            qs = qs.filter(tipo=tipo)
+        if self.request.query_params.get('incluir_inactivos') != '1':
+            qs = qs.filter(is_active=True)
+        return qs
+
+    def destroy(self, request, *args, **kwargs):
+        """Soft delete: desactiva la opción (no se borra para conservar referencias)."""
+        opcion = self.get_object()
+        opcion.is_active = False
+        opcion.save()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
 class LogAuditoriaViewSet(viewsets.ReadOnlyModelViewSet):
     """
     Log de auditoría: SOLO lectura y SOLO administradores (sección 0.3).
@@ -224,7 +254,7 @@ class MeView(APIView):
     """GET /api/auth/me/ — usuario autenticado con sus permisos efectivos."""
 
     def get(self, request):
-        return Response(MeSerializer(request.user).data)
+        return Response(MeSerializer(request.user, context={'request': request}).data)
 
 
 class CambiarPasswordView(APIView):

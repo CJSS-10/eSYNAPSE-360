@@ -118,9 +118,17 @@ export const api = {
     listar: (params = '') => apiFetch(`/usuarios/${params}`),
     crear: (data) => apiFetch('/usuarios/', { method: 'POST', body: data }),
     editar: (id, data) => apiFetch(`/usuarios/${id}/`, { method: 'PATCH', body: data }),
+    editarMultipart: (id, formData) => apiUpload(`/usuarios/${id}/`, formData, { method: 'PATCH' }),
     desactivar: (id) => apiFetch(`/usuarios/${id}/`, { method: 'DELETE' }),
     activar: (id) => apiFetch(`/usuarios/${id}/activar/`, { method: 'POST' }),
     asignarRoles: (id, roles) => apiFetch(`/usuarios/${id}/asignar_roles/`, { method: 'POST', body: { roles } }),
+  },
+  // Catálogo gestionable (áreas / laboratorios)
+  opcionesCatalogo: {
+    listar: (tipo) => apiFetch(`/opciones-catalogo/?tipo=${tipo}`),
+    crear: (tipo, nombre) => apiFetch('/opciones-catalogo/', { method: 'POST', body: { tipo, nombre } }),
+    editar: (id, data) => apiFetch(`/opciones-catalogo/${id}/`, { method: 'PATCH', body: data }),
+    eliminar: (id) => apiFetch(`/opciones-catalogo/${id}/`, { method: 'DELETE' }),
   },
   // Roles
   roles: {

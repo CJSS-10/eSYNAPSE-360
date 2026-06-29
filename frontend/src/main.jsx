@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom'
 import App from './App.jsx'
 import { AuthProvider } from './context/AuthContext.jsx'
 import { ConfigProvider } from './context/ConfigContext.jsx'
+import { ConfirmProvider } from './context/ConfirmContext.jsx'
 import './index.css'
 
 // Tema: oscuro por defecto, respeta la preferencia guardada
@@ -15,7 +16,9 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     <BrowserRouter>
       <ConfigProvider>
         <AuthProvider>
-          <App />
+          <ConfirmProvider>
+            <App />
+          </ConfirmProvider>
         </AuthProvider>
       </ConfigProvider>
     </BrowserRouter>

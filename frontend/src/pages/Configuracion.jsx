@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
-import { SlidersHorizontal, Save, Power, Lock } from 'lucide-react'
+import { SlidersHorizontal, Save, Power, Lock, FolderTree } from 'lucide-react'
 import { api } from '../lib/api.js'
 import { useConfig } from '../context/ConfigContext.jsx'
 import { useAuth } from '../context/AuthContext.jsx'
+import GestionCatalogo from '../components/ui/GestionCatalogo.jsx'
 
 export default function Configuracion() {
   const { recargarConfig } = useConfig()
@@ -148,6 +149,22 @@ export default function Configuracion() {
           </div>
         </div>
         <button onClick={guardarMarca} className="btn-primary mt-4 !py-1.5 text-xs"><Save className="h-3.5 w-3.5" /> Guardar</button>
+      </div>
+
+      {/* Áreas y Laboratorios — catálogo de los desplegables de Usuarios */}
+      <div className="card-esynapse p-5">
+        <div className="mb-1 flex items-center gap-2">
+          <FolderTree className="h-5 w-5 text-esynapse-500" />
+          <h2 className="text-lg font-semibold">Áreas y Laboratorios</h2>
+        </div>
+        <p className="mb-4 text-xs text-slate-500 dark:text-slate-400">
+          Estas listas alimentan los desplegables de la ficha de usuario. Renombra para corregir un error,
+          quita las que sobran o agrega nuevas. Quitar una opción solo la oculta del desplegable; no afecta a los usuarios que ya la tengan asignada.
+        </p>
+        <div className="grid gap-6 md:grid-cols-2">
+          <GestionCatalogo tipo="area" titulo="Áreas" singular="área" />
+          <GestionCatalogo tipo="laboratorio" titulo="Laboratorios" singular="laboratorio" />
+        </div>
       </div>
 
       {/* Módulos — SOLO el propietario del sistema (superusuario) */}

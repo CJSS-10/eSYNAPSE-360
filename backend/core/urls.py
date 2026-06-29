@@ -13,6 +13,7 @@ from .views import (
     CatalogoView,
     LogAuditoriaViewSet,
     MeView,
+    OpcionCatalogoViewSet,
     PermisoViewSet,
     RolUsuarioViewSet,
     RolViewSet,
@@ -25,6 +26,7 @@ router.register('roles', RolViewSet, basename='roles')
 router.register('permisos', PermisoViewSet, basename='permisos')
 router.register('roles-usuarios', RolUsuarioViewSet, basename='roles-usuarios')
 router.register('auditoria', LogAuditoriaViewSet, basename='auditoria')
+router.register('opciones-catalogo', OpcionCatalogoViewSet, basename='opciones-catalogo')
 
 urlpatterns = [
     path('auth/me/', MeView.as_view(), name='me'),

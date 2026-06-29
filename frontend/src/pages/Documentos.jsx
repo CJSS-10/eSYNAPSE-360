@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import {
-  AlertTriangle, CheckCircle2, Download, Eye, FileText, FileUp, Globe, Lock, Pencil, Plus,
+  AlertTriangle, Archive, CheckCircle2, Download, Eye, FileText, FileUp, FolderOpen, Globe, Lock, Pencil, Plus,
   Save, Search, Send, ShieldQuestion, XCircle,
 } from 'lucide-react'
 import Modal from '../components/Modal.jsx'
@@ -675,7 +675,7 @@ export default function Documentos() {
                 </div>
 
                 <input type="password" className="input-esynapse" autoComplete="current-password"
-                  placeholder="🔒 Tu contraseña — autoriza y firma esta edición"
+                  placeholder="Tu contraseña — autoriza y firma esta edición"
                   value={passFicha} onChange={(e) => setPassFicha(e.target.value)} />
                 {errFicha && <p className="rounded-lg bg-red-500/10 px-3 py-2 text-xs text-red-500">{errFicha}</p>}
                 <div className="flex justify-end gap-2">
@@ -847,7 +847,7 @@ export default function Documentos() {
                               className="block w-full text-xs text-slate-500 file:mr-2 file:rounded-lg file:border-0 file:bg-slate-200 file:px-2 file:py-1 file:text-xs dark:file:bg-slate-700 dark:file:text-slate-200" />
                           </div>
                           {vp?.requiere_recarga && !archivoCorregido && (
-                            <p className="text-[11px] text-amber-600 dark:text-amber-400">🔒 Adjunta el documento corregido para poder enviarlo a revisión.</p>
+                            <p className="text-[11px] text-amber-600 dark:text-amber-400">Adjunta el documento corregido para poder enviarlo a revisión.</p>
                           )}
                         </div>
                       )}
@@ -897,7 +897,7 @@ export default function Documentos() {
                 {((vp?.estado === 'borrador' && tienePermiso('documentos', 'editar')) ||
                   ((vp?.estado === 'en_revision' || vp?.estado === 'en_aprobacion') && tienePermiso('documentos', 'aprobar'))) && (
                   <input type="password" className="input-esynapse" autoComplete="current-password"
-                    placeholder="🔒 Tu contraseña — segundo factor para firmar electrónicamente"
+                    placeholder="Tu contraseña — segundo factor para firmar electrónicamente"
                     value={passFirma} onChange={(e) => setPassFirma(e.target.value)} />
                 )}
                 {vp?.estado === 'en_aprobacion' && tienePermiso('documentos', 'aprobar') && !(vp?.archivo || '').toLowerCase().endsWith('.pdf') && (
@@ -971,12 +971,12 @@ export default function Documentos() {
                 {!detalle.archivado ? (
                   <button onClick={() => setConfirmar({ tipo: 'archivar', doc: detalle })}
                     className="btn-secondary !py-1.5 text-xs">
-                    📦 Archivar documento
+                    <Archive className="h-3.5 w-3.5" /> Archivar documento
                   </button>
                 ) : (
                   <button onClick={() => accion(() => api.documentos.desarchivar(detalle.id))}
                     className="btn-secondary !py-1.5 text-xs">
-                    📂 Desarchivar (volver al uso activo)
+                    <FolderOpen className="h-3.5 w-3.5" /> Desarchivar (volver al uso activo)
                   </button>
                 )}
                 <button onClick={() => setConfirmar({ tipo: 'eliminar', doc: detalle })}
@@ -986,7 +986,7 @@ export default function Documentos() {
                 {!editandoCodigo ? (
                   <button onClick={() => { setNuevoCodigo(detalle.codigo); setEditandoCodigo(true) }}
                     className="btn-secondary !py-1.5 text-xs">
-                    ✏ Cambiar código
+                    <Pencil className="h-3.5 w-3.5" /> Cambiar código
                   </button>
                 ) : (
                   <div className="flex w-full items-center gap-2">

@@ -1,12 +1,14 @@
 import { useCallback, useEffect, useState } from 'react'
-import { KeyRound, Pencil, Plus, RotateCcw, Search, UserX } from 'lucide-react'
+import { ImagePlus, KeyRound, Pencil, Plus, RotateCcw, Search, UserX } from 'lucide-react'
 import Modal from '../components/Modal.jsx'
+import Avatar from '../components/ui/Avatar.jsx'
+import SelectConCrear from '../components/ui/SelectConCrear.jsx'
 import { api } from '../lib/api.js'
 import { useAuth } from '../context/AuthContext.jsx'
 
 const FORM_VACIO = {
   username: '', first_name: '', last_name: '', email: '',
-  area: '', laboratorio: '', cargo: '', telefono: '', roles: [],
+  area: '', laboratorio: '', cargo: '', telefono: '', roles: [], foto: null,
 }
 
 export default function Usuarios() {
@@ -20,6 +22,7 @@ export default function Usuarios() {
   const [error, setError] = useState('')
   const [passwordTemporal, setPasswordTemporal] = useState(null)
   const [confirmar, setConfirmar] = useState(null)
+  const [fotoPreview, setFotoPreview] = useState(null)
 
   const cargar = useCallback(async () => {
     const params = new URLSearchParams()
@@ -34,13 +37,14 @@ export default function Usuarios() {
     api.roles.listar().then((d) => setRoles(d.results ?? d)).catch(() => {})
   }, [])
 
-  const abrirCrear = () => { setForm(FORM_VACIO); setError(''); setModal('crear') }
+  const abrirCrear = () => { setForm(FORM_VACIO); setFotoPreview(null); setError(''); setModal('crear') }
   const abrirEditar = (u) => {
     setForm({
       username: u.username, first_name: u.first_name, last_name: u.last_name,
       email: u.email, area: u.area, laboratorio: u.laboratorio, cargo: u.cargo,
-      telefono: u.telefono, roles: (u.roles || []).map((r) => r.id),
+      telefono: u.telefono, roles: (u.roles || []).map((r) => r.id), foto: null,
     })
+    setFotoPreview(u.foto_url || null)
     setError('')
     setModal(u)
   }
@@ -53,8 +57,15 @@ export default function Usuarios() {
         const creado = await api.usuarios.crear(form)
         if (creado.password_temporal) setPasswordTemporal({ usuario: creado.username, clave: creado.password_temporal })
       } else {
-        const { roles: rolesIds, username, ...datos } = form
-        await api.usuarios.editar(modal.id, datos)
+        const { roles: rolesIds, username, foto, ...datos } = form
+        if (foto) {
+          const fd = new FormData()
+          Object.entries(datos).forEach(([k, v]) => fd.append(k, v ?? ''))
+          fd.append('foto', foto)
+          await api.usuarios.editarMultipart(modal.id, fd)
+        } else {
+          await api.usuarios.editar(modal.id, datos)
+        }
         await api.usuarios.asignarRoles(modal.id, rolesIds)
       }
       setModal(null)
@@ -142,7 +153,12 @@ export default function Usuarios() {
           <tbody>
             {usuarios.map((u) => (
               <tr key={u.id} className="border-b border-slate-100 last:border-0 dark:border-slate-800/60">
-                <td className="px-4 py-3 font-medium">{u.username}</td>
+                <td className="px-4 py-3">
+                  <div className="flex items-center gap-2.5">
+                    <Avatar src={u.foto_url} nombre={u.nombre_completo || u.username} className="h-8 w-8 text-[11px]" />
+                    <span className="font-medium">{u.username}</span>
+                  </div>
+                </td>
                 <td className="px-4 py-3">{u.nombre_completo}</td>
                 <td className="px-4 py-3 text-slate-500 dark:text-slate-400">
                   {u.area}{u.laboratorio ? ` / ${u.laboratorio}` : ''}
@@ -214,11 +230,27 @@ export default function Usuarios() {
             {campo('Email', 'email', { type: 'email', required: true })}
             {campo('Nombres', 'first_name')}
             {campo('Apellidos', 'last_name')}
-            {campo('Área', 'area', { required: true })}
-            {campo('Laboratorio', 'laboratorio')}
+            <SelectConCrear tipo="area" label="Área" value={form.area} onChange={(v) => setForm({ ...form, area: v })} required />
+            <SelectConCrear tipo="laboratorio" label="Laboratorio" value={form.laboratorio} onChange={(v) => setForm({ ...form, laboratorio: v })} />
             {campo('Cargo', 'cargo', { required: true })}
             {campo('Teléfono', 'telefono')}
           </div>
+          {modal !== 'crear' && (
+            <div>
+              <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">Foto de perfil</label>
+              <div className="flex items-center gap-3">
+                <Avatar src={fotoPreview} nombre={form.first_name || form.username} className="h-14 w-14 text-base" />
+                <label className="btn-secondary cursor-pointer">
+                  <ImagePlus className="h-4 w-4" /> Subir foto
+                  <input type="file" accept="image/*" className="hidden"
+                    onChange={(e) => {
+                      const f = e.target.files[0]
+                      if (f) { setForm({ ...form, foto: f }); setFotoPreview(URL.createObjectURL(f)) }
+                    }} />
+                </label>
+              </div>
+            </div>
+          )}
           <div>
             <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">Roles</label>
             <div className="flex flex-wrap gap-2">

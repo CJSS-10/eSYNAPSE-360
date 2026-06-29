@@ -46,6 +46,7 @@ class Usuario(AbstractUser):
     laboratorio = models.CharField('Laboratorio', max_length=100, blank=True)
     cargo = models.CharField('Cargo', max_length=100)
     telefono = models.CharField('Teléfono', max_length=20, blank=True)
+    foto = models.FileField('Foto de perfil', upload_to='usuarios/fotos/', null=True, blank=True)
     # is_active ya viene en AbstractUser — se usa para soft delete
 
     created_at = models.DateTimeField('Fecha de creación', auto_now_add=True)
@@ -281,3 +282,28 @@ class ModuloHabilitado(models.Model):
         habilitados = set(cls.objects.filter(habilitado=True).values_list('clave', flat=True))
         habilitados.update(MODULOS_NUCLEO)
         return habilitados
+
+
+class OpcionCatalogo(models.Model):
+    """
+    Catálogo editable de opciones organizacionales (Áreas y Laboratorios)
+    que alimentan los desplegables del sistema. Gestionable desde la UI:
+    el administrador puede crear nuevas áreas/laboratorios sobre la marcha.
+    """
+    TIPOS = [('area', 'Área'), ('laboratorio', 'Laboratorio')]
+
+    tipo = models.CharField('Tipo', max_length=20, choices=TIPOS, db_index=True)
+    nombre = models.CharField('Nombre', max_length=100)
+    is_active = models.BooleanField('Activo', default=True)
+    orden = models.PositiveIntegerField('Orden', default=0)
+
+    class Meta:
+        verbose_name = 'Opción de catálogo'
+        verbose_name_plural = 'Opciones de catálogo (áreas/laboratorios)'
+        ordering = ['tipo', 'orden', 'nombre']
+        constraints = [
+            models.UniqueConstraint(fields=['tipo', 'nombre'], name='unique_opcion_tipo_nombre'),
+        ]
+
+    def __str__(self):
+        return f'{self.get_tipo_display()}: {self.nombre}'

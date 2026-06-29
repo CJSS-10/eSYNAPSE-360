@@ -5,7 +5,16 @@ from django.utils.crypto import get_random_string
 from rest_framework import serializers
 
 from .constants import MODULOS, OPERACIONES
-from .models import LogAuditoria, Permiso, Rol, RolUsuario, Usuario
+from .models import LogAuditoria, OpcionCatalogo, Permiso, Rol, RolUsuario, Usuario
+
+
+def _foto_url(obj, context):
+    """URL absoluta de la foto de perfil (o None)."""
+    foto = getattr(obj, 'foto', None)
+    if not foto:
+        return None
+    request = context.get('request') if context else None
+    return request.build_absolute_uri(foto.url) if request else foto.url
 
 
 class PermisoSerializer(serializers.ModelSerializer):
@@ -78,12 +87,14 @@ class UsuarioSerializer(serializers.ModelSerializer):
     """Lectura y edición de usuarios. La contraseña nunca se expone."""
     roles = serializers.SerializerMethodField()
     nombre_completo = serializers.SerializerMethodField()
+    foto = serializers.FileField(write_only=True, required=False, allow_null=True)
+    foto_url = serializers.SerializerMethodField()
 
     class Meta:
         model = Usuario
         fields = ['id', 'username', 'email', 'first_name', 'last_name', 'nombre_completo',
-                  'area', 'laboratorio', 'cargo', 'telefono', 'is_active', 'is_superuser',
-                  'roles', 'last_login', 'created_at', 'updated_at']
+                  'area', 'laboratorio', 'cargo', 'telefono', 'foto', 'foto_url',
+                  'is_active', 'is_superuser', 'roles', 'last_login', 'created_at', 'updated_at']
         read_only_fields = ['is_superuser', 'last_login', 'created_at', 'updated_at']
 
     def get_roles(self, obj):
@@ -94,6 +105,9 @@ class UsuarioSerializer(serializers.ModelSerializer):
 
     def get_nombre_completo(self, obj):
         return obj.get_full_name() or obj.username
+
+    def get_foto_url(self, obj):
+        return _foto_url(obj, self.context)
 
 
 class UsuarioCreateSerializer(serializers.ModelSerializer):
@@ -167,14 +181,18 @@ class MeSerializer(serializers.ModelSerializer):
     roles = serializers.SerializerMethodField()
     permisos = serializers.SerializerMethodField()
     nombre_completo = serializers.SerializerMethodField()
+    foto_url = serializers.SerializerMethodField()
 
     class Meta:
         model = Usuario
         fields = ['id', 'username', 'email', 'first_name', 'last_name', 'nombre_completo',
-                  'area', 'laboratorio', 'cargo', 'telefono', 'is_superuser', 'roles', 'permisos']
+                  'area', 'laboratorio', 'cargo', 'telefono', 'foto_url', 'is_superuser', 'roles', 'permisos']
 
     def get_nombre_completo(self, obj):
         return obj.get_full_name() or obj.username
+
+    def get_foto_url(self, obj):
+        return _foto_url(obj, self.context)
 
     def get_roles(self, obj):
         return [
@@ -196,3 +214,11 @@ class MeSerializer(serializers.ModelSerializer):
         for modulo, operacion in qs:
             permisos.setdefault(modulo, []).append(operacion)
         return permisos
+
+
+class OpcionCatalogoSerializer(serializers.ModelSerializer):
+    """Opción de catálogo (Área o Laboratorio), gestionable desde la UI."""
+
+    class Meta:
+        model = OpcionCatalogo
+        fields = ['id', 'tipo', 'nombre', 'is_active', 'orden']
