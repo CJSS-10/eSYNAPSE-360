@@ -12,6 +12,12 @@ from .views import (
     SolicitudACViewSet,
     EquipoViewSet,
     CartaTrazabilidadViewSet,
+    NodoTrazabilidadViewSet,
+    MagnitudEquipoViewSet,
+    ClasificacionEquipoViewSet,
+    SolicitudCambioEquipoViewSet,
+    PuntoIntervaloViewSet,
+    ResultadoIntervaloViewSet,
 )
 
 router = DefaultRouter()
@@ -23,6 +29,12 @@ router.register('programas-auditoria', ProgramaAuditoriaViewSet, basename='progr
 router.register('requisitos-norma', RequisitoNormaViewSet, basename='requisitos-norma')
 router.register('equipos', EquipoViewSet, basename='equipos')
 router.register('cartas-trazabilidad', CartaTrazabilidadViewSet, basename='cartas-trazabilidad')
+router.register('nodos-trazabilidad', NodoTrazabilidadViewSet, basename='nodos-trazabilidad')
+router.register('magnitudes-equipo', MagnitudEquipoViewSet, basename='magnitudes-equipo')
+router.register('clasificaciones-equipo', ClasificacionEquipoViewSet, basename='clasificaciones-equipo')
+router.register('solicitudes-cambio-equipo', SolicitudCambioEquipoViewSet, basename='solicitudes-cambio-equipo')
+router.register('puntos-intervalo', PuntoIntervaloViewSet, basename='puntos-intervalo')
+router.register('resultados-intervalo', ResultadoIntervaloViewSet, basename='resultados-intervalo')
 
 urlpatterns = [
     path('mis-tareas/', MisTareasView.as_view(), name='mis-tareas'),

@@ -69,7 +69,7 @@ def convertir_a_pdf(contenido: bytes, extension: str) -> bytes | None:
 def localizar_cajas(pdf_base: bytes, firmas) -> dict:
     """
     Busca las etiquetas ELABORADO / REVISADO / APROBADO en la primera página
-    (plantilla estándar del Anexo 1 de SIG-PRO-01) y devuelve el recuadro de
+    (plantilla estándar del Anexo 1) y devuelve el recuadro de
     firma de cada rol: {rol: (x1, y1, x2, y2)}. Vacío si no hay plantilla.
     """
     import pdfplumber

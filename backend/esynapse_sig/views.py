@@ -246,7 +246,7 @@ class DocumentoViewSet(viewsets.ModelViewSet):
     def archivar(self, request, pk=None):
         """
         Retira el documento del uso activo conservándolo durante su periodo
-        de retención (SIG-PRO-01 6.6). No puede archivarse con una versión
+        de retención. No puede archivarse con una versión
         en flujo de aprobación pendiente.
         """
         doc = self.get_object()
@@ -553,8 +553,8 @@ class DocumentoViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'])
     def verificar_vigencia(self, request, pk=None):
         """
-        Registra una verificación de vigencia de documento externo
-        (SIG-PRO-01-r05). Body: {"vigente": true/false, "observaciones": ""}.
+        Registra una verificación de vigencia de documento externo.
+        Body: {"vigente": true/false, "observaciones": ""}.
         """
         doc = self.get_object()
         if doc.origen != 'externo':
@@ -765,7 +765,7 @@ class HallazgoViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'])
     def generar_sac(self, request, pk=None):
         """
-        Deriva una No Conformidad a Acciones Correctivas (SIG-PRO-11): crea la
+        Deriva una No Conformidad a Acciones Correctivas: crea la
         SAC en M9 enlazada al hallazgo y precargada con su descripción y
         requisito. Solo aplica a NC (Mayor/Menor) y a una SAC activa por vez.
         Las observaciones y oportunidades de mejora se derivan a Riesgos (M3).
@@ -814,7 +814,7 @@ class HallazgoViewSet(viewsets.ModelViewSet):
 
 
 # ============================================================
-# M9 — SOLICITUDES DE ACCIÓN CORRECTIVA (SIG-PRO-11)
+# M9 — SOLICITUDES DE ACCIÓN CORRECTIVA
 # ============================================================
 from .models import AccionSAC, SolicitudAC  # noqa: E402
 from .serializers import (  # noqa: E402
@@ -826,7 +826,7 @@ from .serializers import (  # noqa: E402
 
 class SolicitudACViewSet(viewsets.ModelViewSet):
     """
-    M9 — SAC según SIG-PRO-11. Ciclo:
+    M9 — SAC. Ciclo:
     Registrada → evaluar (6.4) → En análisis (6.5) → aprobar_plan (6.6)
     → En implementación (6.7) → En verificación → verificar_eficacia (6.8)
     → Cerrada conforme | reanálisis si no eficaz.
@@ -1025,7 +1025,7 @@ class SolicitudACViewSet(viewsets.ModelViewSet):
                
 
 # ============================================================
-# M10 — AUDITORÍAS INTERNAS (SIG-PRO-16)
+# M10 — AUDITORÍAS INTERNAS
 # ============================================================
 from .models import (  # noqa: E402
     ActaAuditoria, Auditoria, EquipoAuditoria, Hallazgo as _Hallazgo,
@@ -1051,7 +1051,7 @@ class RequisitoNormaViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class ProgramaAuditoriaViewSet(viewsets.ModelViewSet):
-    """Programa anual de auditorías (SIG-PRO-16-r01)."""
+    """Programa anual de auditorías."""
     queryset = ProgramaAuditoria.objects.all().prefetch_related('auditorias__auditor_lider')
     serializer_class = ProgramaAuditoriaSerializer
     permission_classes = [PermisoModular]
@@ -1080,7 +1080,7 @@ class ProgramaAuditoriaViewSet(viewsets.ModelViewSet):
 
 class AuditoriaViewSet(viewsets.ModelViewSet):
     """
-    M10 — Auditoría interna (SIG-PRO-16). Ciclo:
+    M10 — Auditoría interna. Ciclo:
     Programada → Planificada → En ejecución → En informe → Cerrada.
     Los hallazgos se registran como Hallazgos (M8), que alimentan las
     Acciones Correctivas (M9).
@@ -1193,7 +1193,7 @@ class AuditoriaViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'])
     def registrar_acta(self, request, pk=None):
-        """Registra/actualiza el acta de apertura o cierre (r03/r05)."""
+        """Registra/actualiza el acta de apertura o cierre."""
         a = self.get_object()
         tipo = request.data.get('tipo')
         if tipo not in ('apertura', 'cierre'):
@@ -1285,7 +1285,7 @@ class AuditoriaViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'])
     def generar_informe(self, request, pk=None):
-        """En ejecución → En informe. Consolida conclusiones del Informe (r04)."""
+        """En ejecución → En informe. Consolida conclusiones del informe."""
         a = self.get_object()
         if a.estado != 'en_ejecucion':
             return self._error('Solo se genera el informe de una auditoría En ejecución.')
@@ -1326,22 +1326,86 @@ class AuditoriaViewSet(viewsets.ModelViewSet):
 
 
 # ============================================================
-# M13 — EQUIPOS (MET-PRO-04)
+# M13 — EQUIPOS
 # ============================================================
 from datetime import timedelta as _timedelta  # noqa: E402
 
 from .models import (  # noqa: E402
     ActividadPrograma, CartaTrazabilidad, Equipo, InformeEquipo, MovimientoEquipo,
-    RegistroEquipo,
+    NodoTrazabilidad, PuntoIntervalo, RegistroEquipo, ResultadoIntervalo,
+    SolicitudCambioEquipo, calcular_intervalo_punto,
 )
 from .serializers import (  # noqa: E402
     CartaTrazabilidadSerializer, EquipoListaSerializer, EquipoSerializer,
-    InformeEquipoSerializer,
+    InformeEquipoSerializer, NodoTrazabilidadSerializer, PuntoIntervaloSerializer,
+    ResultadoIntervaloSerializer, SolicitudCambioEquipoSerializer,
 )
 
 
+def _puede_aprobar_equipos(request):
+    """True si el usuario puede aprobar cambios del módulo Equipos."""
+    return request.user.tiene_permiso('equipos', 'aprobar')
+
+
+def _crear_solicitud_equipo(request, *, entidad, operacion, equipo=None,
+                            entidad_id=None, payload=None, archivo=None, resumen=''):
+    """
+    Registra un cambio pendiente de aprobación y responde 202. Lo usan los puntos
+    de guardado (alta/baja, bitácoras, intervalo, nodos) cuando el usuario no tiene
+    permiso de aprobar.
+    """
+    sol = SolicitudCambioEquipo(
+        equipo=equipo, entidad=entidad, operacion=operacion, entidad_id=entidad_id,
+        payload=payload or {}, resumen=resumen, created_by=request.user)
+    if archivo:
+        sol.archivo = archivo
+    sol.save()
+    return Response(
+        {'pendiente': True,
+         'detail': 'El cambio quedó registrado y pendiente de aprobación por un supervisor.'},
+        status=status.HTTP_202_ACCEPTED)
+
+
+def aplicar_matriz_intervalo(eq_id, celdas, usuario):
+    """
+    Sincroniza la matriz de intervalo de calibración (años × puntos): upsert de las
+    celdas con datos y borrado de las que vienen vacías. Compartido por el guardado
+    directo y por la aprobación de una solicitud.
+    """
+    puntos_validos = set(PuntoIntervalo.objects.filter(
+        equipo_id=eq_id, is_active=True).values_list('id', flat=True))
+    entrantes = {}
+    for c in (celdas or []):
+        try:
+            pid = int(c.get('punto')); anio = int(c.get('anio'))
+        except (TypeError, ValueError):
+            continue
+        if pid not in puntos_validos or anio <= 0:
+            continue
+        entrantes[(pid, anio)] = {
+            'resultado': float(c.get('resultado') or 0),
+            'incertidumbre': float(c.get('incertidumbre') or 0),
+            'emp': float(c.get('emp') or 0),
+        }
+    existentes = {(r.punto_id, r.anio): r for r in
+                  ResultadoIntervalo.objects.filter(punto_id__in=puntos_validos)}
+    a_borrar = [r.id for k, r in existentes.items() if k not in entrantes]
+    if a_borrar:
+        ResultadoIntervalo.objects.filter(id__in=a_borrar).delete()
+    for (pid, anio), vals in entrantes.items():
+        r = existentes.get((pid, anio))
+        if r:
+            r.resultado = vals['resultado']; r.incertidumbre = vals['incertidumbre']
+            r.emp = vals['emp']; r.updated_by = usuario
+            r.save()
+        else:
+            ResultadoIntervalo.objects.create(
+                punto_id=pid, anio=anio,
+                created_by=usuario, updated_by=usuario, **vals)
+
+
 class EquipoViewSet(viewsets.ModelViewSet):
-    """M13 — Equipos del laboratorio (hoja de vida + inventario, MET-PRO-04)."""
+    """M13 — Equipos del laboratorio (hoja de vida + inventario)."""
     queryset = Equipo.objects.all().prefetch_related(
         'actividades', 'movimientos', 'informes', 'registros')
     permission_classes = [PermisoModular]
@@ -1391,6 +1455,36 @@ class EquipoViewSet(viewsets.ModelViewSet):
         eq = self.get_object(); eq.is_active = False; eq.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+    def update(self, request, *args, **kwargs):
+        """
+        Control de cambios: si el usuario no tiene permiso de aprobar en el
+        módulo, la edición no se aplica de inmediato — se guarda como una
+        solicitud pendiente que un supervisor debe aprobar. Quien sí puede
+        aprobar aplica el cambio directamente.
+        """
+        if not request.user.tiene_permiso('equipos', 'aprobar'):
+            return self._solicitar_edicion(request)
+        return super().update(request, *args, **kwargs)
+
+    def _solicitar_edicion(self, request):
+        eq = self.get_object()
+        # Validar lo propuesto (sin guardar) para rechazar entradas inválidas
+        ser = self.get_serializer(eq, data=request.data, partial=True)
+        ser.is_valid(raise_exception=True)
+        payload = {k: request.data.get(k) for k in request.data.keys() if k not in request.FILES}
+        sol = SolicitudCambioEquipo(
+            equipo=eq, entidad='equipo', operacion='editar', entidad_id=eq.pk,
+            payload=payload, resumen=f'Edición de la ficha de {eq.codigo} — {eq.nombre}',
+            created_by=request.user,
+        )
+        if 'imagen' in request.FILES:
+            sol.archivo = request.FILES['imagen']
+        sol.save()
+        return Response(
+            {'pendiente': True,
+             'detail': 'El cambio quedó registrado y pendiente de aprobación por un supervisor.'},
+            status=status.HTTP_202_ACCEPTED)
+
     def _error(self, msg):
         return Response({'detail': msg}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -1406,6 +1500,15 @@ class EquipoViewSet(viewsets.ModelViewSet):
         siembra el primer registro en la pestaña Calibraciones y se calcula
         la próxima calibración (regla "patrón vigente").
         """
+        # Control de cambios: sin permiso de aprobar, el alta queda pendiente.
+        if not _puede_aprobar_equipos(request):
+            ser_v = self.get_serializer(data=request.data)
+            ser_v.is_valid(raise_exception=True)
+            payload = {k: v for k, v in request.data.items() if k != 'imagen'}
+            return _crear_solicitud_equipo(
+                request, entidad='equipo', operacion='crear',
+                payload=payload, archivo=request.FILES.get('imagen'),
+                resumen=f'Alta de equipo {request.data.get("codigo", "")} — {request.data.get("nombre", "")}')
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
@@ -1472,6 +1575,25 @@ class EquipoViewSet(viewsets.ModelViewSet):
         tipo = request.data.get('tipo')
         if tipo not in dict(RegistroEquipo._meta.get_field('tipo').choices):
             return self._error('Tipo de registro no válido.')
+        # El documento adjunto es obligatorio en mantenimientos, calibraciones,
+        # verificaciones, comprobaciones intermedias y caracterizaciones (no en el historial).
+        if tipo != 'suceso' and 'archivo' not in request.FILES:
+            return self._error('El documento adjunto es obligatorio para este registro.')
+        # Control de cambios: sin permiso de aprobar, el registro queda pendiente.
+        if not _puede_aprobar_equipos(request):
+            payload = {
+                'tipo': tipo, 'frecuencia': request.data.get('frecuencia', ''),
+                'numero_documento': request.data.get('numero_documento', ''),
+                'descripcion': request.data.get('descripcion', ''),
+                'observaciones': request.data.get('observaciones', ''),
+                'vb': request.data.get('vb', ''),
+                'fecha': request.data.get('fecha') or None,
+                'fecha_proxima': request.data.get('fecha_proxima') or None,
+            }
+            return _crear_solicitud_equipo(
+                request, entidad='registro', operacion='crear', equipo=eq,
+                payload=payload, archivo=request.FILES.get('archivo'),
+                resumen=f'Bitácora ({tipo}) de {eq.codigo} — {eq.nombre}')
         reg = RegistroEquipo(
             equipo=eq, tipo=tipo,
             frecuencia=request.data.get('frecuencia', ''),
@@ -1509,7 +1631,7 @@ class EquipoViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'])
     def marcar_inoperativo(self, request, pk=None):
-        """Fuera de servicio: aísla el equipo (MET-PRO-04 6.2.5). Levantar TNC aparte."""
+        """Fuera de servicio: aísla el equipo. Levantar trabajo no conforme aparte."""
         eq = self.get_object()
         eq.estado = 'inoperativo'
         eq.motivo_inoperativo = request.data.get('motivo', '')
@@ -1531,10 +1653,49 @@ class EquipoViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'])
     def dar_baja(self, request, pk=None):
         eq = self.get_object()
+        if not _puede_aprobar_equipos(request):
+            return _crear_solicitud_equipo(
+                request, entidad='equipo', operacion='baja', equipo=eq,
+                resumen=f'Dar de baja {eq.codigo} — {eq.nombre}')
         eq.estado = 'baja'
         eq.save()
         return self._data(eq, request)
     dar_baja.operacion = 'eliminar'
+
+    @action(detail=False, methods=['get'])
+    def inventario_pdf(self, request):
+        """PDF horizontal del Inventario de Equipos; respeta los filtros."""
+        p = request.query_params
+        qs = Equipo.objects.all()
+        if p.get('incluir_inactivos') != '1':
+            qs = qs.filter(is_active=True)
+        for campo in ('magnitud', 'clasificacion', 'estado'):
+            if p.get(campo):
+                qs = qs.filter(**{campo: p[campo]})
+        if p.get('laboratorio'):
+            qs = qs.filter(laboratorio__icontains=p['laboratorio'])
+        if p.get('vencidos') == '1':
+            qs = qs.filter(requiere_calibracion=True, fecha_proxima_calibracion__lt=timezone.now().date())
+        if p.get('buscar'):
+            from django.db.models import Q
+            b = p['buscar']
+            qs = qs.filter(Q(codigo__icontains=b) | Q(nombre__icontains=b) | Q(marca__icontains=b) | Q(serie__icontains=b))
+        qs = qs.order_by('codigo')
+        lab = p.get('laboratorio') or p.get('magnitud') or ''
+        from .ficha_pdf import generar_inventario_pdf
+        pdf = generar_inventario_pdf(list(qs), lab)
+        resp = HttpResponse(pdf, content_type='application/pdf')
+        resp['Content-Disposition'] = 'inline; filename="Inventario de Equipos.pdf"'
+        return resp
+    inventario_pdf.operacion = 'leer'
+
+    @action(detail=False, methods=['get'])
+    def laboratorios(self, request):
+        """Laboratorios (ubicaciones) presentes en los equipos, para el filtro de inventario."""
+        labs = (Equipo.objects.exclude(laboratorio='')
+                .values_list('laboratorio', flat=True).distinct())
+        return Response(sorted(set(labs)))
+    laboratorios.operacion = 'leer'
 
     @action(detail=True, methods=['post'])
     def agregar_actividad(self, request, pk=None):
@@ -1557,8 +1718,80 @@ class EquipoViewSet(viewsets.ModelViewSet):
     agregar_actividad.operacion = 'editar'
 
     @action(detail=True, methods=['post'])
+    def programar(self, request, pk=None):
+        """Programa Anual: upsert de una actividad (equipo+tipo+año) con frecuencia y meses."""
+        eq = self.get_object()
+        tipo = request.data.get('tipo')
+        if tipo not in dict(ActividadPrograma._meta.get_field('tipo').choices):
+            return self._error('Tipo de actividad no válido.')
+        anio = int(request.data.get('anio') or timezone.now().year)
+        meses = request.data.get('meses', [])
+        if isinstance(meses, str):
+            import json as _json
+            try:
+                meses = _json.loads(meses)
+            except ValueError:
+                meses = []
+        meses = [int(m) for m in meses if str(m).isdigit() and 1 <= int(m) <= 12]
+        frecuencia = (request.data.get('frecuencia') or '').strip()
+        if not meses and not frecuencia:
+            ActividadPrograma.objects.filter(equipo=eq, tipo=tipo, anio=anio).delete()
+        else:
+            ActividadPrograma.objects.update_or_create(
+                equipo=eq, tipo=tipo, anio=anio,
+                defaults={'frecuencia': frecuencia, 'meses': meses})
+        return Response({'ok': True})
+    programar.operacion = 'editar'
+
+    @action(detail=False, methods=['get'])
+    def programa(self, request):
+        """Programa Anual consolidado: equipos (de un laboratorio) con sus actividades del año."""
+        anio = int(request.query_params.get('anio') or timezone.now().year)
+        lab = request.query_params.get('laboratorio', '')
+        # El equipamiento auxiliar no entra al programa anual (solo patrones y equipos de medición)
+        qs = Equipo.objects.filter(is_active=True).exclude(clasificacion__icontains='auxiliar')
+        if lab:
+            qs = qs.filter(laboratorio__icontains=lab)
+        qs = qs.order_by('codigo').prefetch_related('actividades')
+        data = []
+        for e in qs:
+            acts = {a.tipo: {'frecuencia': a.frecuencia, 'meses': a.meses or []}
+                    for a in e.actividades.all() if a.anio == anio}
+            data.append({
+                'id': e.id, 'codigo': e.codigo, 'nombre': e.nombre, 'cantidad': e.cantidad,
+                'clase_exactitud': e.clase_exactitud, 'marca': e.marca, 'modelo': e.modelo,
+                'serie': e.serie, 'actividades': acts,
+            })
+        return Response({'anio': anio, 'laboratorio': lab, 'equipos': data})
+    programa.operacion = 'leer'
+
+    @action(detail=False, methods=['get'])
+    def programa_pdf(self, request):
+        """PDF del Programa Anual por año y laboratorio."""
+        anio = int(request.query_params.get('anio') or timezone.now().year)
+        lab = request.query_params.get('laboratorio', '')
+        # El equipamiento auxiliar no entra al programa anual (solo patrones y equipos de medición)
+        qs = Equipo.objects.filter(is_active=True).exclude(clasificacion__icontains='auxiliar')
+        if lab:
+            qs = qs.filter(laboratorio__icontains=lab)
+        qs = qs.order_by('codigo').prefetch_related('actividades')
+        data = []
+        for e in qs:
+            acts = {a.tipo: {'frecuencia': a.frecuencia, 'meses': a.meses or []}
+                    for a in e.actividades.all() if a.anio == anio}
+            data.append({'nombre': e.nombre, 'codigo': e.codigo, 'cantidad': e.cantidad,
+                         'clase_exactitud': e.clase_exactitud, 'marca': e.marca, 'modelo': e.modelo,
+                         'serie': e.serie, 'actividades': acts})
+        from .ficha_pdf import generar_programa_pdf
+        pdf = generar_programa_pdf(data, anio, lab)
+        resp = HttpResponse(pdf, content_type='application/pdf')
+        resp['Content-Disposition'] = f'inline; filename="Programa Anual {anio}.pdf"'
+        return resp
+    programa_pdf.operacion = 'leer'
+
+    @action(detail=True, methods=['post'])
     def registrar_movimiento(self, request, pk=None):
-        """Salida del equipo (MET-PRO-04-r09)."""
+        """Salida del equipo."""
         eq = self.get_object()
         motivo = request.data.get('motivo')
         if motivo not in dict(MovimientoEquipo._meta.get_field('motivo').choices):
@@ -1645,9 +1878,23 @@ class EquipoViewSet(viewsets.ModelViewSet):
         return resp
     ficha_pdf.operacion = 'leer'
 
+    @action(detail=True, methods=['get'])
+    def bitacora_pdf(self, request, pk=None):
+        """PDF de una bitácora (mantenimientos, calibraciones, etc.) según ?tipo=."""
+        eq = self.get_object()
+        tipo = request.query_params.get('tipo', '')
+        titulo = request.query_params.get('titulo', '')
+        from .ficha_pdf import generar_bitacora_pdf
+        registros = list(eq.registros.filter(tipo=tipo).order_by('fecha', 'id')) if tipo else []
+        pdf = generar_bitacora_pdf(eq, tipo, titulo, registros)
+        resp = HttpResponse(pdf, content_type='application/pdf')
+        resp['Content-Disposition'] = f'inline; filename="{(titulo or tipo)} {eq.codigo}.pdf"'
+        return resp
+    bitacora_pdf.operacion = 'leer'
+
 
 class CartaTrazabilidadViewSet(viewsets.ModelViewSet):
-    """Cartas de trazabilidad por magnitud (MET-PRO-04-r04)."""
+    """Cartas de trazabilidad por magnitud."""
     queryset = CartaTrazabilidad.objects.all()
     serializer_class = CartaTrazabilidadSerializer
     permission_classes = [PermisoModular]
@@ -1662,6 +1909,437 @@ class CartaTrazabilidadViewSet(viewsets.ModelViewSet):
             qs = qs.filter(magnitud=self.request.query_params['magnitud'])
         return qs
 
+    @action(detail=True, methods=['get'])
+    def carta_pdf(self, request, pk=None):
+        """PDF del árbol de trazabilidad (diagrama con cajas y conectores)."""
+        from django.db.models import Max
+        from .ficha_pdf import generar_carta_trazabilidad_pdf
+        carta = self.get_object()
+        # Fecha de actualización = última modificación de la carta o de cualquiera de sus eslabones
+        ult_nodo = carta.nodos.filter(is_active=True).aggregate(m=Max('updated_at'))['m']
+        candidatas = [d for d in (carta.updated_at, ult_nodo) if d]
+        if candidatas:
+            carta.fecha_actualizacion = max(candidatas).date()
+        nodos = []
+        for n in carta.nodos.filter(is_active=True).order_by('orden', 'id').prefetch_related('padres'):
+            nodos.append({
+                'id': n.id, 'orden': n.orden, 'nivel': n.nivel,
+                'padres': list(n.padres.values_list('id', flat=True)),
+                'entidad': n.entidad, 'descripcion': n.descripcion, 'codigo': n.codigo,
+                'procedimiento': n.procedimiento, 'certificado': n.certificado,
+                'incertidumbre': n.incertidumbre, 'nota': n.nota,
+            })
+        pdf = generar_carta_trazabilidad_pdf(carta, nodos)
+        resp = HttpResponse(pdf, content_type='application/pdf')
+        resp['Content-Disposition'] = f'inline; filename="carta_trazabilidad_{carta.magnitud or carta.pk}.pdf"'
+        return resp
+    carta_pdf.operacion = 'leer'
+
     def destroy(self, request, *args, **kwargs):
         c = self.get_object(); c.is_active = False; c.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class NodoTrazabilidadViewSet(viewsets.ModelViewSet):
+    """Eslabones (cajas) del árbol de una carta de trazabilidad."""
+    queryset = NodoTrazabilidad.objects.select_related('equipo', 'carta')
+    serializer_class = NodoTrazabilidadSerializer
+    permission_classes = [PermisoModular]
+    modulo = 'equipos'
+
+    def get_queryset(self):
+        qs = super().get_queryset().filter(is_active=True)
+        if self.request.query_params.get('carta'):
+            qs = qs.filter(carta_id=self.request.query_params['carta'])
+        return qs
+
+    def create(self, request, *args, **kwargs):
+        # Control de cambios: sin permiso de aprobar, el alta del nodo queda pendiente.
+        if not _puede_aprobar_equipos(request):
+            ser = self.get_serializer(data=request.data)
+            ser.is_valid(raise_exception=True)
+            return _crear_solicitud_equipo(
+                request, entidad='nodo', operacion='crear',
+                payload={k: v for k, v in request.data.items()},
+                resumen=f'Nuevo nodo de trazabilidad: {request.data.get("descripcion") or request.data.get("entidad") or ""}')
+        return super().create(request, *args, **kwargs)
+
+    def update(self, request, *args, **kwargs):
+        if not _puede_aprobar_equipos(request):
+            nodo = self.get_object()
+            ser = self.get_serializer(nodo, data=request.data, partial=kwargs.get('partial', False))
+            ser.is_valid(raise_exception=True)
+            return _crear_solicitud_equipo(
+                request, entidad='nodo', operacion='editar', entidad_id=nodo.pk,
+                payload={k: v for k, v in request.data.items()},
+                resumen=f'Edición de nodo: {nodo.descripcion or nodo.entidad or nodo.pk}')
+        return super().update(request, *args, **kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        n = self.get_object()
+        if not _puede_aprobar_equipos(request):
+            return _crear_solicitud_equipo(
+                request, entidad='nodo', operacion='eliminar', entidad_id=n.pk,
+                resumen=f'Eliminar nodo de trazabilidad: {n.descripcion or n.entidad or n.pk}')
+        # Baja lógica: arrastra a los hijos para no dejar nodos huérfanos colgando
+        def baja(nodo):
+            for h in nodo.hijos.filter(is_active=True):
+                baja(h)
+            nodo.is_active = False
+            nodo.save(update_fields=['is_active', 'updated_at'])
+        baja(n)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=True, methods=['post'])
+    def rellenar_desde_equipo(self, request, pk=None):
+        """Copia al nodo los datos de calibración del equipo enlazado."""
+        n = self.get_object()
+        if not n.equipo:
+            return Response({'detail': 'El nodo no está enlazado a ningún equipo del inventario.'},
+                            status=status.HTTP_400_BAD_REQUEST)
+        n.rellenar_desde_equipo()
+        n.updated_by = request.user
+        n.save()
+        return Response(NodoTrazabilidadSerializer(n, context={'request': request}).data)
+    rellenar_desde_equipo.operacion = 'editar'
+
+
+from .models import ClasificacionEquipo, MagnitudEquipo  # noqa: E402
+from .serializers import (  # noqa: E402
+    ClasificacionEquipoSerializer, MagnitudEquipoSerializer,
+)
+
+
+class MagnitudEquipoViewSet(viewsets.ModelViewSet):
+    """Catálogo gestionable de magnitudes (módulo Equipos). Renombrar propaga a los equipos."""
+    queryset = MagnitudEquipo.objects.all()
+    serializer_class = MagnitudEquipoSerializer
+    permission_classes = [PermisoModular]
+    modulo = 'equipos'
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        if self.request.query_params.get('incluir_inactivos') != '1':
+            qs = qs.filter(is_active=True)
+        return qs
+
+    def perform_update(self, serializer):
+        anterior = serializer.instance.nombre
+        obj = serializer.save()
+        if obj.nombre != anterior:
+            Equipo.objects.filter(magnitud=anterior).update(magnitud=obj.nombre)
+            CartaTrazabilidad.objects.filter(magnitud=anterior).update(magnitud=obj.nombre)
+
+    def destroy(self, request, *args, **kwargs):
+        obj = self.get_object(); obj.is_active = False; obj.save()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class ClasificacionEquipoViewSet(viewsets.ModelViewSet):
+    """Catálogo gestionable de clasificaciones (módulo Equipos). Renombrar propaga a los equipos."""
+    queryset = ClasificacionEquipo.objects.all()
+    serializer_class = ClasificacionEquipoSerializer
+    permission_classes = [PermisoModular]
+    modulo = 'equipos'
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        if self.request.query_params.get('incluir_inactivos') != '1':
+            qs = qs.filter(is_active=True)
+        return qs
+
+    def perform_update(self, serializer):
+        anterior = serializer.instance.nombre
+        obj = serializer.save()
+        if obj.nombre != anterior:
+            Equipo.objects.filter(clasificacion=anterior).update(clasificacion=obj.nombre)
+
+    def destroy(self, request, *args, **kwargs):
+        obj = self.get_object(); obj.is_active = False; obj.save()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class SolicitudCambioEquipoViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    Bandeja de control de cambios de equipos: lista las solicitudes (por defecto
+    las pendientes) y permite aprobarlas (se aplica el cambio real) o rechazarlas
+    (se descarta). Aprobar/rechazar requiere el permiso 'aprobar' del módulo.
+    """
+    queryset = SolicitudCambioEquipo.objects.select_related('equipo', 'created_by', 'resuelto_por')
+    serializer_class = SolicitudCambioEquipoSerializer
+    permission_classes = [PermisoModular]
+    modulo = 'equipos'
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        estado = self.request.query_params.get('estado', 'pendiente')
+        if estado and estado != 'todas':
+            qs = qs.filter(estado=estado)
+        if self.request.query_params.get('equipo'):
+            qs = qs.filter(equipo_id=self.request.query_params['equipo'])
+        if self.request.query_params.get('mias') == '1':
+            qs = qs.filter(created_by=self.request.user)
+        return qs
+
+    @action(detail=False, methods=['get'])
+    def mis_devueltas_count(self, request):
+        """N.° de solicitudes propias devueltas para corrección (distintivo del solicitante)."""
+        n = SolicitudCambioEquipo.objects.filter(
+            created_by=request.user, estado='devuelta').count()
+        return Response({'devueltas': n})
+    mis_devueltas_count.operacion = 'leer'
+
+    @action(detail=False, methods=['get'])
+    def pendientes_count(self, request):
+        """N.° de solicitudes pendientes (para el distintivo del buzón)."""
+        return Response({'pendientes': SolicitudCambioEquipo.objects.filter(estado='pendiente').count()})
+    pendientes_count.operacion = 'leer'
+
+    @action(detail=True, methods=['post'])
+    def aprobar(self, request, pk=None):
+        """Aplica el cambio propuesto y marca la solicitud como aprobada."""
+        from rest_framework.exceptions import ValidationError
+        sol = self.get_object()
+        if sol.estado != 'pendiente':
+            return self._error('La solicitud ya fue resuelta.')
+        try:
+            self._aplicar(sol, request)
+        except ValidationError as e:
+            return Response({'detail': 'No se pudo aplicar el cambio (datos inválidos).',
+                             'errores': e.detail}, status=status.HTTP_400_BAD_REQUEST)
+        sol.estado = 'aprobada'
+        sol.resuelto_por = request.user
+        sol.resuelto_at = timezone.now()
+        sol.observaciones = request.data.get('observaciones', '') or ''
+        sol.save()
+        return Response(SolicitudCambioEquipoSerializer(sol, context={'request': request}).data)
+    aprobar.operacion = 'aprobar'
+
+    @action(detail=True, methods=['post'])
+    def rechazar(self, request, pk=None):
+        """Descarta el cambio propuesto y marca la solicitud como rechazada."""
+        sol = self.get_object()
+        if sol.estado != 'pendiente':
+            return self._error('La solicitud ya fue resuelta.')
+        sol.estado = 'rechazada'
+        sol.resuelto_por = request.user
+        sol.resuelto_at = timezone.now()
+        sol.observaciones = request.data.get('observaciones', '') or ''
+        sol.save()
+        return Response(SolicitudCambioEquipoSerializer(sol, context={'request': request}).data)
+    rechazar.operacion = 'aprobar'
+
+    @action(detail=True, methods=['post'])
+    def devolver(self, request, pk=None):
+        """Devuelve la solicitud al solicitante para corrección (no se aplica nada)."""
+        sol = self.get_object()
+        if sol.estado != 'pendiente':
+            return self._error('La solicitud ya fue resuelta.')
+        sol.estado = 'devuelta'
+        sol.resuelto_por = request.user
+        sol.resuelto_at = timezone.now()
+        sol.observaciones = request.data.get('observaciones', '') or ''
+        sol.save()
+        return Response(SolicitudCambioEquipoSerializer(sol, context={'request': request}).data)
+    devolver.operacion = 'aprobar'
+
+    @action(detail=True, methods=['post'])
+    def reenviar(self, request, pk=None):
+        """El solicitante corrige (opcionalmente actualiza el payload) y reenvía a pendiente."""
+        sol = self.get_object()
+        if sol.created_by_id != request.user.id:
+            return self._error('Solo quien creó la solicitud puede reenviarla.')
+        if sol.estado != 'devuelta':
+            return self._error('Solo se pueden reenviar solicitudes devueltas.')
+        nuevo = request.data.get('payload')
+        if isinstance(nuevo, dict):
+            sol.payload = nuevo
+        sol.estado = 'pendiente'
+        sol.resuelto_por = None
+        sol.resuelto_at = None
+        sol.save()
+        return Response(SolicitudCambioEquipoSerializer(sol, context={'request': request}).data)
+    reenviar.operacion = 'editar'
+
+    def _error(self, msg):
+        return Response({'detail': msg}, status=status.HTTP_400_BAD_REQUEST)
+
+    def _aplicar(self, sol, request):
+        """Ejecuta la operación real según la entidad/operación de la solicitud."""
+        import os
+        ent, op = sol.entidad, sol.operacion
+        pl = sol.payload or {}
+        user = request.user
+
+        # --- Equipo: editar ficha ---
+        if ent == 'equipo' and op == 'editar':
+            eq = sol.equipo
+            ser = EquipoSerializer(eq, data=pl, partial=True, context={'request': request})
+            ser.is_valid(raise_exception=True)
+            ser.save(updated_by=user)
+            if sol.archivo:
+                eq.imagen.save(os.path.basename(sol.archivo.name), sol.archivo, save=True)
+            return
+
+        # --- Equipo: alta ---
+        if ent == 'equipo' and op == 'crear':
+            ser = EquipoSerializer(data=pl, context={'request': request})
+            ser.is_valid(raise_exception=True)
+            eq = ser.save(created_by=user, updated_by=user)
+            if sol.archivo:
+                eq.imagen.save(os.path.basename(sol.archivo.name), sol.archivo, save=True)
+            fecha_ult = pl.get('fecha_ultima_calibracion') or None
+            n_cert = pl.get('n_certificado') or ''
+            if fecha_ult or n_cert:
+                from datetime import date as _date
+                def _parse(v):
+                    return _date.fromisoformat(v) if isinstance(v, str) and v else (v or None)
+                fult = _parse(fecha_ult)
+                prox = _parse(pl.get('fecha_proxima_calibracion'))
+                if not prox and fult and eq.periodicidad_dias:
+                    prox = fult + _timedelta(days=eq.periodicidad_dias)
+                RegistroEquipo.objects.create(
+                    equipo=eq, tipo='calibracion', numero_documento=n_cert,
+                    frecuencia=(f'{eq.periodicidad_dias} días' if eq.periodicidad_dias else ''),
+                    fecha=fult, fecha_proxima=prox)
+                eq.actualizar_calibracion()
+            return
+
+        # --- Equipo: dar de baja ---
+        if ent == 'equipo' and op == 'baja':
+            eq = sol.equipo
+            if eq:
+                eq.estado = 'baja'; eq.updated_by = user; eq.save()
+            return
+
+        # --- Registro de bitácora: crear ---
+        if ent == 'registro' and op == 'crear':
+            eq = sol.equipo
+            reg = RegistroEquipo(
+                equipo=eq, tipo=pl.get('tipo', ''),
+                frecuencia=pl.get('frecuencia', ''), numero_documento=pl.get('numero_documento', ''),
+                descripcion=pl.get('descripcion', ''), observaciones=pl.get('observaciones', ''),
+                vb=pl.get('vb', ''), created_by=user, updated_by=user)
+            if pl.get('fecha'):
+                reg.fecha = pl['fecha']
+            if pl.get('fecha_proxima'):
+                reg.fecha_proxima = pl['fecha_proxima']
+            if sol.archivo:
+                reg.archivo = sol.archivo
+            reg.save()
+            if reg.tipo == 'calibracion':
+                eq.actualizar_calibracion()
+            return
+
+        # --- Intervalo de calibración: guardar matriz ---
+        if ent == 'intervalo':
+            aplicar_matriz_intervalo(pl.get('equipo'), pl.get('celdas') or [], user)
+            return
+
+        # --- Nodo de trazabilidad ---
+        if ent == 'nodo':
+            from .models import NodoTrazabilidad
+            if op == 'crear':
+                ser = NodoTrazabilidadSerializer(data=pl, context={'request': request})
+                ser.is_valid(raise_exception=True)
+                ser.save(created_by=user, updated_by=user)
+            elif op == 'editar':
+                nodo = NodoTrazabilidad.objects.filter(pk=sol.entidad_id).first()
+                if nodo:
+                    ser = NodoTrazabilidadSerializer(nodo, data=pl, partial=True, context={'request': request})
+                    ser.is_valid(raise_exception=True)
+                    ser.save(updated_by=user)
+            elif op == 'eliminar':
+                nodo = NodoTrazabilidad.objects.filter(pk=sol.entidad_id).first()
+                if nodo:
+                    def _baja(n):
+                        for h in n.hijos.filter(is_active=True):
+                            _baja(h)
+                        n.is_active = False
+                        n.save(update_fields=['is_active', 'updated_at'])
+                    _baja(nodo)
+            return
+
+
+class PuntoIntervaloViewSet(viewsets.ModelViewSet):
+    """Puntos nominales para el intervalo de calibración (método OIML D10)."""
+    queryset = PuntoIntervalo.objects.all().prefetch_related('resultados')
+    serializer_class = PuntoIntervaloSerializer
+    permission_classes = [PermisoModular]
+    modulo = 'equipos'
+
+    def get_queryset(self):
+        qs = super().get_queryset().filter(is_active=True)
+        if self.request.query_params.get('equipo'):
+            qs = qs.filter(equipo_id=self.request.query_params['equipo'])
+        return qs.order_by('orden', 'id')
+
+    def destroy(self, request, *args, **kwargs):
+        p = self.get_object(); p.is_active = False; p.save()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=False, methods=['get'])
+    def resumen(self, request):
+        """Puntos del patrón con su cálculo + el intervalo del patrón (menor periodo)."""
+        eq_id = request.query_params.get('equipo')
+        if not eq_id:
+            return Response({'detail': 'Falta el equipo.'}, status=status.HTTP_400_BAD_REQUEST)
+        puntos = PuntoIntervalo.objects.filter(equipo_id=eq_id, is_active=True).order_by('orden', 'id')
+        data = PuntoIntervaloSerializer(puntos, many=True, context={'request': request}).data
+        periodos = [p['calculo']['periodo'] for p in data if p['calculo']['periodo'] is not None]
+        return Response({'puntos': data, 'intervalo_patron': min(periodos) if periodos else None})
+    resumen.operacion = 'leer'
+
+    @action(detail=False, methods=['post'])
+    def guardar_matriz(self, request):
+        """
+        Guardado masivo de la matriz (años × puntos). Recibe {equipo, celdas:[{punto,
+        anio, resultado, incertidumbre, emp}]}. Hace upsert de las celdas con datos y
+        elimina las que ya no vienen (celdas que el usuario dejó en blanco).
+        """
+        eq_id = request.data.get('equipo')
+        celdas = request.data.get('celdas') or []
+        if not eq_id:
+            return Response({'detail': 'Falta el equipo.'}, status=status.HTTP_400_BAD_REQUEST)
+        if not _puede_aprobar_equipos(request):
+            eq = Equipo.objects.filter(pk=eq_id).first()
+            return _crear_solicitud_equipo(
+                request, entidad='intervalo', operacion='editar', equipo=eq,
+                payload={'equipo': eq_id, 'celdas': celdas},
+                resumen=f'Intervalo de calibración de {eq.codigo if eq else ""} ({len(celdas)} valores)')
+        aplicar_matriz_intervalo(eq_id, celdas, request.user)
+
+        puntos = PuntoIntervalo.objects.filter(equipo_id=eq_id, is_active=True).order_by('orden', 'id')
+        data = PuntoIntervaloSerializer(puntos, many=True, context={'request': request}).data
+        periodos = [p['calculo']['periodo'] for p in data if p['calculo']['periodo'] is not None]
+        return Response({'puntos': data, 'intervalo_patron': min(periodos) if periodos else None})
+    guardar_matriz.operacion = 'editar'
+
+    @action(detail=False, methods=['get'])
+    def intervalo_pdf(self, request):
+        """PDF del Intervalo de Calibración (MET-PRO-04-r08) del patrón."""
+        from .ficha_pdf import generar_intervalo_pdf
+        eq = Equipo.objects.filter(pk=request.query_params.get('equipo')).first()
+        if not eq:
+            return Response({'detail': 'Equipo no encontrado.'}, status=status.HTTP_404_NOT_FOUND)
+        puntos = PuntoIntervalo.objects.filter(equipo=eq, is_active=True).order_by('orden', 'id')
+        data = PuntoIntervaloSerializer(puntos, many=True, context={'request': request}).data
+        pdf = generar_intervalo_pdf(eq, data)
+        resp = HttpResponse(pdf, content_type='application/pdf')
+        resp['Content-Disposition'] = f'inline; filename="intervalo_calibracion_{eq.codigo}.pdf"'
+        return resp
+    intervalo_pdf.operacion = 'leer'
+
+
+class ResultadoIntervaloViewSet(viewsets.ModelViewSet):
+    """Resultados anuales de un punto de intervalo de calibración."""
+    queryset = ResultadoIntervalo.objects.all()
+    serializer_class = ResultadoIntervaloSerializer
+    permission_classes = [PermisoModular]
+    modulo = 'equipos'
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        if self.request.query_params.get('punto'):
+            qs = qs.filter(punto_id=self.request.query_params['punto'])
+        return qs.order_by('anio', 'id')

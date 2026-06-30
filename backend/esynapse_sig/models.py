@@ -68,7 +68,7 @@ class Documento(AuditableModel):
     )
     soporte = models.CharField('Soporte', max_length=10, choices=SOPORTES, default='digital')
     origen = models.CharField('Origen', max_length=10, choices=ORIGENES_DOCUMENTO, default='interno')
-    # Solo documentos externos (SIG-PRO-01 sección 6.7):
+    # Solo documentos externos:
     entidad_emisora = models.CharField(
         'Entidad emisora', max_length=150, blank=True,
         help_text='INACAL-DA, ISO, MINTRA, fabricante, etc. Solo para documentos externos.',
@@ -422,7 +422,7 @@ class ArchivoVersion(AuditableModel):
 
 
 # ============================================================
-# M9 — SOLICITUDES DE ACCIÓN CORRECTIVA (SIG-PRO-11)
+# M9 — SOLICITUDES DE ACCIÓN CORRECTIVA
 # ============================================================
 
 FUENTES_SAC = [
@@ -450,7 +450,7 @@ ESTADOS_SAC = [
 
 class SolicitudAC(AuditableModel):
     """
-    M9 — Solicitud de Acción Correctiva (SIG-PRO-11-r01).
+    M9 — Solicitud de Acción Correctiva.
     Código SAC-NN-YYYY. Ciclo: Registrada → (evaluación 6.4) →
     En análisis → En implementación → En verificación → Cerrada.
     """
@@ -459,7 +459,7 @@ class SolicitudAC(AuditableModel):
         Hallazgo, verbose_name='Hallazgo vinculado (M8)', on_delete=models.PROTECT,
         related_name='solicitudes_ac', null=True, blank=True,
     )
-    # 1. Procedencia (r01)
+    # 1. Procedencia
     fuente = models.CharField('Procedencia', max_length=30, choices=FUENTES_SAC)
     fuente_detalle = models.CharField('Detalle de procedencia', max_length=200, blank=True)
     normas_aplicables = models.JSONField('Normas aplicables', default=list, blank=True)
@@ -543,7 +543,7 @@ ESTADOS_ACCION_SAC = [
 
 class AccionSAC(AuditableModel):
     """
-    Acción de una SAC: corrección inmediata (sección 5 del r01) o
+    Acción de una SAC: corrección inmediata o
     acción correctiva (sección 7). Con fecha, responsable y evidencia.
     """
     solicitud = models.ForeignKey(
@@ -574,7 +574,7 @@ class AccionSAC(AuditableModel):
 
 
 # ============================================================
-# M10 — AUDITORÍAS INTERNAS (SIG-PRO-16)
+# M10 — AUDITORÍAS INTERNAS
 # ============================================================
 
 MODALIDADES_AUDITORIA = [
@@ -631,7 +631,7 @@ class RequisitoNorma(models.Model):
 
 
 class ProgramaAuditoria(AuditableModel):
-    """Programa anual de auditorías (SIG-PRO-16-r01)."""
+    """Programa anual de auditorías."""
     anio = models.PositiveIntegerField('Año', unique=True)
     estado = models.CharField('Estado', max_length=15,
                               choices=[('borrador', 'Borrador'), ('aprobado', 'Aprobado')],
@@ -652,7 +652,7 @@ class ProgramaAuditoria(AuditableModel):
 
 
 class Auditoria(AuditableModel):
-    """M10 — Auditoría interna (SIG-PRO-16). Código AI-NN-YYYY."""
+    """M10 — Auditoría interna. Código AI-NN-YYYY."""
     codigo = models.CharField('Código', max_length=20, unique=True, editable=False)
     programa = models.ForeignKey(ProgramaAuditoria, on_delete=models.PROTECT,
                                  related_name='auditorias', null=True, blank=True)
@@ -674,7 +674,7 @@ class Auditoria(AuditableModel):
     reprogramada = models.BooleanField('Reprogramada', default=False)
     motivo_reprogramacion = models.CharField('Motivo de reprogramación', max_length=255, blank=True)
     estado = models.CharField('Estado', max_length=15, choices=ESTADOS_AUDITORIA, default='programada')
-    # Informe (SIG-PRO-16-r04)
+    # Informe
     fortalezas = models.TextField('Fortalezas', blank=True)
     debilidades = models.TextField('Debilidades', blank=True)
     conclusiones = models.TextField('Conclusiones', blank=True)
@@ -775,7 +775,7 @@ class ItemVerificacion(AuditableModel):
 
 
 # ============================================================
-# M13 — EQUIPOS / CONTROL DEL EQUIPAMIENTO (MET-PRO-04)
+# M13 — EQUIPOS / CONTROL DEL EQUIPAMIENTO
 # ============================================================
 
 MAGNITUDES_EQUIPO = [
@@ -808,16 +808,75 @@ ESTADOS_EQUIPO = [
 ]
 
 
+def _es_nombre_patron(nombre):
+    """True si el nombre de la clasificación corresponde a un patrón (regla de patrón vigente)."""
+    import unicodedata
+    if not nombre:
+        return False
+    txt = unicodedata.normalize('NFKD', str(nombre)).encode('ascii', 'ignore').decode().lower()
+    return 'patron' in txt
+
+
+def prefijo_de_magnitud(nombre):
+    """Prefijo de código para una magnitud (M, TH, FP…), tomado del catálogo gestionable."""
+    if not nombre:
+        return 'GEN'
+    p = (MagnitudEquipo.objects.filter(nombre=nombre)
+         .values_list('prefijo', flat=True).first())
+    if p:
+        return p.upper()
+    if nombre in PREFIJO_MAGNITUD:
+        return PREFIJO_MAGNITUD[nombre].upper()
+    iniciales = ''.join(parte[0] for parte in str(nombre).split()[:2])
+    return (iniciales or str(nombre)[:2]).upper()
+
+
+class MagnitudEquipo(models.Model):
+    """Catálogo gestionable de magnitudes (módulo Equipos). Cada una define el prefijo del código."""
+    nombre = models.CharField('Magnitud', max_length=100, unique=True)
+    prefijo = models.CharField('Prefijo de código', max_length=4,
+                               help_text='Prefijo del código de equipo (ej: M, TH, FP).')
+    orden = models.PositiveIntegerField('Orden', default=0)
+    is_active = models.BooleanField('Activo', default=True)
+
+    class Meta:
+        verbose_name = 'Magnitud de equipo'
+        verbose_name_plural = 'Magnitudes de equipo'
+        ordering = ['orden', 'nombre']
+
+    def __str__(self):
+        return self.nombre
+
+
+class ClasificacionEquipo(models.Model):
+    """Catálogo gestionable de clasificaciones (módulo Equipos). 'Patrón…' cuenta como patrón."""
+    nombre = models.CharField('Clasificación', max_length=100, unique=True)
+    orden = models.PositiveIntegerField('Orden', default=0)
+    is_active = models.BooleanField('Activo', default=True)
+
+    class Meta:
+        verbose_name = 'Clasificación de equipo'
+        verbose_name_plural = 'Clasificaciones de equipo'
+        ordering = ['orden', 'nombre']
+
+    def __str__(self):
+        return self.nombre
+
+    @property
+    def es_patron(self):
+        return _es_nombre_patron(self.nombre)
+
+
 class Equipo(AuditableModel):
     """
-    M13 — Equipo o patrón del laboratorio (Hoja de Vida + Inventario,
-    MET-PRO-04-r01/r02). Código por magnitud (M-001, TH-01, ...).
+    M13 — Equipo o patrón del laboratorio (Hoja de Vida + Inventario).
+    Código por magnitud (M-001, TH-01, ...).
     """
     codigo = models.CharField('Código', max_length=20, unique=True,
                               help_text='Lo asigna el laboratorio (p. ej. M-001, TH-01).')
-    magnitud = models.CharField('Magnitud', max_length=20, choices=MAGNITUDES_EQUIPO)
-    clasificacion = models.CharField('Clasificación', max_length=20, choices=CLASIFICACIONES_EQUIPO,
-                                     default='equipamiento')
+    magnitud = models.CharField('Magnitud', max_length=100, blank=True)
+    clasificacion = models.CharField('Clasificación', max_length=100, blank=True,
+                                     default='Equipamiento Auxiliar')
     nombre = models.CharField('Nombre del equipo', max_length=150)
     marca = models.CharField('Marca', max_length=100, blank=True)
     modelo = models.CharField('Modelo', max_length=100, blank=True)
@@ -828,7 +887,8 @@ class Equipo(AuditableModel):
     division_escala = models.CharField('División de escala (d) / verificación (e)', max_length=80, blank=True)
     clase_exactitud = models.CharField('Clase de exactitud', max_length=80, blank=True)
     resolucion = models.CharField('Resolución', max_length=80, blank=True)
-    cantidad = models.CharField('Alcance / Cantidad', max_length=40, blank=True)
+    cantidad = models.CharField('Alcance / Valor nominal', max_length=40, blank=True)
+    cantidad_unidades = models.CharField('Cantidad', max_length=40, blank=True)
     material = models.CharField('Material', max_length=80, blank=True)
     tipo_indicacion = models.CharField('Tipo de indicación', max_length=80, blank=True)
     laboratorio = models.CharField('Ubicación / Laboratorio', max_length=120, blank=True)
@@ -868,7 +928,7 @@ class Equipo(AuditableModel):
 
     @property
     def es_patron(self):
-        return self.clasificacion in ('patron_referencia', 'patron_verificacion', 'patron_trabajo')
+        return _es_nombre_patron(self.clasificacion)
 
     @property
     def calibracion_vigente(self):
@@ -913,7 +973,7 @@ TIPOS_REGISTRO_EQUIPO = [
 
 class RegistroEquipo(AuditableModel):
     """
-    Bitácora de la Hoja de Vida (MET-PRO-04-r01). Un registro por fila de cada
+    Bitácora de la Hoja de Vida. Un registro por fila de cada
     pestaña del Excel: Calibración, Mantenimiento, Verificación, Comprobación
     Intermedia, Caracterización e Historial de Sucesos.
 
@@ -953,7 +1013,7 @@ TIPOS_ACTIVIDAD = [
 
 
 class ActividadPrograma(AuditableModel):
-    """Programa anual de actividades por equipo (MET-PRO-04-r03)."""
+    """Programa anual de actividades por equipo."""
     equipo = models.ForeignKey(Equipo, on_delete=models.PROTECT, related_name='actividades')
     tipo = models.CharField('Tipo', max_length=25, choices=TIPOS_ACTIVIDAD)
     anio = models.PositiveIntegerField('Año')
@@ -986,7 +1046,7 @@ ESTADOS_FISICOS = [
 
 
 class MovimientoEquipo(AuditableModel):
-    """Control de salida y entrada del equipamiento (MET-PRO-04-r09)."""
+    """Control de salida y entrada del equipamiento."""
     equipo = models.ForeignKey(Equipo, on_delete=models.PROTECT, related_name='movimientos')
     motivo = models.CharField('Motivo de salida', max_length=15, choices=MOTIVOS_MOVIMIENTO)
     destino = models.CharField('Destino', max_length=150, blank=True)
@@ -1026,7 +1086,7 @@ PREFIJO_INFORME = {
 
 class InformeEquipo(AuditableModel):
     """
-    Informes técnicos del equipo (MET-PRO-04-r05/r06/r07): mantenimiento,
+    Informes técnicos del equipo: mantenimiento,
     comprobación intermedia, caracterización. El cálculo metrológico vive en
     el archivo adjunto; el sistema registra el informe y sus datos clave.
     """
@@ -1056,7 +1116,7 @@ class InformeEquipo(AuditableModel):
     def generar_numero(tipo, magnitud):
         from django.utils import timezone
         prefijo = PREFIJO_INFORME.get(tipo, 'INF')
-        mag = PREFIJO_MAGNITUD.get(magnitud, magnitud).upper()
+        mag = prefijo_de_magnitud(magnitud)
         anio = timezone.now().year
         base = f'{prefijo}-{mag}-'
         sufijo = f'-{anio}'
@@ -1079,8 +1139,8 @@ class InformeEquipo(AuditableModel):
 
 
 class CartaTrazabilidad(AuditableModel):
-    """Carta de trazabilidad metrológica por magnitud (MET-PRO-04-r04)."""
-    magnitud = models.CharField('Magnitud', max_length=20, choices=MAGNITUDES_EQUIPO)
+    """Carta de trazabilidad metrológica por magnitud."""
+    magnitud = models.CharField('Magnitud', max_length=100, blank=True)
     procedimiento_calibracion = models.CharField('Procedimiento de calibración', max_length=150, blank=True)
     contenido = models.TextField('Contenido / cadena de trazabilidad', blank=True)
     archivo = models.FileField('Archivo', upload_to='equipos/trazabilidad/%Y/', null=True, blank=True)
@@ -1093,4 +1153,179 @@ class CartaTrazabilidad(AuditableModel):
         ordering = ['magnitud']
 
     def __str__(self):
-        return f'Trazabilidad {self.get_magnitud_display()}'
+        return f'Trazabilidad {self.magnitud}'
+
+
+class SolicitudCambioEquipo(AuditableModel):
+    """
+    Cambio sobre un registro de equipo pendiente de aprobación.
+
+    Cuando un usuario SIN permiso de aprobar modifica un equipo (o sus
+    bitácoras), el cambio no se aplica de inmediato: se guarda aquí en estado
+    pendiente hasta que un usuario CON permiso de aprobar lo acepta (se aplica
+    el cambio real) o lo rechaza (se descarta). 'created_by' es el solicitante.
+    """
+    ENTIDADES = [
+        ('equipo', 'Equipo'),
+        ('registro', 'Registro de bitácora'),
+        ('actividad', 'Actividad del programa anual'),
+        ('movimiento', 'Movimiento'),
+        ('informe', 'Informe'),
+        ('intervalo', 'Intervalo de calibración'),
+        ('nodo', 'Nodo de trazabilidad'),
+    ]
+    OPERACIONES = [
+        ('crear', 'Crear'),
+        ('editar', 'Editar'),
+        ('eliminar', 'Eliminar'),
+        ('baja', 'Dar de baja'),
+    ]
+    ESTADOS = [
+        ('pendiente', 'Pendiente'),
+        ('aprobada', 'Aprobada'),
+        ('devuelta', 'Devuelta para corrección'),
+        ('rechazada', 'Rechazada'),
+    ]
+
+    equipo = models.ForeignKey('Equipo', verbose_name='Equipo', on_delete=models.CASCADE,
+                               related_name='solicitudes_cambio', null=True, blank=True)
+    entidad = models.CharField('Entidad afectada', max_length=20, choices=ENTIDADES, default='equipo')
+    operacion = models.CharField('Operación', max_length=10, choices=OPERACIONES, default='editar')
+    entidad_id = models.IntegerField('ID del registro objetivo', null=True, blank=True)
+    payload = models.JSONField('Datos propuestos', default=dict, blank=True)
+    archivo = models.FileField('Archivo adjunto propuesto', upload_to='equipos/solicitudes/%Y/',
+                               null=True, blank=True)
+    resumen = models.CharField('Resumen del cambio', max_length=255, blank=True)
+    estado = models.CharField('Estado', max_length=12, choices=ESTADOS, default='pendiente')
+    observaciones = models.TextField('Observaciones del aprobador', blank=True)
+    resuelto_por = models.ForeignKey('core.Usuario', verbose_name='Resuelto por', on_delete=models.PROTECT,
+                                     related_name='solicitudes_equipo_resueltas', null=True, blank=True)
+    resuelto_at = models.DateTimeField('Fecha de resolución', null=True, blank=True)
+
+    class Meta:
+        verbose_name = 'Solicitud de cambio de equipo'
+        verbose_name_plural = 'Solicitudes de cambio de equipo'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'{self.get_operacion_display()} {self.get_entidad_display()} ({self.get_estado_display()})'
+
+
+class NodoTrazabilidad(AuditableModel):
+    """
+    Eslabón (caja) del árbol de una Carta de Trazabilidad. Se encadena con
+    'padre' para formar la cadena metrológica (patrón nacional/internacional →
+    patrón de referencia → patrón de trabajo → equipo). Un nodo puede enlazarse
+    a un equipo del inventario para reflejar sus datos de calibración, o
+    describir un patrón / entidad externa (p. ej. la entidad metrológica
+    nacional o un proveedor de calibración).
+    """
+    carta = models.ForeignKey(CartaTrazabilidad, verbose_name='Carta', on_delete=models.CASCADE,
+                              related_name='nodos')
+    padres = models.ManyToManyField('self', verbose_name='Es trazable a', symmetrical=False,
+                                    related_name='hijos', blank=True)
+    orden = models.PositiveIntegerField('Orden', default=0)
+    equipo = models.ForeignKey('Equipo', verbose_name='Equipo del inventario', on_delete=models.SET_NULL,
+                               related_name='nodos_trazabilidad', null=True, blank=True)
+    entidad = models.CharField('Entidad que calibró', max_length=150, blank=True)
+    descripcion = models.CharField('Descripción del patrón', max_length=200, blank=True)
+    codigo = models.CharField('Código de identificación', max_length=50, blank=True)
+    procedimiento = models.TextField('Procedimiento de calibración', blank=True)
+    certificado = models.CharField('N° de certificado de calibración', max_length=120, blank=True)
+    incertidumbre = models.CharField('Incertidumbre (U)', max_length=120, blank=True)
+    nota = models.TextField('Nota / método', blank=True)
+    nivel = models.PositiveIntegerField('Nivel', default=1)
+    is_active = models.BooleanField('Activo', default=True)
+
+    class Meta:
+        verbose_name = 'Nodo de trazabilidad'
+        verbose_name_plural = 'Nodos de trazabilidad'
+        ordering = ['orden', 'id']
+
+    def __str__(self):
+        return self.descripcion or self.codigo or f'Nodo {self.pk}'
+
+    def rellenar_desde_equipo(self):
+        """Copia al nodo los datos de calibración del equipo enlazado."""
+        eq = self.equipo
+        if not eq:
+            return
+        self.descripcion = self.descripcion or (eq.nombre or '')
+        self.codigo = eq.codigo or self.codigo
+        self.entidad = self.entidad or (eq.proveedor_calibracion or '')
+        self.certificado = eq.n_certificado or self.certificado
+
+
+class PuntoIntervalo(AuditableModel):
+    """
+    Punto nominal de un patrón para la determinación del intervalo de
+    calibración (método OIML D10). Por cada punto se registran los resultados
+    anuales y el sistema calcula la deriva y el periodo recomendado.
+    """
+    equipo = models.ForeignKey('Equipo', verbose_name='Patrón', on_delete=models.CASCADE,
+                               related_name='puntos_intervalo')
+    valor_nominal = models.CharField('Valor nominal', max_length=60)
+    orden = models.PositiveIntegerField('Orden', default=0)
+    is_active = models.BooleanField('Activo', default=True)
+
+    class Meta:
+        verbose_name = 'Punto de intervalo de calibración'
+        verbose_name_plural = 'Puntos de intervalo de calibración'
+        ordering = ['orden', 'id']
+
+    def __str__(self):
+        return f'{self.valor_nominal} ({self.equipo.codigo})'
+
+
+class ResultadoIntervalo(AuditableModel):
+    """Resultado anual de calibración de un punto, para el cálculo de la deriva."""
+    punto = models.ForeignKey(PuntoIntervalo, verbose_name='Punto', on_delete=models.CASCADE,
+                              related_name='resultados')
+    anio = models.PositiveIntegerField('Año de calibración')
+    resultado = models.FloatField('Resultado (desviación)', default=0)
+    incertidumbre = models.FloatField('Incertidumbre', default=0)
+    emp = models.FloatField('EMP (error máximo permitido)', default=0)
+
+    class Meta:
+        verbose_name = 'Resultado de intervalo'
+        verbose_name_plural = 'Resultados de intervalo'
+        ordering = ['anio', 'id']
+        # Un solo resultado por punto y año (estructura de matriz año × punto).
+        unique_together = [('punto', 'anio')]
+
+    def __str__(self):
+        return f'{self.anio}: {self.resultado}'
+
+
+def calcular_intervalo_punto(resultados):
+    """
+    Cálculo OIML D10 (deriva), idéntico al MET-PRO-04-r08:
+      - EMP  = máx(EMP de cada año); Umáx = máx(incertidumbre de cada año)
+      - Tolerancia = EMP - Umáx
+      - Deriva(año) = |Δresultado / Δaño|; Deriva máxima = máx(derivas)
+      - Periodo OIML D10 = Tolerancia / Deriva máxima  (None si no hay deriva)
+      - Periodo de Calibración (PC) = Periodo × 0,5
+    'resultados': lista de dicts {anio, resultado, incertidumbre, emp}.
+    """
+    rs = sorted([r for r in resultados if r.get('anio') is not None], key=lambda r: r['anio'])
+    emp_max = max([(r.get('emp') or 0) for r in rs], default=0.0)
+    umax_max = max([(r.get('incertidumbre') or 0) for r in rs], default=0.0)
+    tol = emp_max - umax_max
+    derivas, detalle = [], []
+    for i, r in enumerate(rs):
+        d = None
+        if i + 1 < len(rs):
+            dt = (rs[i + 1]['anio'] or 0) - (r['anio'] or 0)
+            if dt:
+                d = abs(((rs[i + 1].get('resultado') or 0) - (r.get('resultado') or 0)) / dt)
+        detalle.append({'anio': r['anio'], 'deriva': d})
+        if d is not None:
+            derivas.append(d)
+    deriva_max = max(derivas) if derivas else 0.0
+    periodo = (tol / deriva_max) if deriva_max > 0 else None
+    return {
+        'emp': emp_max, 'umax': umax_max, 'tolerancia': tol,
+        'deriva_maxima': deriva_max, 'periodo': periodo,
+        'periodo_calibracion': (periodo * 0.5) if periodo is not None else None,
+        'derivas': detalle,
+    }

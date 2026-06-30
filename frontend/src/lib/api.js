@@ -130,6 +130,19 @@ export const api = {
     editar: (id, data) => apiFetch(`/opciones-catalogo/${id}/`, { method: 'PATCH', body: data }),
     eliminar: (id) => apiFetch(`/opciones-catalogo/${id}/`, { method: 'DELETE' }),
   },
+  // Catálogos del módulo Equipos (magnitud con prefijo, clasificación con regla de patrón)
+  magnitudesEquipo: {
+    listar: () => apiFetch('/magnitudes-equipo/'),
+    crear: (nombre) => apiFetch('/magnitudes-equipo/', { method: 'POST', body: { nombre } }),
+    editar: (id, data) => apiFetch(`/magnitudes-equipo/${id}/`, { method: 'PATCH', body: data }),
+    eliminar: (id) => apiFetch(`/magnitudes-equipo/${id}/`, { method: 'DELETE' }),
+  },
+  clasificacionesEquipo: {
+    listar: () => apiFetch('/clasificaciones-equipo/'),
+    crear: (nombre) => apiFetch('/clasificaciones-equipo/', { method: 'POST', body: { nombre } }),
+    editar: (id, data) => apiFetch(`/clasificaciones-equipo/${id}/`, { method: 'PATCH', body: data }),
+    eliminar: (id) => apiFetch(`/clasificaciones-equipo/${id}/`, { method: 'DELETE' }),
+  },
   // Roles
   roles: {
     listar: () => apiFetch('/roles/'),
@@ -138,7 +151,7 @@ export const api = {
     desactivar: (id) => apiFetch(`/roles/${id}/`, { method: 'DELETE' }),
   },
   catalogo: () => apiFetch('/configuracion/catalogo/'),
-  // M9 — Solicitudes de Acción Correctiva (SIG-PRO-11)
+  // M9 — Solicitudes de Acción Correctiva
   sac: {
     listar: (params = '') => apiFetch(`/sac/${params}`),
     detalle: (id) => apiFetch(`/sac/${id}/`),
@@ -216,7 +229,7 @@ export const api = {
     externosPorVerificar: () => apiFetch('/documentos/externos_por_verificar/'),
   },
   auditoria: (params = '') => apiFetch(`/auditoria/${params}`),
-  // M10 — Auditorías Internas (SIG-PRO-16)
+  // M10 — Auditorías Internas
   requisitosNorma: (norma) => apiFetch(`/requisitos-norma/?norma=${norma}`),
   programasAuditoria: {
     listar: (params = '') => apiFetch(`/programas-auditoria/${params}`),
@@ -246,7 +259,7 @@ export const api = {
   // Transversales: buzón de tareas y calendario
   misTareas: () => apiFetch('/mis-tareas/'),
   calendario: (usuarioId) => apiFetch(`/calendario/${usuarioId ? `?usuario=${usuarioId}` : ''}`),
-  // M13 — Equipos (MET-PRO-04)
+  // M13 — Equipos
   equipos: {
     listar: (params = '') => apiFetch(`/equipos/${params}`),
     detalle: (id) => apiFetch(`/equipos/${id}/`),
@@ -260,6 +273,12 @@ export const api = {
     agregarRegistro: (id, formData) => apiUpload(`/equipos/${id}/agregar_registro/`, formData),
     subirImagen: (id, formData) => apiUpload(`/equipos/${id}/`, formData, { method: 'PATCH' }),
     fichaPdf: (id) => apiBlob(`/equipos/${id}/ficha_pdf/`),
+    bitacoraPdf: (id, tipo, titulo) => apiBlob(`/equipos/${id}/bitacora_pdf/?tipo=${encodeURIComponent(tipo)}&titulo=${encodeURIComponent(titulo || '')}`),
+    inventarioPdf: (params = '') => apiBlob(`/equipos/inventario_pdf/${params}`),
+    laboratorios: () => apiFetch('/equipos/laboratorios/'),
+    programa: (params = '') => apiFetch(`/equipos/programa/${params}`),
+    programar: (id, data) => apiFetch(`/equipos/${id}/programar/`, { method: 'POST', body: data }),
+    programaPdf: (params = '') => apiBlob(`/equipos/programa_pdf/${params}`),
     eliminarRegistro: (id, registroId) => apiFetch(`/equipos/${id}/eliminar_registro/`, { method: 'POST', body: { registro_id: registroId } }),
     agregarActividad: (id, data) => apiFetch(`/equipos/${id}/agregar_actividad/`, { method: 'POST', body: data }),
     registrarMovimiento: (id, data) => apiFetch(`/equipos/${id}/registrar_movimiento/`, { method: 'POST', body: data }),
@@ -267,9 +286,42 @@ export const api = {
     registrarInforme: (id, formData) => apiUpload(`/equipos/${id}/registrar_informe/`, formData),
     resumen: () => apiFetch('/equipos/resumen/'),
   },
+  // M13 — Control de cambios de equipos (solicitudes pendientes de aprobación)
+  solicitudesEquipo: {
+    listar: (params = '') => apiFetch(`/solicitudes-cambio-equipo/${params}`),
+    pendientesCount: () => apiFetch('/solicitudes-cambio-equipo/pendientes_count/'),
+    misDevueltasCount: () => apiFetch('/solicitudes-cambio-equipo/mis_devueltas_count/'),
+    aprobar: (id, observaciones = '') => apiFetch(`/solicitudes-cambio-equipo/${id}/aprobar/`, { method: 'POST', body: { observaciones } }),
+    devolver: (id, observaciones = '') => apiFetch(`/solicitudes-cambio-equipo/${id}/devolver/`, { method: 'POST', body: { observaciones } }),
+    rechazar: (id, observaciones = '') => apiFetch(`/solicitudes-cambio-equipo/${id}/rechazar/`, { method: 'POST', body: { observaciones } }),
+    reenviar: (id, payload = null) => apiFetch(`/solicitudes-cambio-equipo/${id}/reenviar/`, { method: 'POST', body: payload ? { payload } : {} }),
+  },
   cartasTrazabilidad: {
     listar: (params = '') => apiFetch(`/cartas-trazabilidad/${params}`),
+    detalle: (id) => apiFetch(`/cartas-trazabilidad/${id}/`),
     crear: (data) => apiFetch('/cartas-trazabilidad/', { method: 'POST', body: data }),
+    eliminar: (id) => apiFetch(`/cartas-trazabilidad/${id}/`, { method: 'DELETE' }),
+    pdf: (id) => apiBlob(`/cartas-trazabilidad/${id}/carta_pdf/`),
+  },
+  nodosTrazabilidad: {
+    crear: (data) => apiFetch('/nodos-trazabilidad/', { method: 'POST', body: data }),
+    editar: (id, data) => apiFetch(`/nodos-trazabilidad/${id}/`, { method: 'PATCH', body: data }),
+    eliminar: (id) => apiFetch(`/nodos-trazabilidad/${id}/`, { method: 'DELETE' }),
+    rellenarDesdeEquipo: (id) => apiFetch(`/nodos-trazabilidad/${id}/rellenar_desde_equipo/`, { method: 'POST' }),
+  },
+  // M13 — Intervalo de Calibración (MET-PRO-04-r08, método OIML D10)
+  puntosIntervalo: {
+    resumen: (params = '') => apiFetch(`/puntos-intervalo/resumen/${params}`),
+    crear: (data) => apiFetch('/puntos-intervalo/', { method: 'POST', body: data }),
+    editar: (id, data) => apiFetch(`/puntos-intervalo/${id}/`, { method: 'PATCH', body: data }),
+    eliminar: (id) => apiFetch(`/puntos-intervalo/${id}/`, { method: 'DELETE' }),
+    guardarMatriz: (data) => apiFetch('/puntos-intervalo/guardar_matriz/', { method: 'POST', body: data }),
+    pdf: (params = '') => apiBlob(`/puntos-intervalo/intervalo_pdf/${params}`),
+  },
+  resultadosIntervalo: {
+    crear: (data) => apiFetch('/resultados-intervalo/', { method: 'POST', body: data }),
+    editar: (id, data) => apiFetch(`/resultados-intervalo/${id}/`, { method: 'PATCH', body: data }),
+    eliminar: (id) => apiFetch(`/resultados-intervalo/${id}/`, { method: 'DELETE' }),
   },
   // Configuración del sistema (marca + licenciamiento de módulos)
   configPublica: () => apiFetch('/configuracion/publica/'),

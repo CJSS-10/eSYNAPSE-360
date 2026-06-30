@@ -485,7 +485,7 @@ class SolicitudACSerializer(serializers.ModelSerializer):
 
 
 class SolicitudACListaSerializer(serializers.ModelSerializer):
-    """Columnas del Seguimiento SIG-PRO-11-r02."""
+    """Columnas del Seguimiento de acciones."""
     fuente_display = serializers.CharField(source='get_fuente_display', read_only=True)
     estado_display = serializers.CharField(source='get_estado_display', read_only=True)
     responsable_nombre = serializers.SerializerMethodField()
@@ -509,7 +509,7 @@ class SolicitudACListaSerializer(serializers.ModelSerializer):
 
 
 # ============================================================
-# M10 — AUDITORÍAS INTERNAS (SIG-PRO-16)
+# M10 — AUDITORÍAS INTERNAS
 # ============================================================
 from .models import (  # noqa: E402
     ActaAuditoria, Auditoria, EquipoAuditoria, ItemVerificacion,
@@ -661,7 +661,7 @@ class ProgramaAuditoriaSerializer(serializers.ModelSerializer):
 
 
 # ============================================================
-# M13 — EQUIPOS (MET-PRO-04)
+# M13 — EQUIPOS
 # ============================================================
 from .models import (  # noqa: E402
     ActividadPrograma, CartaTrazabilidad, Equipo, InformeEquipo, MovimientoEquipo,
@@ -720,15 +720,15 @@ class RegistroEquipoSerializer(serializers.ModelSerializer):
 
 
 class EquipoListaSerializer(serializers.ModelSerializer):
-    magnitud_display = serializers.CharField(source='get_magnitud_display', read_only=True)
-    clasificacion_display = serializers.CharField(source='get_clasificacion_display', read_only=True)
+    magnitud_display = serializers.CharField(source='magnitud', read_only=True)
+    clasificacion_display = serializers.CharField(source='clasificacion', read_only=True)
     estado_display = serializers.CharField(source='get_estado_display', read_only=True)
     calibracion_vigente = serializers.BooleanField(read_only=True)
     es_patron = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = Equipo
-        # Columnas del Inventario (MET-PRO-04-r02)
+        # Columnas del Inventario
         fields = ['id', 'codigo', 'nombre', 'magnitud', 'magnitud_display', 'clasificacion',
                   'clasificacion_display', 'marca', 'modelo', 'serie', 'cantidad',
                   'clase_exactitud', 'resolucion', 'laboratorio',
@@ -739,8 +739,8 @@ class EquipoListaSerializer(serializers.ModelSerializer):
 
 
 class EquipoSerializer(serializers.ModelSerializer):
-    magnitud_display = serializers.CharField(source='get_magnitud_display', read_only=True)
-    clasificacion_display = serializers.CharField(source='get_clasificacion_display', read_only=True)
+    magnitud_display = serializers.CharField(source='magnitud', read_only=True)
+    clasificacion_display = serializers.CharField(source='clasificacion', read_only=True)
     estado_display = serializers.CharField(source='get_estado_display', read_only=True)
     calibracion_vigente = serializers.BooleanField(read_only=True)
     es_patron = serializers.BooleanField(read_only=True)
@@ -757,7 +757,7 @@ class EquipoSerializer(serializers.ModelSerializer):
         fields = ['id', 'codigo', 'magnitud', 'magnitud_display', 'clasificacion',
                   'clasificacion_display', 'nombre', 'marca', 'modelo', 'serie', 'procedencia',
                   'intervalo_indicacion', 'division_escala', 'clase_exactitud', 'resolucion',
-                  'cantidad', 'material', 'tipo_indicacion', 'laboratorio', 'instructivo', 'manual',
+                  'cantidad', 'cantidad_unidades', 'material', 'tipo_indicacion', 'laboratorio', 'instructivo', 'manual',
                   'criterio_aceptacion', 'exactitud_asignada', 'inicio_servicio',
                   'estado', 'estado_display', 'motivo_inoperativo', 'fecha_fuera_servicio',
                   'requiere_calibracion', 'n_certificado', 'proveedor_calibracion',
@@ -781,14 +781,126 @@ class EquipoSerializer(serializers.ModelSerializer):
 
 
 class CartaTrazabilidadSerializer(serializers.ModelSerializer):
-    magnitud_display = serializers.CharField(source='get_magnitud_display', read_only=True)
+    magnitud_display = serializers.CharField(source='magnitud', read_only=True)
     archivo_url = serializers.SerializerMethodField()
+
+    nodos = serializers.SerializerMethodField()
 
     class Meta:
         model = CartaTrazabilidad
         fields = ['id', 'magnitud', 'magnitud_display', 'procedimiento_calibracion',
-                  'contenido', 'archivo_url', 'fecha_actualizacion', 'is_active', 'created_at']
+                  'contenido', 'archivo_url', 'fecha_actualizacion', 'is_active', 'created_at', 'nodos']
         read_only_fields = ['is_active']
+
+    def get_archivo_url(self, obj):
+        return obj.archivo.url if obj.archivo else None
+
+    def get_nodos(self, obj):
+        nodos = obj.nodos.filter(is_active=True).order_by('orden', 'id')
+        return NodoTrazabilidadSerializer(nodos, many=True, context=self.context).data
+
+
+class NodoTrazabilidadSerializer(serializers.ModelSerializer):
+    """Eslabón del árbol de una carta de trazabilidad."""
+    equipo_codigo = serializers.CharField(source='equipo.codigo', read_only=True, default='')
+    equipo_nombre = serializers.CharField(source='equipo.nombre', read_only=True, default='')
+
+    class Meta:
+        from .models import NodoTrazabilidad
+        model = NodoTrazabilidad
+        fields = ['id', 'carta', 'padres', 'orden', 'equipo', 'equipo_codigo', 'equipo_nombre',
+                  'entidad', 'descripcion', 'codigo', 'procedimiento', 'certificado',
+                  'incertidumbre', 'nota', 'nivel', 'is_active']
+        read_only_fields = ['is_active']
+
+
+class ResultadoIntervaloSerializer(serializers.ModelSerializer):
+    """Resultado anual de un punto (para el cálculo de deriva)."""
+    class Meta:
+        from .models import ResultadoIntervalo
+        model = ResultadoIntervalo
+        fields = ['id', 'punto', 'anio', 'resultado', 'incertidumbre', 'emp']
+
+
+class PuntoIntervaloSerializer(serializers.ModelSerializer):
+    """Punto nominal con sus resultados anuales y el cálculo OIML D10."""
+    resultados = serializers.SerializerMethodField()
+    calculo = serializers.SerializerMethodField()
+
+    class Meta:
+        from .models import PuntoIntervalo
+        model = PuntoIntervalo
+        fields = ['id', 'equipo', 'valor_nominal', 'orden',
+                  'resultados', 'calculo', 'is_active']
+        read_only_fields = ['is_active']
+
+    def get_resultados(self, obj):
+        rs = obj.resultados.order_by('anio', 'id')
+        return ResultadoIntervaloSerializer(rs, many=True, context=self.context).data
+
+    def get_calculo(self, obj):
+        from .models import calcular_intervalo_punto
+        datos = list(obj.resultados.values('anio', 'resultado', 'incertidumbre', 'emp'))
+        return calcular_intervalo_punto(datos)
+
+
+class MagnitudEquipoSerializer(serializers.ModelSerializer):
+    """Catálogo gestionable de magnitudes (módulo Equipos)."""
+    class Meta:
+        from .models import MagnitudEquipo
+        model = MagnitudEquipo
+        fields = ['id', 'nombre', 'prefijo', 'orden', 'is_active']
+        extra_kwargs = {'prefijo': {'required': False}}
+
+    def create(self, validated_data):
+        if not validated_data.get('prefijo'):
+            nombre = validated_data.get('nombre', '')
+            iniciales = ''.join(p[0] for p in str(nombre).split()[:2])
+            validated_data['prefijo'] = (iniciales or str(nombre)[:2]).upper() or 'GEN'
+        return super().create(validated_data)
+
+
+class ClasificacionEquipoSerializer(serializers.ModelSerializer):
+    """Catálogo gestionable de clasificaciones (módulo Equipos)."""
+    es_patron = serializers.BooleanField(read_only=True)
+
+    class Meta:
+        from .models import ClasificacionEquipo
+        model = ClasificacionEquipo
+        fields = ['id', 'nombre', 'orden', 'is_active', 'es_patron']
+
+
+class SolicitudCambioEquipoSerializer(serializers.ModelSerializer):
+    """Solicitud de cambio de equipo pendiente de aprobación (solo lectura desde la API)."""
+    entidad_display = serializers.CharField(source='get_entidad_display', read_only=True)
+    operacion_display = serializers.CharField(source='get_operacion_display', read_only=True)
+    estado_display = serializers.CharField(source='get_estado_display', read_only=True)
+    equipo_codigo = serializers.CharField(source='equipo.codigo', read_only=True, default='')
+    equipo_nombre = serializers.CharField(source='equipo.nombre', read_only=True, default='')
+    solicitante = serializers.SerializerMethodField()
+    aprobador = serializers.SerializerMethodField()
+    archivo_url = serializers.SerializerMethodField()
+    es_mio = serializers.SerializerMethodField()
+
+    class Meta:
+        from .models import SolicitudCambioEquipo
+        model = SolicitudCambioEquipo
+        fields = ['id', 'equipo', 'equipo_codigo', 'equipo_nombre', 'entidad', 'entidad_display',
+                  'operacion', 'operacion_display', 'entidad_id', 'payload', 'archivo_url',
+                  'resumen', 'estado', 'estado_display', 'observaciones', 'solicitante',
+                  'aprobador', 'es_mio', 'resuelto_at', 'created_at']
+
+    def get_es_mio(self, obj):
+        req = self.context.get('request')
+        return bool(req and obj.created_by_id and req.user.id == obj.created_by_id)
+
+    def get_solicitante(self, obj):
+        u = obj.created_by
+        return (u.get_full_name() or u.username) if u else None
+
+    def get_aprobador(self, obj):
+        u = obj.resuelto_por
+        return (u.get_full_name() or u.username) if u else None
 
     def get_archivo_url(self, obj):
         return obj.archivo.url if obj.archivo else None
