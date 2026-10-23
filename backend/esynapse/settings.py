@@ -3,11 +3,16 @@ eSYNAPSE 360 — Configuración del proyecto Django (Fase 0).
 Metrindust S.A.C. — Sistema Integrado de Gestión Empresarial.
 """
 
+import os
 from datetime import timedelta
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Modo pruebas: el lanzador de pruebas fija ESYNAPSE_MODO=pruebas y el sistema
+# trabaja sobre una copia de la base y de los archivos subidos, sin tocar los reales.
+MODO_PRUEBAS = os.environ.get('ESYNAPSE_MODO', '').strip().lower() == 'pruebas'
 
 
 # SECURITY WARNING: keep the secret key used in production secret!
@@ -37,6 +42,13 @@ INSTALLED_APPS = [
     # Apps del SIGE
     'core',
     'esynapse_sig',
+    'quejas',
+    'procesos',
+    'cambios',
+    'riesgos',
+    'legal',
+    'sst',
+    'organizacion',
 ]
 
 MIDDLEWARE = [
@@ -76,7 +88,7 @@ WSGI_APPLICATION = 'esynapse.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'NAME': BASE_DIR / ('db_pruebas.sqlite3' if MODO_PRUEBAS else 'db.sqlite3'),
     }
 }
 
@@ -151,7 +163,7 @@ STATIC_URL = 'static/'
 
 # Archivos subidos (documentos, evidencias)
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_ROOT = BASE_DIR / ('media_pruebas' if MODO_PRUEBAS else 'media')
 
 # Permitir que el visor integrado muestre PDFs propios en iframes del mismo origen
 X_FRAME_OPTIONS = 'SAMEORIGIN'

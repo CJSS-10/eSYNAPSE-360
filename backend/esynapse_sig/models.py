@@ -14,6 +14,13 @@ NORMAS_APLICABLES = [
     ('iso_17025', 'NTP ISO/IEC 17025'),
 ]
 
+# Las listas de verificación admiten además una lista INTEGRADA de las tres
+# normas de sistemas de gestión (como en el formato del laboratorio), que se
+# audita en una sola lista combinada.
+NORMAS_LISTA = NORMAS_APLICABLES + [
+    ('sig_integrado', 'Sistema Integrado (ISO 9001 · 14001 · 45001)'),
+]
+
 SOPORTES = [
     ('digital', 'Digital'),
     ('fisico', 'Físico'),
@@ -47,6 +54,25 @@ ESTADOS_VERSION = [
 ]
 
 
+def vincular_proceso(obj):
+    """Une el texto del proceso con el catálogo oficial (M7). El texto manda: si
+    coincide con un proceso del catálogo se vincula (y toma su nombre exacto); si
+    no coincide, queda como texto sin vincular. Sin texto, se toma el nombre del
+    proceso del catálogo indicado."""
+    from procesos.models import Proceso
+    texto = (obj.proceso or '').strip()
+    if texto:
+        p = Proceso.buscar_por_texto(texto)
+        if p:
+            obj.proceso_catalogo, obj.proceso = p, p.nombre
+        elif obj.proceso_catalogo_id and obj.proceso_catalogo.nombre.lower() == texto.lower():
+            obj.proceso = obj.proceso_catalogo.nombre
+        else:
+            obj.proceso_catalogo = None
+    elif obj.proceso_catalogo_id:
+        obj.proceso = obj.proceso_catalogo.nombre
+
+
 class Documento(AuditableModel):
     """
     Registro maestro del documento. Las versiones viven en VersionDocumento.
@@ -62,6 +88,11 @@ class Documento(AuditableModel):
         null=True, blank=True, related_name='hijos',
     )
     proceso = models.CharField('Proceso vinculado', max_length=100, blank=True)
+    # Proceso del catálogo oficial (M7). El texto de arriba se conserva para
+    # los formatos y se completa con el nombre del proceso del catálogo.
+    proceso_catalogo = models.ForeignKey('procesos.Proceso', verbose_name='Proceso del catálogo',
+                                         on_delete=models.PROTECT, null=True, blank=True,
+                                         related_name='documentos')
     normas_aplicables = models.JSONField(
         'Normas aplicables', default=list, blank=True,
         help_text='Lista de claves de NORMAS_APLICABLES (ej: ["iso_9001", "iso_17025"])',
@@ -102,6 +133,10 @@ class Documento(AuditableModel):
 
     def __str__(self):
         return f'{self.codigo} — {self.titulo}'
+
+    def save(self, *args, **kwargs):
+        vincular_proceso(self)
+        super().save(*args, **kwargs)
 
     @property
     def version_vigente(self):
@@ -168,6 +203,32 @@ class VersionDocumento(AuditableModel):
         return f'{self.documento.codigo} v{self.version} ({self.get_estado_display()})'
 
 
+class FormatoImpreso(models.Model):
+    """
+    Catálogo de los formatos (PDF) que genera el sistema y su vínculo con el
+    documento correspondiente de la lista maestra. La cabecera de control de
+    cada PDF toma código, versión, fecha y firmas de la versión vigente de ese
+    documento; si no está vinculado, usa el código y los datos de respaldo.
+    """
+    clave = models.CharField('Clave interna', max_length=60, unique=True)
+    nombre = models.CharField('Formato', max_length=150)
+    modulo = models.CharField('Módulo', max_length=40)
+    codigo_sgc = models.CharField('Código del formato (respaldo)', max_length=30)
+    documento = models.ForeignKey(
+        'Documento', verbose_name='Documento de la lista maestra', on_delete=models.SET_NULL,
+        null=True, blank=True, related_name='formatos_impresos')
+    orden = models.PositiveIntegerField('Orden', default=0)
+    is_active = models.BooleanField('Activo', default=True)
+
+    class Meta:
+        verbose_name = 'Formato impreso'
+        verbose_name_plural = 'Formatos impresos'
+        ordering = ['orden', 'nombre']
+
+    def __str__(self):
+        return f'{self.nombre} ({self.codigo_sgc})'
+
+
 class VerificacionExterna(AuditableModel):
     """
     Verificación periódica de vigencia de documentos externos
@@ -206,19 +267,26 @@ FUENTES_HALLAZGO = [
     ('auditoria_externa', 'Auditoría externa'),
     ('inspeccion', 'Inspección'),
     ('queja', 'Queja'),
+    ('revision_direccion', 'Revisión por la dirección'),
     ('seguimiento', 'Seguimiento de procesos'),
     ('indicador', 'Indicador'),
     ('riesgo', 'Riesgo materializado'),
+    ('accidente', 'Incidente / accidente de trabajo'),
     ('otro', 'Otro'),
 ]
 
 ESTADOS_HALLAZGO = [
     ('registrado', 'Registrado'),
-    ('en_analisis', 'En análisis'),
-    ('en_tratamiento', 'En tratamiento'),
+    # Observaciones y oportunidades de mejora: según el procedimiento de no
+    # conformidades se tratan en Riesgos y Oportunidades, no aquí.
+    ('derivado', 'Derivado a riesgos y oportunidades'),
+    ('en_analisis', 'En análisis'),          # ciclo anterior (solo históricos)
+    ('en_tratamiento', 'En tratamiento'),    # NC con su solicitud de acción correctiva en curso
     ('cerrado', 'Cerrado'),
-    ('reabierto', 'Reabierto'),
+    ('reabierto', 'Reabierto'),              # ciclo anterior (solo históricos)
 ]
+
+TIPOS_NC = ('nc_mayor', 'nc_menor')
 
 PREFIJOS_HALLAZGO = {
     'nc_mayor': 'NC',
@@ -226,6 +294,12 @@ PREFIJOS_HALLAZGO = {
     'observacion': 'OBS',
     'odm': 'ODM',
 }
+
+
+TRATAMIENTOS_HALLAZGO = [
+    ('accion_correctiva', 'Acción correctiva'),
+    ('riesgos_oportunidades', 'Riesgos y oportunidades'),
+]
 
 
 class Hallazgo(AuditableModel):
@@ -237,6 +311,9 @@ class Hallazgo(AuditableModel):
     tipo = models.CharField('Tipo', max_length=20, choices=TIPOS_HALLAZGO)
     fuente = models.CharField('Fuente', max_length=30, choices=FUENTES_HALLAZGO)
     proceso = models.CharField('Proceso afectado', max_length=100)
+    proceso_catalogo = models.ForeignKey('procesos.Proceso', verbose_name='Proceso del catálogo',
+                                         on_delete=models.PROTECT, null=True, blank=True,
+                                         related_name='hallazgos')
     descripcion = models.TextField('Descripción del hallazgo')
     requisito = models.CharField(
         'Requisito incumplido', max_length=200, blank=True,
@@ -267,7 +344,22 @@ class Hallazgo(AuditableModel):
         'esynapse_sig.Auditoria', verbose_name='Auditoría de origen', on_delete=models.PROTECT,
         related_name='hallazgos', null=True, blank=True,
     )
+    # Por dónde se trata: las no conformidades van a acciones correctivas; las
+    # observaciones y oportunidades de mejora, a riesgos y oportunidades.
+    tratamiento = models.CharField('Tratamiento', max_length=25, choices=TRATAMIENTOS_HALLAZGO, blank=True)
+    # Solicitud de acción correctiva que trata la NC. Varias NC (ocurrencias de
+    # un mismo problema) pueden sumarse a una solicitud abierta.
+    sac = models.ForeignKey('esynapse_sig.SolicitudAC', verbose_name='Solicitud de acción correctiva',
+                            on_delete=models.PROTECT, related_name='hallazgos_vinculados', null=True, blank=True)
+    # Reclasificaciones controladas: [{fecha, usuario, de, a, codigo_anterior, motivo}]
+    reclasificaciones = models.JSONField('Reclasificaciones', default=list, blank=True)
     is_active = models.BooleanField('Activo', default=True)
+
+    # Etapa cerrada = solo lectura. El registro se corrige mientras el hallazgo
+    # no se ha derivado a una solicitud de acción correctiva (las observaciones
+    # y oportunidades de mejora, mientras Riesgos y Oportunidades no las recibe).
+    CAMPOS_REGISTRO = ('fuente', 'proceso', 'proceso_catalogo', 'descripcion', 'requisito', 'lugar',
+                       'fecha_deteccion', 'evidencia', 'responsable')
 
     class Meta:
         verbose_name = 'Hallazgo'
@@ -277,11 +369,49 @@ class Hallazgo(AuditableModel):
     def __str__(self):
         return f'{self.codigo} — {self.get_tipo_display()}'
 
+    @property
+    def es_nc(self):
+        return self.tipo in TIPOS_NC
+
+    def anio_codigo(self):
+        """Año del código: el del programa de auditoría si nació en una
+        auditoría; si no, el de la fecha de detección."""
+        if self.auditoria_id and self.auditoria.programa_id:
+            return self.auditoria.programa.anio
+        f = self.fecha_deteccion
+        if isinstance(f, str):
+            return int(f[:4])
+        if f:
+            return f.year
+        from django.utils import timezone
+        return timezone.now().year
+
+    def registro_abierto(self):
+        """¿Se puede corregir el registro? No si ya pasó a una solicitud de
+        acción correctiva, si está cerrado, o si es de una auditoría (allí se
+        corrige, dentro de su propia etapa)."""
+        if self.auditoria_id or self.sac_id:
+            return False
+        return self.estado in ('registrado', 'derivado')
+
+    def etapas_abiertas(self):
+        return ['registro'] if self.registro_abierto() else []
+
+    def mensaje_registro_cerrado(self, campo=''):
+        nombre = self._meta.get_field(campo).verbose_name if campo else ''
+        detalle = f' (campo «{nombre}»)' if nombre else ''
+        if self.auditoria_id:
+            return (f'El hallazgo nació en la auditoría {self.auditoria.codigo}: se corrige desde la '
+                    f'auditoría mientras sus hallazgos no se hayan comunicado{detalle}.')
+        if self.sac_id:
+            return (f'La etapa de registro está cerrada: el hallazgo ya se trata en la {self.sac.codigo}{detalle}.')
+        return f'La etapa de registro está cerrada: el hallazgo está {self.get_estado_display().lower()}{detalle}.'
+
     @staticmethod
-    def generar_codigo(tipo):
+    def generar_codigo(tipo, anio=None):
         from django.utils import timezone
         prefijo = PREFIJOS_HALLAZGO.get(tipo, 'HAL')
-        anio = timezone.now().year
+        anio = anio or timezone.now().year
         # Correlativo por prefijo y año, formato PREFIJO-NNN-YYYY
         nums = []
         for cod in Hallazgo.objects.filter(
@@ -293,14 +423,29 @@ class Hallazgo(AuditableModel):
                     nums.append(int(partes[1]))
                 except ValueError:
                     pass
+        # Un código que quedó libre al reclasificar un hallazgo no se reutiliza:
+        # sigue en el historial de ese hallazgo.
+        for hist in Hallazgo.objects.exclude(reclasificaciones=[]).values_list('reclasificaciones', flat=True):
+            for r in hist or []:
+                partes = str(r.get('codigo_anterior', '')).split('-')
+                if len(partes) == 3 and partes[0] == prefijo and partes[2] == str(anio) and partes[1].isdigit():
+                    nums.append(int(partes[1]))
         siguiente = max(nums) + 1 if nums else 1
         return f'{prefijo}-{siguiente:03d}-{anio}'
 
     def save(self, *args, **kwargs):
+        vincular_proceso(self)
         if not self.codigo:
-            self.codigo = self.generar_codigo(self.tipo)
-        if self.tipo == 'nc_mayor':
-            self.requiere_ac = True
+            self.codigo = self.generar_codigo(self.tipo, self.anio_codigo())
+        # Toda NC se registra en una solicitud de acción correctiva (allí se
+        # evalúa si basta una corrección); observaciones y oportunidades de
+        # mejora se derivan a Riesgos y Oportunidades.
+        self.requiere_ac = self.es_nc
+        self.tratamiento = 'accion_correctiva' if self.es_nc else 'riesgos_oportunidades'
+        if not self.es_nc and self.estado == 'registrado':
+            self.estado = 'derivado'
+        elif self.es_nc and self.estado == 'derivado':
+            self.estado = 'registrado'
         super().save(*args, **kwargs)
 
 
@@ -451,7 +596,7 @@ ESTADOS_SAC = [
 class SolicitudAC(AuditableModel):
     """
     M9 — Solicitud de Acción Correctiva.
-    Código SAC-NN-YYYY. Ciclo: Registrada → (evaluación 6.4) →
+    Código SAC-NN-YYYY. Ciclo: Registrada → (evaluación de la necesidad de AC) →
     En análisis → En implementación → En verificación → Cerrada.
     """
     codigo = models.CharField('Código', max_length=20, unique=True, editable=False)
@@ -463,12 +608,13 @@ class SolicitudAC(AuditableModel):
     fuente = models.CharField('Procedencia', max_length=30, choices=FUENTES_SAC)
     fuente_detalle = models.CharField('Detalle de procedencia', max_length=200, blank=True)
     normas_aplicables = models.JSONField('Normas aplicables', default=list, blank=True)
+    entidad_auditora = models.CharField('Personal / entidad auditora', max_length=150, blank=True)
     auditor = models.CharField('Auditor', max_length=150, blank=True)
     auditado = models.CharField('Auditado', max_length=150, blank=True)
     requisito_auditado = models.CharField('Requisito auditado', max_length=200, blank=True)
     # 2. No conformidad
     descripcion_nc = models.TextField('Descripción de la No Conformidad')
-    # 3-4. Evaluación (6.4)
+    # 3-4. Evaluación de la necesidad de AC
     significancia = models.CharField('Nivel de significancia', max_length=10,
                                      choices=SIGNIFICANCIA_SAC, blank=True)
     analisis_extension = models.TextField('Análisis de la extensión', blank=True)
@@ -495,8 +641,54 @@ class SolicitudAC(AuditableModel):
     evaluacion_eficacia = models.TextField('Evaluación de la eficacia', blank=True)
     resultado_eficaz = models.BooleanField('Resultado eficaz', null=True, blank=True)
     fecha_verificacion = models.DateTimeField('Fecha de verificación', null=True, blank=True)
+    # Quien verificó realmente la eficacia (el designado o quien tiene permiso de aprobar).
+    verificado_por = models.ForeignKey(
+        'core.Usuario', verbose_name='Verificado por', on_delete=models.PROTECT,
+        related_name='sac_verificadas', null=True, blank=True,
+    )
     fecha_cierre = models.DateTimeField('Fecha de cierre', null=True, blank=True)
+    # Fecha de registro del formato (p. ej. la fecha de la auditoría); si no se
+    # indica, la fecha en que se creó la solicitud.
+    fecha_registro = models.DateField('Fecha de registro', null=True, blank=True)
+    # Ciclo de análisis: si la verificación resulta no eficaz se revisa el
+    # análisis y se definen nuevas acciones; el ciclo anterior queda en el
+    # historial [{ciclo, fecha, porques, causa_raiz, evaluacion, verificado_por}].
+    ciclo = models.PositiveSmallIntegerField('Ciclo de análisis', default=1)
+    ciclos_anteriores = models.JSONField('Ciclos anteriores (no eficaces)', default=list, blank=True)
     is_active = models.BooleanField('Activo', default=True)
+
+    # Etapa cerrada = solo lectura: los datos del registro (secciones 1 y 2 de
+    # la solicitud) se corrigen solo mientras está Registrada.
+    CAMPOS_REGISTRO = ('fuente', 'fuente_detalle', 'normas_aplicables', 'entidad_auditora', 'auditor',
+                       'auditado', 'requisito_auditado', 'descripcion_nc', 'responsable', 'fecha_registro')
+    CERRADAS = ('cerrada_conforme', 'cerrada_sin_ac')
+
+    def etapas_abiertas(self):
+        e = self.estado
+        if e in self.CERRADAS:
+            return []
+        abiertas = {'registrada': ['registro', 'evaluacion', 'correcciones'],
+                    'en_analisis': ['analisis', 'acciones', 'correcciones'],
+                    'en_implementacion': ['implementacion'] + ([] if self.requiere_ac else ['correcciones']),
+                    'en_verificacion': ['verificacion']}
+        return abiertas.get(e, [])
+
+    def puede_agregar(self, tipo):
+        """Correcciones: hasta la implementación (si no requiere acción
+        correctiva); acciones correctivas: solo en el análisis, antes de
+        aprobar el plan."""
+        etapa = 'acciones' if tipo == 'correctiva' else 'correcciones'
+        return etapa in self.etapas_abiertas()
+
+    def clasificacion(self):
+        """NC mayor / menor de la NC de origen y si requiere acción correctiva."""
+        h = self.hallazgo
+        tipo = h.get_tipo_display() if h else ''
+        if self.requiere_ac is None:
+            trat = ''
+        else:
+            trat = 'AC' if self.requiere_ac else 'Solo corrección'
+        return ' / '.join(x for x in (tipo, trat) if x)
 
     class Meta:
         verbose_name = 'Solicitud de Acción Correctiva'
@@ -510,7 +702,7 @@ class SolicitudAC(AuditableModel):
     def generar_codigo():
         from django.utils import timezone
         anio = timezone.now().year
-        # Correlativo por año, formato SAC-NNN-YYYY
+        # Correlativo por año, formato SAC-NN-AAAA (como en el procedimiento)
         nums = []
         for cod in SolicitudAC.objects.filter(
                 codigo__startswith='SAC-', codigo__endswith=f'-{anio}'
@@ -522,11 +714,14 @@ class SolicitudAC(AuditableModel):
                 except ValueError:
                     pass
         n = max(nums) + 1 if nums else 1
-        return f'SAC-{n:03d}-{anio}'
+        return f'SAC-{n:02d}-{anio}'
 
     def save(self, *args, **kwargs):
+        from django.utils import timezone
         if not self.codigo:
             self.codigo = self.generar_codigo()
+        if not self.fecha_registro:
+            self.fecha_registro = timezone.localdate()
         super().save(*args, **kwargs)
 
 
@@ -563,6 +758,26 @@ class AccionSAC(AuditableModel):
     verificacion = models.TextField('Verificación de la acción', blank=True)
     evidencia = models.FileField('Evidencia', upload_to='sac/evidencias/%Y/',
                                  blank=True, null=True)
+    ciclo = models.PositiveSmallIntegerField('Ciclo de análisis', default=1)
+    # Baja lógica: una acción pendiente se quita mientras su etapa sigue abierta.
+    is_active = models.BooleanField('Activo', default=True)
+    # Reaperturas de una acción completada por error (antes de verificar la
+    # eficacia): [{fecha, usuario, motivo, verificacion, fecha_completada, evidencia}]
+    reaperturas = models.JSONField('Reaperturas', default=list, blank=True)
+
+    def reabrible(self):
+        """Una acción completada se reabre (con motivo) mientras la solicitud está
+        en implementación o esperando la verificación de la eficacia."""
+        s = self.solicitud
+        return (self.is_active and self.estado == 'completada' and self.ciclo == s.ciclo
+                and s.estado in ('en_implementacion', 'en_verificacion'))
+
+    def editable(self):
+        """Se corrige o se quita mientras está pendiente, es del ciclo vigente y
+        su etapa sigue abierta (correcciones / acciones correctivas)."""
+        s = self.solicitud
+        return (self.is_active and self.estado == 'pendiente' and self.ciclo == s.ciclo
+                and s.puede_agregar(self.tipo))
 
     class Meta:
         verbose_name = 'Acción de SAC'
@@ -588,10 +803,16 @@ TIPOS_AUDITORIA = [
     ('extraordinaria', 'Extraordinaria'),
 ]
 
+# Secuencia del procedimiento de auditoría interna: plan → documentos de
+# trabajo → reunión de apertura → ejecución → conclusiones → reunión de
+# cierre → informe → cierre.
 ESTADOS_AUDITORIA = [
-    ('programada', 'Programada'),
-    ('planificada', 'Planificada'),
+    ('programada', 'Programada'),          # plan en elaboración
+    ('planificada', 'Planificada'),        # plan aprobado y comunicado; documentos de trabajo
+    ('apertura', 'Reunión de apertura'),
     ('en_ejecucion', 'En ejecución'),
+    ('conclusiones', 'Conclusiones'),
+    ('reunion_cierre', 'Reunión de cierre'),
     ('en_informe', 'En informe'),
     ('cerrada', 'Cerrada'),
 ]
@@ -612,35 +833,83 @@ RESULTADOS_ITEM = [
 ]
 
 
+BLOQUES_LISTA = [
+    ('requisitos', 'Requisitos de la norma'),
+    ('seguimiento', 'Ítems para auditorías internas de seguimiento'),
+    # Preguntas de la lista de verificación de una norma ISO auditada sola
+    # (9001, 14001 o 45001); las filas 'requisitos' de esas normas son solo
+    # los títulos de cláusula que usan los selectores del programa y el plan.
+    ('lista', 'Preguntas de la lista de verificación por norma'),
+]
+
+
 class RequisitoNorma(models.Model):
     """Catálogo de cláusulas de las normas; base de las listas de verificación."""
-    norma = models.CharField('Norma', max_length=20, choices=NORMAS_APLICABLES)
+    norma = models.CharField('Norma', max_length=20, choices=NORMAS_LISTA)
     codigo = models.CharField('Cláusula', max_length=15)
-    titulo = models.CharField('Título', max_length=255)
+    # Texto completo tal como figura en el formato (incluye las adiciones de la
+    # directriz de acreditación en la lista 17025).
+    titulo = models.TextField('Título')
     es_seccion = models.BooleanField('Es sección', default=False)
+    # Bloque del formato al que pertenece la fila: los requisitos de la norma o
+    # los "ítems para considerar en las auditorías internas de seguimiento".
+    bloque = models.CharField('Bloque', max_length=12, choices=BLOQUES_LISTA, default='requisitos')
+    # Presentación del texto tal como en el formato impreso: párrafos con
+    # negritas, viñetas a) b) c) y sangrías. Lista de {t: texto marcado,
+    # l: viñeta, i: sangría en puntos, j: alineación}. Vacía = se imprime `titulo`.
+    formato = models.JSONField('Formato del texto', default=list, blank=True)
     orden = models.PositiveIntegerField('Orden', default=0)
 
     class Meta:
         verbose_name = 'Requisito de norma'
         verbose_name_plural = 'Catálogo de requisitos de normas'
         ordering = ['norma', 'orden']
-        constraints = [models.UniqueConstraint(fields=['norma', 'codigo'], name='unique_norma_codigo')]
+        # Títulos de cláusula y preguntas se numeran por separado: en la lista
+        # integrada el capítulo "4" y la pregunta N.° 4 conviven.
+        constraints = [
+            models.UniqueConstraint(fields=['norma', 'bloque', 'codigo'], condition=models.Q(es_seccion=False),
+                                    name='unique_norma_bloque_codigo'),
+            models.UniqueConstraint(fields=['norma', 'bloque', 'codigo'], condition=models.Q(es_seccion=True),
+                                    name='unique_norma_bloque_codigo_seccion'),
+        ]
 
     def __str__(self):
         return f'{dict(NORMAS_APLICABLES).get(self.norma, self.norma)} {self.codigo} {self.titulo}'
 
 
 class ProgramaAuditoria(AuditableModel):
-    """Programa anual de auditorías."""
+    """
+    Programa anual de auditorías. Es un documento controlado: una vez aprobado
+    queda de solo lectura (no se agregan ni quitan auditorías ni se cambia lo
+    que lo define). Para cambiarlo se abre "en modificación" con motivo y
+    vuelve a aprobarse; cada ciclo suma una revisión.
+    """
+    ESTADOS = [
+        ('borrador', 'Borrador'),
+        ('en_modificacion', 'En modificación'),
+        ('aprobado', 'Aprobado'),
+    ]
     anio = models.PositiveIntegerField('Año', unique=True)
-    estado = models.CharField('Estado', max_length=15,
-                              choices=[('borrador', 'Borrador'), ('aprobado', 'Aprobado')],
-                              default='borrador')
+    estado = models.CharField('Estado', max_length=15, choices=ESTADOS, default='borrador')
     aprobado_por = models.ForeignKey('core.Usuario', on_delete=models.PROTECT,
                                      related_name='programas_aprobados', null=True, blank=True)
     fecha_aprobacion = models.DateTimeField('Fecha de aprobación', null=True, blank=True)
+    revision = models.PositiveSmallIntegerField('Revisión', default=0)
+    modificado_por = models.ForeignKey('core.Usuario', on_delete=models.SET_NULL,
+                                       related_name='programas_modificados', null=True, blank=True)
+    fecha_modificacion = models.DateTimeField('Abierto para modificación', null=True, blank=True)
+    motivo_modificacion = models.CharField('Motivo de la modificación', max_length=255, blank=True)
     observaciones = models.TextField('Observaciones', blank=True)
     is_active = models.BooleanField('Activo', default=True)
+
+    @property
+    def bloqueado(self):
+        """Aprobado = solo lectura para el contenido del programa."""
+        return self.estado == 'aprobado'
+
+    # Campos de la auditoría que forman parte del programa aprobado (no del plan).
+    CAMPOS_PROGRAMA = ('programa', 'tipo', 'clase', 'normas_aplicables', 'requisitos_por_norma',
+                       'areas_procesos', 'mes_programado', 'observaciones_programa')
 
     class Meta:
         verbose_name = 'Programa anual de auditorías'
@@ -657,23 +926,44 @@ class Auditoria(AuditableModel):
     programa = models.ForeignKey(ProgramaAuditoria, on_delete=models.PROTECT,
                                  related_name='auditorias', null=True, blank=True)
     tipo = models.CharField('Tipo', max_length=15, choices=TIPOS_AUDITORIA, default='programada')
+    # Interna (la ejecuta el SIG) o externa (INACAL, certificadora): el programa
+    # anual registra ambas y las distingue por color.
+    clase = models.CharField('Clase', max_length=10, choices=[('interna', 'Interna'), ('externa', 'Externa')],
+                             default='interna')
     normas_aplicables = models.JSONField('Normas / criterios', default=list, blank=True)
+    # Cláusulas a auditar por norma, como texto: {"iso_9001": "4.1, 7.5", "iso_17025": "6.4"}
+    requisitos_por_norma = models.JSONField('Requisitos a auditar por norma', default=dict, blank=True)
+    observaciones_programa = models.TextField('Observaciones (programa anual)', blank=True)
     objetivo = models.TextField('Objetivo', blank=True)
     alcance = models.TextField('Alcance', blank=True)
     criterios = models.TextField('Criterios de auditoría', blank=True)
     documentos_referencia = models.TextField('Documentos de referencia', blank=True)
+    # Fecha que lleva el plan impreso; si no se indica, se toma la fecha en que
+    # la auditoría pasó a "planificada".
+    fecha_elaboracion_plan = models.DateField('Fecha de elaboración del plan', null=True, blank=True)
     areas_procesos = models.TextField('Áreas / procesos a auditar', blank=True)
+    # Cronograma de entrevistas del plan: lista de {fecha, hora, area, requisitos}.
+    cronograma_entrevistas = models.JSONField('Cronograma de entrevistas', default=list, blank=True)
+    observaciones_plan = models.TextField('Observaciones del plan', blank=True)
+    lugar = models.CharField('Lugar donde se realizó la auditoría', max_length=200, blank=True)
+    personas_entrevistadas = models.TextField('Personas entrevistadas', blank=True)
     modalidad = models.CharField('Modalidad', max_length=12, choices=MODALIDADES_AUDITORIA,
                                  default='presencial')
     auditor_lider = models.ForeignKey('core.Usuario', on_delete=models.PROTECT,
                                       related_name='auditorias_lideradas', null=True, blank=True)
     mes_programado = models.PositiveSmallIntegerField('Mes programado', null=True, blank=True)
+    # Al reprogramar se conserva el mes original y se registra el nuevo aquí.
+    mes_reprogramado = models.PositiveSmallIntegerField('Mes reprogramado', null=True, blank=True)
     fecha_programada = models.DateField('Fecha programada', null=True, blank=True)
     fecha_inicio = models.DateField('Inicio', null=True, blank=True)
     fecha_fin = models.DateField('Fin', null=True, blank=True)
     reprogramada = models.BooleanField('Reprogramada', default=False)
     motivo_reprogramacion = models.CharField('Motivo de reprogramación', max_length=255, blank=True)
     estado = models.CharField('Estado', max_length=15, choices=ESTADOS_AUDITORIA, default='programada')
+    # El plan lo elabora y aprueba el auditor líder, y se comunica a las áreas.
+    plan_aprobado_por = models.ForeignKey('core.Usuario', on_delete=models.PROTECT, null=True, blank=True,
+                                          related_name='planes_auditoria_aprobados')
+    fecha_aprobacion_plan = models.DateTimeField('Aprobación del plan', null=True, blank=True)
     # Informe
     fortalezas = models.TextField('Fortalezas', blank=True)
     debilidades = models.TextField('Debilidades', blank=True)
@@ -690,18 +980,142 @@ class Auditoria(AuditableModel):
         return self.codigo
 
     @staticmethod
-    def generar_codigo():
+    def generar_codigo(anio=None):
+        """Correlativo por año: AI-NN-AAAA. El año es el del programa anual al que
+        pertenece la auditoría (una del Programa 2027 es AI-01-2027 aunque se
+        registre en 2026); sin programa, el año en curso."""
         from django.utils import timezone
-        anio = timezone.now().year
+        anio = anio or timezone.now().year
         sufijo = f'-{anio}'
         ultimo = (Auditoria.objects.filter(codigo__endswith=sufijo)
                   .order_by('-codigo').values_list('codigo', flat=True).first())
         n = int(ultimo.split('-')[1]) + 1 if ultimo else 1
         return f'AI-{n:02d}{sufijo}'
 
+    # --- Etapas de la auditoría: una etapa cerrada es de solo lectura -------
+    # Regla general del sistema (ADR-0005): al avanzar a la siguiente etapa de
+    # una secuencia, los datos de las etapas previas ya no se modifican.
+    # Cada etapa indica en qué estados sigue abierta y qué campos le pertenecen.
+    ETAPAS = {
+        'programa': {
+            'nombre': 'Programa anual',
+            'estados': ('programada',),
+            'campos': ('programa', 'tipo', 'clase', 'normas_aplicables', 'requisitos_por_norma',
+                       'areas_procesos', 'mes_programado', 'observaciones_programa'),
+        },
+        'plan': {
+            'nombre': 'Plan de auditoría',
+            'estados': ('programada',),
+            'campos': ('objetivo', 'alcance', 'criterios', 'documentos_referencia', 'fecha_elaboracion_plan',
+                       'cronograma_entrevistas', 'observaciones_plan', 'modalidad', 'auditor_lider',
+                       'fecha_programada'),
+        },
+        'documentos': {
+            'nombre': 'Documentos de trabajo (lista de verificación)',
+            'estados': ('planificada',),
+            'campos': (),
+        },
+        'apertura': {
+            'nombre': 'Reunión de apertura',
+            'estados': ('apertura',),
+            'campos': (),
+        },
+        'ejecucion': {
+            'nombre': 'Ejecución (evaluación y hallazgos)',
+            'estados': ('en_ejecucion',),
+            'campos': (),
+        },
+        'conclusiones': {
+            'nombre': 'Conclusiones',
+            'estados': ('conclusiones',),
+            'campos': ('conclusiones',),
+        },
+        'cierre': {
+            'nombre': 'Reunión de cierre',
+            'estados': ('reunion_cierre',),
+            'campos': (),
+        },
+        'informe': {
+            'nombre': 'Informe',
+            'estados': ('en_informe',),
+            'campos': ('lugar', 'personas_entrevistadas', 'fortalezas', 'debilidades'),
+        },
+    }
+
+    def etapa_abierta(self, etapa):
+        return self.estado in self.ETAPAS[etapa]['estados']
+
+    def etapas_abiertas(self):
+        return {k: self.etapa_abierta(k) for k in self.ETAPAS}
+
+    def mensaje_etapa_cerrada(self, etapa):
+        cfg = self.ETAPAS[etapa]
+        orden = [e for e, _ in ESTADOS_AUDITORIA]
+        primero = orden.index(cfg['estados'][0])
+        if orden.index(self.estado) < primero:
+            return (f'La etapa "{cfg["nombre"]}" aún no se abre: se habilita cuando la auditoría '
+                    f'está {dict(ESTADOS_AUDITORIA)[cfg["estados"][0]]}.')
+        return (f'La etapa "{cfg["nombre"]}" ya está cerrada (auditoría {self.get_estado_display()}): '
+                f'sus datos son de solo lectura.')
+
+    def campo_bloqueado(self, campo):
+        """Devuelve la etapa cerrada a la que pertenece el campo, o None si se puede editar."""
+        for etapa, cfg in self.ETAPAS.items():
+            if campo in cfg['campos'] and not self.etapa_abierta(etapa):
+                return etapa
+        return None
+
+    def items_pendientes(self):
+        """Ítems evaluados No cumple / Observación que aún no se registraron como
+        hallazgo, ni se sumaron a uno, ni se descartaron con motivo."""
+        return (ItemVerificacion.objects
+                .filter(lista__auditoria=self, es_seccion=False,
+                        resultado__in=ItemVerificacion.RESULTADOS_CON_HALLAZGO,
+                        hallazgo__isnull=True, motivo_descarte='')
+                .select_related('lista').order_by('lista__norma', 'orden'))
+
+    # --- Auditor líder: una sola fuente, el equipo auditor ---
+    # El líder se define únicamente como integrante con rol "líder". El campo
+    # `auditor_lider` es un reflejo de ese integrante cuando es usuario interno
+    # (sirve para permisos y filtros); si el líder es externo queda vacío.
+
+    def integrante_lider(self):
+        return self.equipo.filter(rol='lider').select_related('usuario').order_by('id').first()
+
+    def nombre_lider(self):
+        ig = self.integrante_lider()
+        if ig:
+            u = ig.usuario
+            return ((u.get_full_name() or u.username) if u else ig.nombre_externo) or ''
+        u = self.auditor_lider
+        return (u.get_full_name() or u.username) if u else ''
+
+    def sincronizar_lider(self, incorporar_anterior=False):
+        """Ajusta `auditor_lider` al integrante líder del equipo. Si no hay
+        líder en el equipo pero el campo tiene un usuario (registro anterior a
+        esta regla) y se pide `incorporar_anterior`, ese usuario se agrega al
+        equipo como líder; si no, el campo se vacía."""
+        ig = self.integrante_lider()
+        if ig is None and self.auditor_lider_id and incorporar_anterior:
+            EquipoAuditoria.objects.create(auditoria=self, usuario=self.auditor_lider, rol='lider',
+                                           cargo=getattr(self.auditor_lider, 'cargo', '') or 'Auditor líder')
+            return
+        nuevo = ig.usuario_id if ig else None
+        if self.auditor_lider_id != nuevo:
+            Auditoria.objects.filter(pk=self.pk).update(auditor_lider_id=nuevo)
+            self.auditor_lider_id = nuevo
+
+    def codigo_coincide_con_programa(self):
+        return not self.programa_id or self.codigo.endswith(f'-{self.programa.anio}')
+
     def save(self, *args, **kwargs):
         if not self.codigo:
-            self.codigo = self.generar_codigo()
+            anio = self.programa.anio if self.programa_id else None
+            self.codigo = self.generar_codigo(anio)
+        elif not self.codigo_coincide_con_programa() and self.estado in ('programada', 'planificada'):
+            # Se movió a un programa de otro año antes de ejecutarse: toma el
+            # siguiente correlativo de ese año (el código sigue al programa).
+            self.codigo = self.generar_codigo(self.programa.anio)
         super().save(*args, **kwargs)
 
 
@@ -727,8 +1141,12 @@ class ActaAuditoria(AuditableModel):
     tipo = models.CharField('Tipo', max_length=10,
                             choices=[('apertura', 'Apertura'), ('cierre', 'Cierre')])
     participantes = models.JSONField('Participantes', default=list, blank=True)
-    contenido = models.TextField('Contenido', blank=True)
-    observaciones_auditado = models.TextField('Observaciones del área auditada', blank=True)
+    # Secciones de texto del acta. El significado cambia según el tipo:
+    # Apertura -> (2) Propósito, (3) Consideraciones del área, (4) Compromisos del área.
+    # Cierre   -> (2) Resultados, (3) Observaciones del equipo auditor, (4) Observaciones de la empresa.
+    contenido = models.TextField('Sección 2 (propósito / resultados)', blank=True)
+    seccion3 = models.TextField('Sección 3 (consideraciones / observaciones del equipo)', blank=True)
+    observaciones_auditado = models.TextField('Sección 4 (compromisos / observaciones de la empresa)', blank=True)
     archivo = models.FileField('Acta firmada', upload_to='auditorias/actas/%Y/', null=True, blank=True)
 
     class Meta:
@@ -743,7 +1161,7 @@ class ActaAuditoria(AuditableModel):
 
 class ListaVerificacion(AuditableModel):
     auditoria = models.ForeignKey(Auditoria, on_delete=models.PROTECT, related_name='listas')
-    norma = models.CharField('Norma', max_length=20, choices=NORMAS_APLICABLES)
+    norma = models.CharField('Norma', max_length=20, choices=NORMAS_LISTA)
 
     class Meta:
         verbose_name = 'Lista de verificación'
@@ -758,12 +1176,23 @@ class ListaVerificacion(AuditableModel):
 class ItemVerificacion(AuditableModel):
     lista = models.ForeignKey(ListaVerificacion, on_delete=models.PROTECT, related_name='items')
     codigo = models.CharField('Cláusula', max_length=15)
-    titulo = models.CharField('Requisito', max_length=255)
+    titulo = models.TextField('Requisito')
     es_seccion = models.BooleanField('Es sección', default=False)
+    bloque = models.CharField('Bloque', max_length=12, choices=BLOQUES_LISTA, default='requisitos')
+    formato = models.JSONField('Formato del texto', default=list, blank=True)
     orden = models.PositiveIntegerField('Orden', default=0)
     resultado = models.CharField('Resultado', max_length=12, choices=RESULTADOS_ITEM, default='pendiente')
+    documento_referencia = models.TextField('Documento de referencia', blank=True)
     evidencia = models.TextField('Evidencia', blank=True)
     observacion = models.TextField('Observación', blank=True)
+    # Trazabilidad criterio → evidencia → hallazgo: un ítem evaluado como No
+    # cumple u Observación queda pendiente hasta que se registra como hallazgo
+    # (o se suma a uno existente) o se descarta con motivo.
+    hallazgo = models.ForeignKey('esynapse_sig.Hallazgo', on_delete=models.SET_NULL, null=True, blank=True,
+                                 related_name='items_lista', verbose_name='Hallazgo generado')
+    motivo_descarte = models.TextField('Motivo por el que no genera hallazgo', blank=True)
+
+    RESULTADOS_CON_HALLAZGO = ('no_cumple', 'observa')
 
     class Meta:
         verbose_name = 'Ítem de verificación'
@@ -772,6 +1201,21 @@ class ItemVerificacion(AuditableModel):
 
     def __str__(self):
         return f'{self.lista} {self.codigo}'
+
+    def referencias_norma(self):
+        """[(norma, numeral)] del requisito evaluado. En la lista integrada la
+        primera línea del texto cita las normas ("ISO 9001: 7.1.5.2 · ISO 45001:
+        9.1.1") y el Nro. es solo un correlativo; en las demás, el código es el
+        numeral de la norma de la lista."""
+        import re
+        primera = (self.titulo or '').split('\n')[0]
+        pares = re.findall(r'(ISO \d+): ([\d.]+)', primera)
+        if pares:
+            return pares
+        return [(dict(NORMAS_LISTA).get(self.lista.norma, self.lista.norma), self.codigo)]
+
+    def referencia_texto(self):
+        return ' · '.join(f'{n} {c}' for n, c in self.referencias_norma())
 
 
 # ============================================================
@@ -1173,12 +1617,18 @@ class SolicitudCambioEquipo(AuditableModel):
         ('informe', 'Informe'),
         ('intervalo', 'Intervalo de calibración'),
         ('nodo', 'Nodo de trazabilidad'),
+        ('autorizacion', 'Autorización de competencia'),
+        ('entrenamiento', 'Proceso de entrenamiento'),
+        ('seguimiento', 'Evaluación de seguimiento'),
+        ('programa_auditoria', 'Programa anual de auditorías'),
+        ('informe_auditoria', 'Informe de auditoría (cierre)'),
     ]
     OPERACIONES = [
         ('crear', 'Crear'),
         ('editar', 'Editar'),
         ('eliminar', 'Eliminar'),
         ('baja', 'Dar de baja'),
+        ('aprobar', 'Aprobar / cerrar'),
     ]
     ESTADOS = [
         ('pendiente', 'Pendiente'),
@@ -1187,6 +1637,7 @@ class SolicitudCambioEquipo(AuditableModel):
         ('rechazada', 'Rechazada'),
     ]
 
+    modulo = models.CharField('Módulo', max_length=30, default='equipos')
     equipo = models.ForeignKey('Equipo', verbose_name='Equipo', on_delete=models.CASCADE,
                                related_name='solicitudes_cambio', null=True, blank=True)
     entidad = models.CharField('Entidad afectada', max_length=20, choices=ENTIDADES, default='equipo')
@@ -1299,7 +1750,7 @@ class ResultadoIntervalo(AuditableModel):
 
 def calcular_intervalo_punto(resultados):
     """
-    Cálculo OIML D10 (deriva), idéntico al MET-PRO-04-r08:
+    Cálculo OIML D10 (deriva), idéntico al formato de intervalo de calibración:
       - EMP  = máx(EMP de cada año); Umáx = máx(incertidumbre de cada año)
       - Tolerancia = EMP - Umáx
       - Deriva(año) = |Δresultado / Δaño|; Deriva máxima = máx(derivas)
@@ -1329,3 +1780,331 @@ def calcular_intervalo_punto(resultados):
         'periodo_calibracion': (periodo * 0.5) if periodo is not None else None,
         'derivas': detalle,
     }
+
+
+# ============================================================
+# M12 — Competencia técnica y autorización del personal
+# ============================================================
+
+# Funciones que se pueden autorizar a una persona (carta de autorización).
+FUNCIONES_AUTORIZACION = [
+    ('ejecutar', 'Ejecutar calibración'),
+    ('supervisar', 'Supervisar calibración'),
+    ('informar', 'Informar resultados'),
+    ('revisar', 'Revisar y autorizar resultados'),
+    ('analizar', 'Analizar resultados / opiniones e interpretaciones'),
+    ('firmar', 'Firmar certificados'),
+    ('operar', 'Operar equipos / manipular ítems'),
+]
+ESTADOS_AUTORIZACION = [
+    ('en_entrenamiento', 'En entrenamiento'),
+    ('vigente', 'Vigente'),
+    ('suspendida', 'Suspendida'),
+    ('revocada', 'Revocada'),
+]
+ALCANCE_FIRMA = [
+    ('', 'No aplica'),
+    ('todos', 'Todos los laboratorios'),
+    ('laboratorio', 'Un laboratorio'),
+]
+
+
+class MetodoCalibracion(models.Model):
+    """Catálogo gestionable de métodos / procedimientos de calibración (ligados a una magnitud)."""
+    nombre = models.CharField('Método / procedimiento', max_length=200)
+    codigo = models.CharField('Código', max_length=40, blank=True)
+    magnitud = models.CharField('Magnitud', max_length=100, blank=True)
+    orden = models.PositiveIntegerField('Orden', default=0)
+    is_active = models.BooleanField('Activo', default=True)
+
+    class Meta:
+        verbose_name = 'Método de calibración'
+        verbose_name_plural = 'Métodos de calibración'
+        ordering = ['magnitud', 'orden', 'nombre']
+
+    def __str__(self):
+        return f'{self.codigo + " " if self.codigo else ""}{self.nombre}'
+
+
+class ControlValidez(models.Model):
+    """Catálogo gestionable de controles de aseguramiento de la validez de resultados."""
+    nombre = models.CharField('Control de validez', max_length=150, unique=True)
+    orden = models.PositiveIntegerField('Orden', default=0)
+    is_active = models.BooleanField('Activo', default=True)
+
+    class Meta:
+        verbose_name = 'Control de validez de resultados'
+        verbose_name_plural = 'Controles de validez de resultados'
+        ordering = ['orden', 'nombre']
+
+    def __str__(self):
+        return self.nombre
+
+
+class Autorizacion(AuditableModel):
+    """
+    Autorización de competencia técnica de una persona para un método, con las
+    funciones habilitadas. Vigencia indefinida sujeta a seguimiento periódico
+    (por defecto <= 12 meses); se suspende si el seguimiento no es satisfactorio.
+    """
+    usuario = models.ForeignKey('core.Usuario', verbose_name='Personal', on_delete=models.CASCADE,
+                                related_name='autorizaciones')
+    metodo = models.ForeignKey(MetodoCalibracion, verbose_name='Método', on_delete=models.PROTECT,
+                               related_name='autorizaciones', null=True, blank=True)
+    magnitud = models.CharField('Magnitud', max_length=100, blank=True)
+    funciones = models.JSONField('Funciones autorizadas', default=list, blank=True)
+    alcance_firma = models.CharField('Alcance de firma', max_length=12, choices=ALCANCE_FIRMA, blank=True, default='')
+    laboratorio = models.CharField('Laboratorio (alcance de firma)', max_length=120, blank=True)
+    fecha_autorizacion = models.DateField('Fecha de autorización', null=True, blank=True)
+    autorizado_por = models.ForeignKey('core.Usuario', verbose_name='Autorizado por', on_delete=models.SET_NULL,
+                                       related_name='autorizaciones_otorgadas', null=True, blank=True)
+    estado = models.CharField('Estado', max_length=20, choices=ESTADOS_AUTORIZACION, default='en_entrenamiento')
+    frecuencia_seguimiento_meses = models.PositiveSmallIntegerField('Frecuencia de seguimiento (meses)', default=12)
+    fecha_ultimo_seguimiento = models.DateField('Último seguimiento', null=True, blank=True)
+    evidencia = models.FileField('Evidencia', upload_to='competencia/autorizaciones/%Y/', null=True, blank=True)
+    observaciones = models.TextField('Observaciones', blank=True)
+    # Solo el Gerente Técnico puede ser eximido del entrenamiento y del trabajo
+    # bajo supervisión, con sustento documentado de su competencia.
+    exento_entrenamiento = models.BooleanField('Eximido de entrenamiento', default=False)
+    sustento_exencion = models.TextField('Sustento de la exención', blank=True)
+    suspendida_en = models.DateTimeField('Suspendida desde', null=True, blank=True)
+    is_active = models.BooleanField('Activo', default=True)
+
+    def save(self, *args, **kwargs):
+        from django.utils import timezone
+        if self.estado == 'suspendida':
+            anterior = (Autorizacion.objects.filter(pk=self.pk).values_list('estado', flat=True).first()
+                        if self.pk else None)
+            if anterior != 'suspendida' or not self.suspendida_en:
+                self.suspendida_en = timezone.now()
+        super().save(*args, **kwargs)
+
+    class Meta:
+        verbose_name = 'Autorización'
+        verbose_name_plural = 'Autorizaciones'
+        ordering = ['usuario__last_name', 'usuario__first_name', 'metodo__nombre']
+
+    def __str__(self):
+        return f'{self.usuario} — {self.metodo or "General"}'
+
+    @property
+    def fecha_proximo_seguimiento(self):
+        import calendar
+        from datetime import date
+        base = self.fecha_ultimo_seguimiento or self.fecha_autorizacion
+        if not base or not self.frecuencia_seguimiento_meses:
+            return None
+        m = base.month - 1 + self.frecuencia_seguimiento_meses
+        y = base.year + m // 12
+        mm = m % 12 + 1
+        d = min(base.day, calendar.monthrange(y, mm)[1])
+        return date(y, mm, d)
+
+    @property
+    def estado_seguimiento(self):
+        """vigente / por_vencer / vencido (None si la autorización no está vigente o sin base)."""
+        from datetime import date, timedelta
+        prox = self.fecha_proximo_seguimiento
+        if not prox or self.estado != 'vigente':
+            return None
+        hoy = date.today()
+        if prox < hoy:
+            return 'vencido'
+        if prox <= hoy + timedelta(days=30):
+            return 'por_vencer'
+        return 'vigente'
+
+
+class ProcesoEntrenamiento(AuditableModel):
+    """Entrenamiento y trabajo bajo supervisión previos a la autorización."""
+    TIPOS = [('entrenamiento', 'Entrenamiento'), ('reentrenamiento', 'Re-entrenamiento')]
+    ESTADOS = [('en_proceso', 'En proceso'), ('completado', 'Completado (conforme)'), ('no_conforme', 'No conforme')]
+
+    usuario = models.ForeignKey('core.Usuario', verbose_name='Personal', on_delete=models.CASCADE,
+                                related_name='entrenamientos')
+    metodo = models.ForeignKey(MetodoCalibracion, verbose_name='Método', on_delete=models.PROTECT,
+                               related_name='entrenamientos', null=True, blank=True)
+    tipo = models.CharField('Tipo', max_length=15, choices=TIPOS, default='entrenamiento')
+    tutor = models.ForeignKey('core.Usuario', verbose_name='Tutor (entrenamiento)', on_delete=models.SET_NULL,
+                              related_name='entrenamientos_tutorados', null=True, blank=True)
+    tutor_supervision = models.ForeignKey('core.Usuario', verbose_name='Tutor (supervisión)', on_delete=models.SET_NULL,
+                                          related_name='supervisiones_tutoradas', null=True, blank=True)
+    # Sección 1 del formato de entrenamiento: [{actividad, documento, fecha_inicio, conformidad}]
+    checklist_entrenamiento = models.JSONField('Actividades de entrenamiento', default=list, blank=True)
+    periodo_supervision_dias = models.PositiveSmallIntegerField('Periodo de supervisión (días)', null=True, blank=True)
+    fecha_inicio_supervision = models.DateField('Inicio de supervisión', null=True, blank=True)
+    checklist_supervision = models.JSONField('Checklist de supervisión', default=list, blank=True)
+    nota_teorica = models.FloatField('Nota teórica (0-20)', null=True, blank=True)
+    control_validez = models.ForeignKey(ControlValidez, verbose_name='Control de validez aplicado',
+                                        on_delete=models.SET_NULL, related_name='+', null=True, blank=True)
+    resultado_control = models.CharField('Resultado del control', max_length=20, blank=True)
+    estado = models.CharField('Estado', max_length=15, choices=ESTADOS, default='en_proceso')
+    comentarios = models.TextField('Comentarios', blank=True)
+    evidencia = models.FileField('Evidencia', upload_to='competencia/entrenamiento/%Y/', null=True, blank=True)
+    is_active = models.BooleanField('Activo', default=True)
+
+    class Meta:
+        verbose_name = 'Proceso de entrenamiento'
+        verbose_name_plural = 'Procesos de entrenamiento'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'Entrenamiento {self.usuario} — {self.metodo or ""}'
+
+    @property
+    def concluido(self):
+        return self.estado in ('completado', 'no_conforme')
+
+
+NOTA_MINIMA_TEORICA = 14
+
+
+def es_conforme(valor):
+    """Conformidad de un ítem de las listas de entrenamiento y supervisión."""
+    return str(valor or '').strip().upper().rstrip('.') == 'CONFORME'
+
+
+def es_gerente_tecnico(usuario):
+    import unicodedata
+    cargo = unicodedata.normalize('NFKD', getattr(usuario, 'cargo', '') or '').encode('ascii', 'ignore').decode()
+    return 'gerente tecnico' in cargo.lower()
+
+
+def faltantes_entrenamiento(checklist_entrenamiento, checklist_supervision, nota_teorica, control_validez,
+                            resultado_control, tutor_supervision):
+    """
+    Lo que falta para dar por superado un entrenamiento: todas las actividades y
+    todos los ítems de supervisión conformes, nota teórica de 14 o más y un
+    control de validez con resultado satisfactorio.
+    """
+    falta = []
+    actividades = [a for a in (checklist_entrenamiento or []) if isinstance(a, dict) and str(a.get('actividad') or '').strip()]
+    if not actividades or not all(es_conforme(a.get('conformidad')) for a in actividades):
+        falta.append('todas las actividades de entrenamiento conformes')
+    if not tutor_supervision:
+        falta.append('el tutor del trabajo bajo supervisión')
+    items = [i for i in (checklist_supervision or []) if isinstance(i, dict) and str(i.get('item') or '').strip()]
+    if not items or not all(es_conforme(i.get('conformidad')) for i in items):
+        falta.append('todos los ítems del trabajo bajo supervisión conformes')
+    if nota_teorica is None or float(nota_teorica) < NOTA_MINIMA_TEORICA:
+        falta.append(f'nota teórica de {NOTA_MINIMA_TEORICA} o más')
+    if not control_validez or resultado_control != 'satisfactorio':
+        falta.append('un control de validez con resultado satisfactorio')
+    return falta
+
+
+def motivo_sin_entrenamiento(usuario, metodo, suspendida=None, exento=False):
+    """
+    None si la persona puede quedar autorizada (vigente) en el método; si no,
+    el motivo. Una autorización suspendida solo se reautoriza con un
+    re-entrenamiento superado después de la suspensión.
+    """
+    qs = ProcesoEntrenamiento.objects.filter(usuario=usuario, metodo=metodo, estado='completado', is_active=True)
+    if suspendida is not None:
+        qs = qs.filter(tipo='reentrenamiento')
+        if suspendida.suspendida_en:
+            from django.utils import timezone
+            # Fecha local de la suspensión (no la de UTC: de noche ya sería el día siguiente).
+            qs = qs.filter(created_at__date__gte=timezone.localtime(suspendida.suspendida_en).date())
+        if not qs.exists():
+            return ('La autorización está suspendida: para reautorizar, la persona debe superar un re-entrenamiento '
+                    'con trabajo bajo supervisión de este método, registrado después de la suspensión.')
+        return None
+    if exento or qs.exists():
+        return None
+    return ('Para autorizar, la persona debe haber superado el entrenamiento y el trabajo bajo supervisión de este '
+            'método (actividades y supervisión conformes, nota teórica de 14 o más y control de validez satisfactorio).')
+
+
+class EvaluacionSeguimiento(AuditableModel):
+    """Seguimiento de la competencia: entrevista o control de validez, con su decisión."""
+    TIPOS = [('entrevista', 'Entrevista de seguimiento'), ('control_validez', 'Control de validez'),
+             ('testificacion', 'Testificación'), ('otro', 'Otro')]
+    RESULTADOS = [('satisfactorio', 'Satisfactorio'), ('no_satisfactorio', 'No satisfactorio')]
+    DECISIONES = [('mantener', 'Mantener autorización'), ('suspender', 'Suspender'), ('reautorizar', 'Reautorizar')]
+
+    autorizacion = models.ForeignKey(Autorizacion, verbose_name='Autorización', on_delete=models.CASCADE,
+                                     related_name='seguimientos', null=True, blank=True)
+    usuario = models.ForeignKey('core.Usuario', verbose_name='Personal', on_delete=models.CASCADE,
+                                related_name='seguimientos')
+    fecha = models.DateField('Fecha', null=True, blank=True)
+    tipo = models.CharField('Tipo', max_length=20, choices=TIPOS, default='entrevista')
+    control_validez = models.ForeignKey(ControlValidez, on_delete=models.SET_NULL, related_name='+', null=True, blank=True)
+    tema = models.CharField('Tema', max_length=200, blank=True)
+    hora = models.CharField('Hora', max_length=10, blank=True)
+    area = models.CharField('Área', max_length=120, blank=True)
+    evaluador = models.ForeignKey('core.Usuario', verbose_name='Responsable de la entrevista', on_delete=models.SET_NULL,
+                                  related_name='seguimientos_evaluados', null=True, blank=True)
+    # I. Desarrollo del formato de entrevista: [{n, establecido, obtenido}]
+    preguntas = models.JSONField('Preguntas y puntajes', default=list, blank=True)
+    puntaje_obtenido = models.FloatField('Puntaje obtenido', null=True, blank=True)
+    puntaje_total = models.FloatField('Puntaje total', null=True, blank=True)
+    puntaje_minimo = models.FloatField('Puntaje mínimo', null=True, blank=True)
+    puntaje_maximo = models.FloatField('Puntaje máximo', null=True, blank=True)
+    puntaje_por_pregunta = models.FloatField('Puntaje por pregunta', null=True, blank=True)
+    n_preguntas = models.PositiveSmallIntegerField('N° de preguntas', null=True, blank=True)
+    resultado = models.CharField('Resultado', max_length=20, choices=RESULTADOS, blank=True)
+    decision = models.CharField('Decisión', max_length=15, choices=DECISIONES, blank=True)
+    conclusiones = models.TextField('Conclusiones', blank=True)
+    observaciones = models.TextField('Observaciones', blank=True)
+    evidencia = models.FileField('Evidencia', upload_to='competencia/seguimiento/%Y/', null=True, blank=True)
+    is_active = models.BooleanField('Activo', default=True)
+
+    class Meta:
+        verbose_name = 'Evaluación de seguimiento'
+        verbose_name_plural = 'Evaluaciones de seguimiento'
+        ordering = ['-fecha', '-created_at']
+
+    def __str__(self):
+        return f'Seguimiento {self.usuario} — {self.fecha or ""}'
+
+
+PORCENTAJE_MINIMO_ENTREVISTA = 0.70
+
+
+def calcular_puntajes(preguntas, puntaje_por_pregunta=None):
+    """
+    Totales de la entrevista de seguimiento, con las fórmulas del formato:
+    total = suma de lo obtenido; máximo = puntaje por pregunta × n.° de
+    preguntas; mínimo = 70 % del máximo; conforme si mínimo ≤ total ≤ máximo.
+    Sin puntaje por pregunta se toma el mayor puntaje establecido.
+    """
+    def num(v):
+        try:
+            return float(v)
+        except (TypeError, ValueError):
+            return 0.0
+    filas = [p for p in (preguntas or []) if isinstance(p, dict)]
+    filas = [{'n': i + 1, 'establecido': num(p.get('establecido')), 'obtenido': num(p.get('obtenido'))}
+             for i, p in enumerate(filas)]
+    if not filas:
+        return {'preguntas': [], 'n_preguntas': None, 'puntaje_total': None, 'puntaje_maximo': None,
+                'puntaje_minimo': None, 'puntaje_por_pregunta': puntaje_por_pregunta, 'resultado': None}
+    por_pregunta = num(puntaje_por_pregunta) if puntaje_por_pregunta not in (None, '') else max(p['establecido'] for p in filas)
+    total = round(sum(p['obtenido'] for p in filas), 2)
+    maximo = round(por_pregunta * len(filas), 2)
+    minimo = round(maximo * PORCENTAJE_MINIMO_ENTREVISTA, 2)
+    return {'preguntas': filas, 'n_preguntas': len(filas), 'puntaje_total': total, 'puntaje_maximo': maximo,
+            'puntaje_minimo': minimo, 'puntaje_por_pregunta': por_pregunta,
+            'resultado': (None if maximo <= 0 else
+                          'satisfactorio' if minimo <= total <= maximo else 'no_satisfactorio')}
+
+
+def esta_autorizado(usuario, metodo=None, funcion='ejecutar', laboratorio=None):
+    """
+    True si la persona tiene una autorización VIGENTE para la función indicada.
+    Sostiene la regla de técnico autorizado (ejecutar/supervisar/…) y la de firma
+    controlada (funcion='firmar', con alcance por laboratorio).
+    """
+    qs = Autorizacion.objects.filter(usuario=usuario, estado='vigente', is_active=True)
+    if funcion == 'firmar':
+        for a in qs:
+            if 'firmar' in (a.funciones or []):
+                if a.alcance_firma == 'todos':
+                    return True
+                if a.alcance_firma == 'laboratorio' and (not laboratorio or a.laboratorio == laboratorio):
+                    return True
+        return False
+    if metodo is not None:
+        qs = qs.filter(metodo=metodo)
+    return any(funcion in (a.funciones or []) for a in qs)

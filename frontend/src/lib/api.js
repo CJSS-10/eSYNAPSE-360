@@ -16,7 +16,16 @@ const tokens = {
   },
 }
 
-async function refrescarToken() {
+// Una sola renovación a la vez: si varias consultas vencen juntas (p. ej. una
+// pantalla que carga cinco datos en paralelo), todas esperan la misma. Con
+// tokens rotativos, renovar dos veces con el mismo token invalidaba la sesión.
+let renovando = null
+function refrescarToken() {
+  if (!renovando) renovando = renovar().finally(() => { renovando = null })
+  return renovando
+}
+
+async function renovar() {
   const refresh = tokens.refresh
   if (!refresh) return false
   const r = await fetch(`${BASE}/auth/refresh/`, {
@@ -24,10 +33,23 @@ async function refrescarToken() {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ refresh }),
   })
-  if (!r.ok) { tokens.clear(); return false }
+  if (!r.ok) {
+    // Otra pestaña pudo renovarla primero: si ya hay otro token guardado, se usa ese.
+    if (tokens.refresh && tokens.refresh !== refresh) return true
+    tokens.clear()
+    return false
+  }
   const data = await r.json()
   tokens.set(data.access, data.refresh)
   return true
+}
+
+const SESION_EXPIRADA = 'Tu sesión expiró. Vuelve a ingresar.'
+function sesionExpirada() {
+  window.dispatchEvent(new Event('esynapse:sesion-expirada'))
+  const e = new Error(SESION_EXPIRADA)
+  e.status = 401
+  return e
 }
 
 export async function apiFetch(path, { method = 'GET', body, _reintento = false } = {}) {
@@ -40,18 +62,16 @@ export async function apiFetch(path, { method = 'GET', body, _reintento = false 
     body: body !== undefined ? JSON.stringify(body) : undefined,
   })
 
-  if (r.status === 401 && !_reintento && tokens.refresh) {
-    const ok = await refrescarToken()
-    if (ok) return apiFetch(path, { method, body, _reintento: true })
-    window.dispatchEvent(new Event('esynapse:sesion-expirada'))
+  if (r.status === 401) {
+    if (!_reintento && await refrescarToken()) return apiFetch(path, { method, body, _reintento: true })
+    throw sesionExpirada()
   }
 
   if (r.status === 204) return null
   const data = await r.json().catch(() => null)
   if (!r.ok) {
     const error = new Error(
-      data?.detail
-      || (data && typeof data === 'object' ? JSON.stringify(data) : null)
+      mensajeError(data)
       || `Error del servidor (HTTP ${r.status}). Verifica que el backend esté actualizado y migrado.`,
     )
     error.status = r.status
@@ -61,21 +81,37 @@ export async function apiFetch(path, { method = 'GET', body, _reintento = false 
   return data
 }
 
+/** Mensaje legible de un error de la API: «detail» o los mensajes por campo
+ *  (sin el formato técnico de la respuesta). */
+function mensajeError(data) {
+  if (!data) return null
+  if (typeof data === 'string') return data
+  if (data.detail) return data.detail
+  if (typeof data !== 'object') return null
+  const partes = []
+  const recorrer = (v) => {
+    if (v == null) return
+    if (typeof v === 'string') partes.push(v)
+    else if (Array.isArray(v)) v.forEach(recorrer)
+    else if (typeof v === 'object') Object.values(v).forEach(recorrer)
+  }
+  recorrer(data)
+  return partes.length ? [...new Set(partes)].join(' ') : null
+}
+
 export async function apiUpload(path, formData, { method = 'POST', _reintento = false } = {}) {
   const headers = {}
   if (tokens.access) headers.Authorization = `Bearer ${tokens.access}`
   const r = await fetch(`${BASE}${path}`, { method, headers, body: formData })
-  if (r.status === 401 && !_reintento && tokens.refresh) {
-    const ok = await refrescarToken()
-    if (ok) return apiUpload(path, formData, { method, _reintento: true })
-    window.dispatchEvent(new Event('esynapse:sesion-expirada'))
+  if (r.status === 401) {
+    if (!_reintento && await refrescarToken()) return apiUpload(path, formData, { method, _reintento: true })
+    throw sesionExpirada()
   }
   if (r.status === 204) return null
   const data = await r.json().catch(() => null)
   if (!r.ok) {
     const error = new Error(
-      data?.detail
-      || (data && typeof data === 'object' ? JSON.stringify(data) : null)
+      mensajeError(data)
       || `Error del servidor (HTTP ${r.status}). Verifica que el backend esté actualizado y migrado.`,
     )
     error.status = r.status
@@ -89,10 +125,9 @@ export async function apiBlob(path, { method = 'GET', _reintento = false } = {})
   const headers = {}
   if (tokens.access) headers.Authorization = `Bearer ${tokens.access}`
   const r = await fetch(`${BASE}${path}`, { method, headers })
-  if (r.status === 401 && !_reintento && tokens.refresh) {
-    const ok = await refrescarToken()
-    if (ok) return apiBlob(path, { method, _reintento: true })
-    window.dispatchEvent(new Event('esynapse:sesion-expirada'))
+  if (r.status === 401) {
+    if (!_reintento && await refrescarToken()) return apiBlob(path, { method, _reintento: true })
+    throw sesionExpirada()
   }
   if (!r.ok) throw new Error(`No se pudo generar el documento (HTTP ${r.status}).`)
   return r.blob()
@@ -122,6 +157,25 @@ export const api = {
     desactivar: (id) => apiFetch(`/usuarios/${id}/`, { method: 'DELETE' }),
     activar: (id) => apiFetch(`/usuarios/${id}/activar/`, { method: 'POST' }),
     asignarRoles: (id, roles) => apiFetch(`/usuarios/${id}/asignar_roles/`, { method: 'POST', body: { roles } }),
+  },
+  // Organización y personal (núcleo): áreas, puestos y trabajadores comunes a todo el sistema
+  org: {
+    areas: (params = '') => apiFetch(`/org-areas/${params}`),
+    crearArea: (data) => apiFetch('/org-areas/', { method: 'POST', body: data }),
+    editarArea: (id, data) => apiFetch(`/org-areas/${id}/`, { method: 'PATCH', body: data }),
+    desactivarArea: (id) => apiFetch(`/org-areas/${id}/`, { method: 'DELETE' }),
+    catalogos: () => apiFetch('/org-areas/catalogos/'),
+    puestos: (params = '') => apiFetch(`/org-puestos/${params}`),
+    puesto: (id) => apiFetch(`/org-puestos/${id}/`),
+    crearPuesto: (data) => apiFetch('/org-puestos/', { method: 'POST', body: data }),
+    editarPuesto: (id, data) => apiFetch(`/org-puestos/${id}/`, { method: 'PATCH', body: data }),
+    desactivarPuesto: (id) => apiFetch(`/org-puestos/${id}/`, { method: 'DELETE' }),
+    trabajadores: (params = '') => apiFetch(`/org-trabajadores/${params}`),
+    trabajador: (id) => apiFetch(`/org-trabajadores/${id}/`),
+    crearTrabajador: (data) => apiFetch('/org-trabajadores/', { method: 'POST', body: data }),
+    editarTrabajador: (id, data) => apiFetch(`/org-trabajadores/${id}/`, { method: 'PATCH', body: data }),
+    accionTrabajador: (id, nombre, data = {}) => apiFetch(`/org-trabajadores/${id}/${nombre}/`, { method: 'POST', body: data }),
+    reactivar: (recurso, id) => apiFetch(`/org-${recurso}/${id}/reactivar/`, { method: 'POST', body: {} }),
   },
   // Catálogo gestionable (áreas / laboratorios)
   opcionesCatalogo: {
@@ -156,14 +210,279 @@ export const api = {
     listar: (params = '') => apiFetch(`/sac/${params}`),
     detalle: (id) => apiFetch(`/sac/${id}/`),
     crear: (data) => apiFetch('/sac/', { method: 'POST', body: data }),
+    editar: (id, data) => apiFetch(`/sac/${id}/`, { method: 'PATCH', body: data }),
     desactivar: (id) => apiFetch(`/sac/${id}/`, { method: 'DELETE' }),
+    pdf: (id) => apiBlob(`/sac/${id}/pdf/`),
+    seguimientoPdf: (params = '') => apiBlob(`/sac/seguimiento_pdf/${params}`),
     evaluar: (id, data) => apiFetch(`/sac/${id}/evaluar/`, { method: 'POST', body: data }),
     registrarAnalisis: (id, data) => apiFetch(`/sac/${id}/registrar_analisis/`, { method: 'POST', body: data }),
     agregarAccion: (id, data) => apiFetch(`/sac/${id}/agregar_accion/`, { method: 'POST', body: data }),
+    editarAccion: (id, data) => apiFetch(`/sac/${id}/editar_accion/`, { method: 'POST', body: data }),
+    quitarAccion: (id, accionId) => apiFetch(`/sac/${id}/quitar_accion/`, { method: 'POST', body: { accion_id: accionId } }),
+    reabrirAccion: (id, accionId, motivo) => apiFetch(`/sac/${id}/reabrir_accion/`, { method: 'POST', body: { accion_id: accionId, motivo } }),
     aprobarPlan: (id, verificador) => apiFetch(`/sac/${id}/aprobar_plan/`, { method: 'POST', body: { verificador } }),
     completarAccion: (id, formData) => apiUpload(`/sac/${id}/completar_accion/`, formData),
     verificarEficacia: (id, eficaz, evaluacion) => apiFetch(`/sac/${id}/verificar_eficacia/`, { method: 'POST', body: { eficaz, evaluacion } }),
     resumen: () => apiFetch('/sac/resumen/'),
+  },
+  // M18 — Quejas
+  quejas: {
+    listar: (params = '') => apiFetch(`/quejas/${params}`),
+    detalle: (id) => apiFetch(`/quejas/${id}/`),
+    crear: (data) => apiFetch('/quejas/', { method: 'POST', body: data }),
+    editar: (id, data) => apiFetch(`/quejas/${id}/`, { method: 'PATCH', body: data }),
+    anular: (id) => apiFetch(`/quejas/${id}/`, { method: 'DELETE' }),
+    catalogos: () => apiFetch('/quejas/catalogos/'),
+    validar: (id, data) => apiFetch(`/quejas/${id}/validar/`, { method: 'POST', body: data }),
+    decidir: (id, data) => apiFetch(`/quejas/${id}/decidir/`, { method: 'POST', body: data }),
+    registrarNc: (id, data) => apiFetch(`/quejas/${id}/registrar_nc/`, { method: 'POST', body: data }),
+    pasarACierre: (id) => apiFetch(`/quejas/${id}/pasar_a_cierre/`, { method: 'POST', body: {} }),
+    cerrar: (id, data) => apiFetch(`/quejas/${id}/cerrar/`, { method: 'POST', body: data }),
+    reabrir: (id, motivo) => apiFetch(`/quejas/${id}/reabrir/`, { method: 'POST', body: { motivo } }),
+    comunicar: (id, formData) => apiUpload(`/quejas/${id}/comunicar/`, formData),
+    adjuntar: (id, formData) => apiUpload(`/quejas/${id}/adjuntar/`, formData),
+    quitarAdjunto: (id, adjuntoId) => apiFetch(`/quejas/${id}/quitar_adjunto/`, { method: 'POST', body: { adjunto_id: adjuntoId } }),
+    pdf: (id) => apiBlob(`/quejas/${id}/pdf/`),
+    seguimientoPdf: (params = '') => apiBlob(`/quejas/seguimiento_pdf/${params}`),
+  },
+  // M17 — Cambios
+  cambios: {
+    listar: (params = '') => apiFetch(`/cambios/${params}`),
+    detalle: (id) => apiFetch(`/cambios/${id}/`),
+    crear: (data) => apiFetch('/cambios/', { method: 'POST', body: data }),
+    editar: (id, data) => apiFetch(`/cambios/${id}/`, { method: 'PATCH', body: data }),
+    anular: (id) => apiFetch(`/cambios/${id}/`, { method: 'DELETE' }),
+    catalogos: () => apiFetch('/cambios/catalogos/'),
+    accion: (id, nombre, data = {}) => apiFetch(`/cambios/${id}/${nombre}/`, { method: 'POST', body: data }),
+    subir: (id, nombre, formData) => apiUpload(`/cambios/${id}/${nombre}/`, formData),
+    pdf: (id) => apiBlob(`/cambios/${id}/pdf/`),
+    planificacionPdf: (id) => apiBlob(`/cambios/${id}/planificacion_pdf/`),
+    seguimientoPdf: (params = '') => apiBlob(`/cambios/seguimiento_pdf/${params}`),
+  },
+  // M3 — Riesgos y oportunidades
+  riesgos: {
+    listar: (params = '') => apiFetch(`/riesgos/${params}`),
+    detalle: (id) => apiFetch(`/riesgos/${id}/`),
+    crear: (data) => apiFetch('/riesgos/', { method: 'POST', body: data }),
+    editar: (id, data) => apiFetch(`/riesgos/${id}/`, { method: 'PATCH', body: data }),
+    anular: (id) => apiFetch(`/riesgos/${id}/`, { method: 'DELETE' }),
+    catalogos: () => apiFetch('/riesgos/catalogos/'),
+    indicadores: () => apiFetch('/riesgos/indicadores/'),
+    hallazgosDerivados: () => apiFetch('/riesgos/hallazgos_derivados/'),
+    accion: (id, nombre, data = {}) => apiFetch(`/riesgos/${id}/${nombre}/`, { method: 'POST', body: data }),
+    subir: (id, nombre, formData) => apiUpload(`/riesgos/${id}/${nombre}/`, formData),
+    matrizPdf: (params = '') => apiBlob(`/riesgos/matriz_pdf/${params}`),
+  },
+  mejoras: {
+    listar: (params = '') => apiFetch(`/oportunidades-mejora/${params}`),
+    crear: (data) => apiFetch('/oportunidades-mejora/', { method: 'POST', body: data }),
+    editar: (id, data) => apiFetch(`/oportunidades-mejora/${id}/`, { method: 'PATCH', body: data }),
+    anular: (id) => apiFetch(`/oportunidades-mejora/${id}/`, { method: 'DELETE' }),
+    accion: (id, nombre, data = {}) => apiFetch(`/oportunidades-mejora/${id}/${nombre}/`, { method: 'POST', body: data }),
+    subir: (id, nombre, formData) => apiUpload(`/oportunidades-mejora/${id}/${nombre}/`, formData),
+    matrizPdf: (params = '') => apiBlob(`/oportunidades-mejora/matriz_pdf/${params}`),
+  },
+  contextoRiesgos: {
+    listar: (params = '') => apiFetch(`/contexto-riesgos/${params}`),
+    crear: (data) => apiFetch('/contexto-riesgos/', { method: 'POST', body: data }),
+    editar: (id, data) => apiFetch(`/contexto-riesgos/${id}/`, { method: 'PATCH', body: data }),
+    retirar: (id) => apiFetch(`/contexto-riesgos/${id}/`, { method: 'DELETE' }),
+  },
+  revisionesRiesgos: {
+    listar: (matriz) => apiFetch(`/revisiones-riesgos/?matriz=${matriz}`),
+    registrar: (tipo, data) => apiFetch(`/revisiones-riesgos/${tipo}/`, { method: 'POST', body: data }),
+  },
+  // M2 — Requisitos legales
+  legal: {
+    requisitos: (params = '') => apiFetch(`/requisitos-legales/${params}`),
+    requisito: (id) => apiFetch(`/requisitos-legales/${id}/`),
+    crearRequisito: (data) => apiFetch('/requisitos-legales/', { method: 'POST', body: data }),
+    editarRequisito: (id, data) => apiFetch(`/requisitos-legales/${id}/`, { method: 'PATCH', body: data }),
+    anularRequisito: (id) => apiFetch(`/requisitos-legales/${id}/`, { method: 'DELETE' }),
+    accionRequisito: (id, nombre, data = {}) => apiFetch(`/requisitos-legales/${id}/${nombre}/`, { method: 'POST', body: data }),
+    catalogos: () => apiFetch('/requisitos-legales/catalogos/'),
+    indicadores: () => apiFetch('/requisitos-legales/indicadores/'),
+    listaPdf: (ambito) => apiBlob(`/requisitos-legales/lista_pdf/?ambito=${ambito}`),
+    obligaciones: (params = '') => apiFetch(`/obligaciones-legales/${params}`),
+    crearObligacion: (data) => apiFetch('/obligaciones-legales/', { method: 'POST', body: data }),
+    editarObligacion: (id, data) => apiFetch(`/obligaciones-legales/${id}/`, { method: 'PATCH', body: data }),
+    bajaObligacion: (id, motivo) => apiFetch(`/obligaciones-legales/${id}/dar_de_baja/`, { method: 'POST', body: { motivo } }),
+    evaluaciones: (params = '') => apiFetch(`/evaluaciones-legales/${params}`),
+    crearEvaluacion: (data) => apiFetch('/evaluaciones-legales/', { method: 'POST', body: data }),
+    anularEvaluacion: (id) => apiFetch(`/evaluaciones-legales/${id}/`, { method: 'DELETE' }),
+    resultados: (id, params = '') => apiFetch(`/evaluaciones-legales/${id}/resultados/${params}`),
+    evaluar: (id, formData) => apiUpload(`/evaluaciones-legales/${id}/evaluar/`, formData),
+    cerrarEvaluacion: (id, password) => apiFetch(`/evaluaciones-legales/${id}/cerrar/`, { method: 'POST', body: { password } }),
+    matrizPdf: (ambito, anio) => apiBlob(`/evaluaciones-legales/matriz_pdf/?ambito=${ambito}&anio=${anio || ''}`),
+  },
+  // M23 — Seguridad y Salud en el Trabajo
+  sst: {
+    filas: (params = '') => apiFetch(`/sst-iperc/${params}`),
+    fila: (id) => apiFetch(`/sst-iperc/${id}/`),
+    crearFila: (data) => apiFetch('/sst-iperc/', { method: 'POST', body: data }),
+    editarFila: (id, data) => apiFetch(`/sst-iperc/${id}/`, { method: 'PATCH', body: data }),
+    retirarFila: (id, motivo) => apiFetch(`/sst-iperc/${id}/retirar/`, { method: 'POST', body: { motivo } }),
+    catalogos: () => apiFetch('/sst-iperc/catalogos/'),
+    resumen: () => apiFetch('/sst-iperc/resumen/'),
+    porPuesto: () => apiFetch('/sst-iperc/por_puesto/'),
+    porTrabajador: (id) => apiFetch(`/sst-iperc/por_trabajador/?trabajador=${id}`),
+    revisarArea: (data) => apiFetch('/sst-iperc/revisar_area/', { method: 'POST', body: data }),
+    aprobacionesIperc: () => apiFetch('/sst-iperc/aprobaciones/'),
+    aprobarIperc: (data) => apiFetch('/sst-iperc/aprobar_comite/', { method: 'POST', body: data }),
+    aprobarIpercPapel: (formData) => apiUpload('/sst-iperc/aprobar_comite/', formData),
+    matrizPdf: (area) => apiBlob(`/sst-iperc/matriz_pdf/?area=${encodeURIComponent(area || '')}`),
+    ats: (params = '') => apiFetch(`/sst-ats/${params}`),
+    unAts: (id) => apiFetch(`/sst-ats/${id}/`),
+    crearAts: (data) => apiFetch('/sst-ats/', { method: 'POST', body: data }),
+    editarAts: (id, data) => apiFetch(`/sst-ats/${id}/`, { method: 'PATCH', body: data }),
+    accionAts: (id, nombre, data = {}) => apiFetch(`/sst-ats/${id}/${nombre}/`, { method: 'POST', body: data }),
+    atsPdf: (id) => apiBlob(`/sst-ats/${id}/pdf/`),
+    eventos: (params = '') => apiFetch(`/sst-eventos/${params}`),
+    evento: (id) => apiFetch(`/sst-eventos/${id}/`),
+    crearEvento: (data) => apiFetch('/sst-eventos/', { method: 'POST', body: data }),
+    editarEvento: (id, data) => apiFetch(`/sst-eventos/${id}/`, { method: 'PATCH', body: data }),
+    accionEvento: (id, nombre, data = {}) => apiFetch(`/sst-eventos/${id}/${nombre}/`, { method: 'POST', body: data }),
+    subirEvento: (id, nombre, formData) => apiUpload(`/sst-eventos/${id}/${nombre}/`, formData),
+    catalogosEventos: () => apiFetch('/sst-eventos/catalogos/'),
+    registroPdf: (id) => apiBlob(`/sst-eventos/${id}/registro_pdf/`),
+    informePdf: (id) => apiBlob(`/sst-eventos/${id}/informe_pdf/`),
+    enfermedades: (params = '') => apiFetch(`/sst-enfermedades/${params}`),
+    crearEnfermedad: (data) => apiFetch('/sst-enfermedades/', { method: 'POST', body: data }),
+    editarEnfermedad: (id, data) => apiFetch(`/sst-enfermedades/${id}/`, { method: 'PATCH', body: data }),
+    accionEnfermedad: (id, nombre, data = {}) => apiFetch(`/sst-enfermedades/${id}/${nombre}/`, { method: 'POST', body: data }),
+    enfermedadPdf: (id) => apiBlob(`/sst-enfermedades/${id}/pdf/`),
+    estadisticas: (anio) => apiFetch(`/sst-estadisticas/anio/?anio=${anio}`),
+    datosMes: (data) => apiFetch('/sst-estadisticas/datos_mes/', { method: 'POST', body: data }),
+    informeEstadisticas: (data) => apiFetch('/sst-estadisticas/informe/', { method: 'POST', body: data }),
+    estadisticasPdf: (anio, informe) => apiBlob(`/sst-estadisticas/registro_pdf/?anio=${anio}${informe ? `&informe=${informe}` : ''}`),
+    datosEstadisticasPdf: (anio) => apiBlob(`/sst-estadisticas/datos_pdf/?anio=${anio}`),
+    recibirAts: (id, formData) => apiUpload(`/sst-ats/${id}/recibir/`, formData),
+    atsResumen: () => apiFetch('/sst-ats/resumen/'),
+    tipos: () => apiFetch('/sst-ats-tipo/'),
+    crearTipo: (data) => apiFetch('/sst-ats-tipo/', { method: 'POST', body: data }),
+    editarTipo: (id, data) => apiFetch(`/sst-ats-tipo/${id}/`, { method: 'PATCH', body: data }),
+    desactivarTipo: (id) => apiFetch(`/sst-ats-tipo/${id}/`, { method: 'DELETE' }),
+    // Inspecciones (inventario, plantillas, inspecciones) y monitoreos
+    elementos: (params = '') => apiFetch(`/sst-elementos/${params}`),
+    crearElemento: (data) => apiFetch('/sst-elementos/', { method: 'POST', body: data }),
+    editarElemento: (id, data) => apiFetch(`/sst-elementos/${id}/`, { method: 'PATCH', body: data }),
+    bajaElemento: (id, motivo) => apiFetch(`/sst-elementos/${id}/dar_baja/`, { method: 'POST', body: { motivo } }),
+    catalogosInspeccion: () => apiFetch('/sst-elementos/catalogos/'),
+    plantillas: (params = '') => apiFetch(`/sst-plantillas/${params}`),
+    crearPlantilla: (data) => apiFetch('/sst-plantillas/', { method: 'POST', body: data }),
+    editarPlantilla: (id, data) => apiFetch(`/sst-plantillas/${id}/`, { method: 'PATCH', body: data }),
+    desactivarPlantilla: (id) => apiFetch(`/sst-plantillas/${id}/`, { method: 'DELETE' }),
+    inspecciones: (params = '') => apiFetch(`/sst-inspecciones/${params}`),
+    inspeccion: (id) => apiFetch(`/sst-inspecciones/${id}/`),
+    crearInspeccion: (data) => apiFetch('/sst-inspecciones/', { method: 'POST', body: data }),
+    editarInspeccion: (id, data) => apiFetch(`/sst-inspecciones/${id}/`, { method: 'PATCH', body: data }),
+    accionInspeccion: (id, nombre, data = {}) => apiFetch(`/sst-inspecciones/${id}/${nombre}/`, { method: 'POST', body: data }),
+    subirInspeccion: (id, nombre, formData) => apiUpload(`/sst-inspecciones/${id}/${nombre}/`, formData),
+    inspeccionPdf: (id) => apiBlob(`/sst-inspecciones/${id}/pdf/`),
+    programaInspecciones: (anio) => apiFetch(`/sst-inspecciones/programa/?anio=${anio}`),
+    resumenInspecciones: () => apiFetch('/sst-inspecciones/resumen/'),
+    programaMonitoreos: (anio) => apiFetch(`/sst-programa-monitoreos/anio/?anio=${anio}`),
+    crearProgramaMonitoreos: (anio) => apiFetch('/sst-programa-monitoreos/', { method: 'POST', body: { anio } }),
+    itemProgramaMonitoreos: (id, data) => apiFetch(`/sst-programa-monitoreos/${id}/item/`, { method: 'POST', body: data }),
+    quitarItemMonitoreos: (id, data) => apiFetch(`/sst-programa-monitoreos/${id}/quitar_item/`, { method: 'POST', body: data }),
+    programaMonitoreosPdf: (id) => apiBlob(`/sst-programa-monitoreos/${id}/pdf/`),
+    monitoreos: (params = '') => apiFetch(`/sst-monitoreos/${params}`),
+    crearMonitoreo: (data) => apiFetch('/sst-monitoreos/', { method: 'POST', body: data }),
+    editarMonitoreo: (id, data) => apiFetch(`/sst-monitoreos/${id}/`, { method: 'PATCH', body: data }),
+    accionMonitoreo: (id, nombre, data = {}) => apiFetch(`/sst-monitoreos/${id}/${nombre}/`, { method: 'POST', body: data }),
+    subirMonitoreo: (id, formData) => apiUpload(`/sst-monitoreos/${id}/informe/`, formData),
+    monitoreoPdf: (id) => apiBlob(`/sst-monitoreos/${id}/pdf/`),
+    recomendaciones: (params = '') => apiFetch(`/sst-recomendaciones/${params}`),
+    crearRecomendacion: (data) => apiFetch('/sst-recomendaciones/', { method: 'POST', body: data }),
+    editarRecomendacion: (id, data) => apiFetch(`/sst-recomendaciones/${id}/`, { method: 'PATCH', body: data }),
+    retirarRecomendacion: (id) => apiFetch(`/sst-recomendaciones/${id}/`, { method: 'DELETE' }),
+    recomendacionesPdf: (anio) => apiBlob(`/sst-recomendaciones/programa_pdf/?anio=${anio}`),
+    // EPP y vigilancia médica
+    eppCatalogo: (params = '') => apiFetch(`/sst-epp-catalogo/${params}`),
+    crearEpp: (data) => apiFetch('/sst-epp-catalogo/', { method: 'POST', body: data }),
+    editarEpp: (id, data) => apiFetch(`/sst-epp-catalogo/${id}/`, { method: 'PATCH', body: data }),
+    desactivarEpp: (id) => apiFetch(`/sst-epp-catalogo/${id}/`, { method: 'DELETE' }),
+    catalogosEpp: () => apiFetch('/sst-epp-catalogo/catalogos/'),
+    matrizEpp: () => apiFetch('/sst-epp-matriz/'),
+    crearPerfilEpp: (data) => apiFetch('/sst-epp-matriz/', { method: 'POST', body: data }),
+    editarPerfilEpp: (id, data) => apiFetch(`/sst-epp-matriz/${id}/`, { method: 'PATCH', body: data }),
+    requisitosEpp: (id, requisitos) => apiFetch(`/sst-epp-matriz/${id}/requisitos/`, { method: 'POST', body: { requisitos } }),
+    desactivarPerfilEpp: (id) => apiFetch(`/sst-epp-matriz/${id}/`, { method: 'DELETE' }),
+    matrizEppPdf: () => apiBlob('/sst-epp-matriz/matriz_pdf/'),
+    entregasEpp: (params = '') => apiFetch(`/sst-epp-entregas/${params}`),
+    entregaEpp: (id) => apiFetch(`/sst-epp-entregas/${id}/`),
+    crearEntregaEpp: (data) => apiFetch('/sst-epp-entregas/', { method: 'POST', body: data }),
+    editarEntregaEpp: (id, data) => apiFetch(`/sst-epp-entregas/${id}/`, { method: 'PATCH', body: data }),
+    accionEntregaEpp: (id, nombre, data = {}) => apiFetch(`/sst-epp-entregas/${id}/${nombre}/`, { method: 'POST', body: data }),
+    subirEntregaEpp: (id, nombre, formData) => apiUpload(`/sst-epp-entregas/${id}/${nombre}/`, formData),
+    estadoEpp: (trabajador) => apiFetch(`/sst-epp-entregas/estado/?trabajador=${trabajador}`),
+    sugerirEpp: (trabajador, campo) => apiFetch(`/sst-epp-entregas/sugerir/?trabajador=${trabajador}${campo ? '&campo=1' : ''}`),
+    resumenEpp: () => apiFetch('/sst-epp-entregas/resumen/'),
+    restablecerPin: (trabajador) => apiFetch('/sst-epp-entregas/restablecer_pin/', { method: 'POST', body: { trabajador } }),
+    entregaEppPdf: (id) => apiBlob(`/sst-epp-entregas/${id}/pdf/`),
+    tarjetaEppPdf: (trabajador) => apiBlob(`/sst-epp-entregas/tarjeta_pdf/?trabajador=${trabajador}`),
+    emos: (params = '') => apiFetch(`/sst-emo/${params}`),
+    emo: (id) => apiFetch(`/sst-emo/${id}/`),
+    crearEmo: (data) => apiFetch('/sst-emo/', { method: 'POST', body: data }),
+    editarEmo: (id, data) => apiFetch(`/sst-emo/${id}/`, { method: 'PATCH', body: data }),
+    accionEmo: (id, nombre, data = {}) => apiFetch(`/sst-emo/${id}/${nombre}/`, { method: 'POST', body: data }),
+    subirEmo: (id, formData) => apiUpload(`/sst-emo/${id}/certificado/`, formData),
+    emoPdf: (id) => apiBlob(`/sst-emo/${id}/pdf/`),
+    vigilancia: () => apiFetch('/sst-emo/vigilancia/'),
+    subirAccionEmo: (id, nombre, formData) => apiUpload(`/sst-emo/${id}/${nombre}/`, formData),
+    anexo4: () => apiFetch('/sst-emo/anexo4/'),
+    registrarAnexo4: (formData) => apiUpload('/sst-emo/registrar_anexo4/', formData),
+
+    // Comité de SST y Programa anual SSOMA
+    comiteVigente: () => apiFetch('/sst-comite/vigente/'),
+    comites: () => apiFetch('/sst-comite/'),
+    crearComite: (data) => apiFetch('/sst-comite/', { method: 'POST', body: data }),
+    editarComite: (id, data) => apiFetch(`/sst-comite/${id}/`, { method: 'PATCH', body: data }),
+    catalogosComite: () => apiFetch('/sst-comite/catalogos/'),
+    accionComite: (id, nombre, data = {}) => apiFetch(`/sst-comite/${id}/${nombre}/`, { method: 'POST', body: data }),
+    subirComite: (id, formData) => apiUpload(`/sst-comite/${id}/adjuntar/`, formData),
+    reuniones: (params = '') => apiFetch(`/sst-comite-reuniones/${params}`),
+    crearReunion: (data) => apiFetch('/sst-comite-reuniones/', { method: 'POST', body: data }),
+    editarReunion: (id, data) => apiFetch(`/sst-comite-reuniones/${id}/`, { method: 'PATCH', body: data }),
+    accionReunion: (id, nombre, data = {}) => apiFetch(`/sst-comite-reuniones/${id}/${nombre}/`, { method: 'POST', body: data }),
+    cerrarReunion: (id, formData) => apiUpload(`/sst-comite-reuniones/${id}/cerrar/`, formData),
+    actaPdf: (id) => apiBlob(`/sst-comite-reuniones/${id}/pdf/`),
+    acuerdos: (params = '') => apiFetch(`/sst-comite-acuerdos/${params}`),
+    seguimientoAcuerdo: (id, data) => apiFetch(`/sst-comite-acuerdos/${id}/seguimiento/`, { method: 'POST', body: data }),
+    programaSsoma: (anio) => apiFetch(`/sst-programa-ssoma/anio/?anio=${anio}`),
+    crearProgramaSsoma: (data) => apiFetch('/sst-programa-ssoma/', { method: 'POST', body: data }),
+    editarProgramaSsoma: (id, data) => apiFetch(`/sst-programa-ssoma/${id}/`, { method: 'PATCH', body: data }),
+    accionProgramaSsoma: (id, nombre, data = {}) => apiFetch(`/sst-programa-ssoma/${id}/${nombre}/`, { method: 'POST', body: data }),
+    programaSsomaPdf: (id) => apiBlob(`/sst-programa-ssoma/${id}/pdf/`),
+  },
+  // M7 — Procesos
+  procesos: {
+    listar: (params = '') => apiFetch(`/procesos/${params}`),
+    crear: (data) => apiFetch('/procesos/', { method: 'POST', body: data }),
+    editar: (id, data) => apiFetch(`/procesos/${id}/`, { method: 'PATCH', body: data }),
+    desactivar: (id) => apiFetch(`/procesos/${id}/`, { method: 'DELETE' }),
+    reactivar: (id) => apiFetch(`/procesos/${id}/reactivar/`, { method: 'POST', body: {} }),
+    catalogos: () => apiFetch('/procesos/catalogos/'),
+    mapa: () => apiFetch('/procesos/mapa/'),
+    vinculados: (id) => apiFetch(`/procesos/${id}/vinculados/`),
+    mapaPdf: () => apiBlob('/procesos/mapa_pdf/'),
+    fichas: (params = '') => apiFetch(`/fichas-proceso/${params}`),
+    ficha: (id) => apiFetch(`/fichas-proceso/${id}/`),
+    crearFicha: (data) => apiFetch('/fichas-proceso/', { method: 'POST', body: data }),
+    editarFicha: (id, data) => apiFetch(`/fichas-proceso/${id}/`, { method: 'PATCH', body: data }),
+    enviar: (id, password) => apiFetch(`/fichas-proceso/${id}/enviar/`, { method: 'POST', body: { password } }),
+    revisar: (id, password) => apiFetch(`/fichas-proceso/${id}/revisar/`, { method: 'POST', body: { password } }),
+    aprobar: (id, password) => apiFetch(`/fichas-proceso/${id}/aprobar/`, { method: 'POST', body: { password } }),
+    devolver: (id, comentarios) => apiFetch(`/fichas-proceso/${id}/devolver/`, { method: 'POST', body: { comentarios } }),
+    nuevaVersion: (id, motivo) => apiFetch(`/fichas-proceso/${id}/nueva_version/`, { method: 'POST', body: { motivo } }),
+    fichaPdf: (id) => apiBlob(`/fichas-proceso/${id}/pdf/`),
+    avisos: (params = '') => apiFetch(`/avisos-proceso/${params}`),
+    crearAviso: (data) => apiFetch('/avisos-proceso/', { method: 'POST', body: data }),
+    descartarAviso: (id, motivo) => apiFetch(`/avisos-proceso/${id}/descartar/`, { method: 'POST', body: { motivo } }),
+    resultados: (params = '') => apiFetch(`/resultados-indicador/${params}`),
+    crearResultado: (data) => apiFetch('/resultados-indicador/', { method: 'POST', body: data }),
+    editarResultado: (id, data) => apiFetch(`/resultados-indicador/${id}/`, { method: 'PATCH', body: data }),
+    quitarResultado: (id) => apiFetch(`/resultados-indicador/${id}/`, { method: 'DELETE' }),
   },
   // M8 — Hallazgos
   hallazgos: {
@@ -172,11 +491,10 @@ export const api = {
     crear: (formData) => apiUpload('/hallazgos/', formData),
     editar: (id, data) => apiFetch(`/hallazgos/${id}/`, { method: 'PATCH', body: data }),
     desactivar: (id) => apiFetch(`/hallazgos/${id}/`, { method: 'DELETE' }),
-    iniciarAnalisis: (id, analisis) => apiFetch(`/hallazgos/${id}/iniciar_analisis/`, { method: 'POST', body: { analisis } }),
-    registrarTratamiento: (id, data) => apiFetch(`/hallazgos/${id}/registrar_tratamiento/`, { method: 'POST', body: data }),
-    cerrar: (id, comentarios) => apiFetch(`/hallazgos/${id}/cerrar/`, { method: 'POST', body: { comentarios } }),
-    reabrir: (id, justificacion) => apiFetch(`/hallazgos/${id}/reabrir/`, { method: 'POST', body: { justificacion } }),
+    reclasificar: (id, tipo, motivo) => apiFetch(`/hallazgos/${id}/reclasificar/`, { method: 'POST', body: { tipo, motivo } }),
     generarSac: (id) => apiFetch(`/hallazgos/${id}/generar_sac/`, { method: 'POST' }),
+    sacAbiertas: (id) => apiFetch(`/hallazgos/${id}/sac_abiertas/`),
+    vincularSac: (id, sacId) => apiFetch(`/hallazgos/${id}/vincular_sac/`, { method: 'POST', body: { sac_id: sacId } }),
     resumen: () => apiFetch('/hallazgos/resumen/'),
   },
   // M6 — Gestión Documental
@@ -230,12 +548,29 @@ export const api = {
   },
   auditoria: (params = '') => apiFetch(`/auditoria/${params}`),
   // M10 — Auditorías Internas
-  requisitosNorma: (norma) => apiFetch(`/requisitos-norma/?norma=${norma}`),
+  // Devuelve siempre el catálogo completo de la norma: si el servidor responde
+  // paginado, recorre todas las páginas y las une.
+  requisitosNorma: async (norma) => {
+    const primera = await apiFetch(`/requisitos-norma/?norma=${norma}`)
+    if (Array.isArray(primera)) return primera
+    const filas = [...(primera.results || [])]
+    let pagina = 2
+    let siguiente = primera.next
+    while (siguiente) {
+      const d = await apiFetch(`/requisitos-norma/?norma=${norma}&page=${pagina}`)
+      filas.push(...(d.results || []))
+      siguiente = d.next
+      pagina += 1
+    }
+    return filas
+  },
   programasAuditoria: {
     listar: (params = '') => apiFetch(`/programas-auditoria/${params}`),
     detalle: (id) => apiFetch(`/programas-auditoria/${id}/`),
     crear: (data) => apiFetch('/programas-auditoria/', { method: 'POST', body: data }),
     aprobar: (id) => apiFetch(`/programas-auditoria/${id}/aprobar/`, { method: 'POST' }),
+    abrirModificacion: (id, motivo) => apiFetch(`/programas-auditoria/${id}/abrir_modificacion/`, { method: 'POST', body: { motivo } }),
+    programaPdf: (id) => apiBlob(`/programas-auditoria/${id}/programa_pdf/`),
   },
   auditorias: {
     listar: (params = '') => apiFetch(`/auditorias/${params}`),
@@ -252,9 +587,34 @@ export const api = {
     generarLista: (id, norma) => apiFetch(`/auditorias/${id}/generar_lista/`, { method: 'POST', body: { norma } }),
     evaluarItem: (id, data) => apiFetch(`/auditorias/${id}/evaluar_item/`, { method: 'POST', body: data }),
     registrarHallazgo: (id, data) => apiFetch(`/auditorias/${id}/registrar_hallazgo/`, { method: 'POST', body: data }),
-    generarInforme: (id, data) => apiFetch(`/auditorias/${id}/generar_informe/`, { method: 'POST', body: data }),
+    editarHallazgo: (id, data) => apiFetch(`/auditorias/${id}/editar_hallazgo/`, { method: 'POST', body: data }),
+    vincularItems: (id, hallazgoId, itemIds) => apiFetch(`/auditorias/${id}/vincular_items/`, { method: 'POST', body: { hallazgo_id: hallazgoId, item_ids: itemIds } }),
+    descartarItems: (id, itemIds, motivo) => apiFetch(`/auditorias/${id}/descartar_items/`, { method: 'POST', body: { item_ids: itemIds, motivo } }),
+    reabrirItem: (id, itemId) => apiFetch(`/auditorias/${id}/reabrir_item/`, { method: 'POST', body: { item_id: itemId } }),
+    anularHallazgo: (id, hallazgoId) => apiFetch(`/auditorias/${id}/anular_hallazgo/`, { method: 'POST', body: { hallazgo_id: hallazgoId } }),
+    terminarEjecucion: (id) => apiFetch(`/auditorias/${id}/terminar_ejecucion/`, { method: 'POST' }),
+    validarHallazgos: (id, data) => apiFetch(`/auditorias/${id}/validar_hallazgos/`, { method: 'POST', body: data }),
     cerrar: (id, data) => apiFetch(`/auditorias/${id}/cerrar/`, { method: 'POST', body: data }),
     resumen: () => apiFetch('/auditorias/resumen/'),
+    planPdf: (id) => apiBlob(`/auditorias/${id}/plan_pdf/`),
+    informePdf: (id) => apiBlob(`/auditorias/${id}/informe_pdf/`),
+    actaPdf: (id, tipo) => apiBlob(`/auditorias/${id}/acta_pdf/?tipo=${encodeURIComponent(tipo)}`),
+    listaPdf: (id, norma) => apiBlob(`/auditorias/${id}/lista_pdf/?norma=${encodeURIComponent(norma)}`),
+  },
+  // Formatos PDF del sistema y su vínculo con la lista maestra (caja de control)
+  formatosImpresos: {
+    listar: () => apiFetch('/formatos-impresos/'),
+    vincular: (id, documento) => apiFetch(`/formatos-impresos/${id}/`, { method: 'PATCH', body: { documento: documento || null } }),
+  },
+  // Candado de aprobación de Auditorías (programa anual e informes de cierre)
+  solicitudesAuditoria: {
+    listar: (params = '') => apiFetch(`/solicitudes-auditoria/${params}`),
+    pendientesCount: () => apiFetch('/solicitudes-auditoria/pendientes_count/'),
+    misDevueltasCount: () => apiFetch('/solicitudes-auditoria/mis_devueltas_count/'),
+    aprobar: (id, observaciones = '') => apiFetch(`/solicitudes-auditoria/${id}/aprobar/`, { method: 'POST', body: { observaciones } }),
+    devolver: (id, observaciones = '') => apiFetch(`/solicitudes-auditoria/${id}/devolver/`, { method: 'POST', body: { observaciones } }),
+    rechazar: (id, observaciones = '') => apiFetch(`/solicitudes-auditoria/${id}/rechazar/`, { method: 'POST', body: { observaciones } }),
+    reenviar: (id, payload = null) => apiFetch(`/solicitudes-auditoria/${id}/reenviar/`, { method: 'POST', body: payload ? { payload } : {} }),
   },
   // Transversales: buzón de tareas y calendario
   misTareas: () => apiFetch('/mis-tareas/'),
@@ -309,7 +669,7 @@ export const api = {
     eliminar: (id) => apiFetch(`/nodos-trazabilidad/${id}/`, { method: 'DELETE' }),
     rellenarDesdeEquipo: (id) => apiFetch(`/nodos-trazabilidad/${id}/rellenar_desde_equipo/`, { method: 'POST' }),
   },
-  // M13 — Intervalo de Calibración (MET-PRO-04-r08, método OIML D10)
+  // M13 — Intervalo de Calibración (método OIML D10)
   puntosIntervalo: {
     resumen: (params = '') => apiFetch(`/puntos-intervalo/resumen/${params}`),
     crear: (data) => apiFetch('/puntos-intervalo/', { method: 'POST', body: data }),
@@ -322,6 +682,52 @@ export const api = {
     crear: (data) => apiFetch('/resultados-intervalo/', { method: 'POST', body: data }),
     editar: (id, data) => apiFetch(`/resultados-intervalo/${id}/`, { method: 'PATCH', body: data }),
     eliminar: (id) => apiFetch(`/resultados-intervalo/${id}/`, { method: 'DELETE' }),
+  },
+  // M12 — Competencia técnica y autorización del personal
+  metodosCalibracion: {
+    listar: (params = '') => apiFetch(`/metodos-calibracion/${params}`),
+    crear: (data) => apiFetch('/metodos-calibracion/', { method: 'POST', body: data }),
+    editar: (id, data) => apiFetch(`/metodos-calibracion/${id}/`, { method: 'PATCH', body: data }),
+    eliminar: (id) => apiFetch(`/metodos-calibracion/${id}/`, { method: 'DELETE' }),
+  },
+  controlesValidez: {
+    listar: (params = '') => apiFetch(`/controles-validez/${params}`),
+    crear: (data) => apiFetch('/controles-validez/', { method: 'POST', body: data }),
+    editar: (id, data) => apiFetch(`/controles-validez/${id}/`, { method: 'PATCH', body: data }),
+    eliminar: (id) => apiFetch(`/controles-validez/${id}/`, { method: 'DELETE' }),
+  },
+  autorizaciones: {
+    listar: (params = '') => apiFetch(`/autorizaciones/${params}`),
+    crear: (data) => apiFetch('/autorizaciones/', { method: 'POST', body: data }),
+    editar: (id, data) => apiFetch(`/autorizaciones/${id}/`, { method: 'PATCH', body: data }),
+    eliminar: (id) => apiFetch(`/autorizaciones/${id}/`, { method: 'DELETE' }),
+    seguimientos: () => apiFetch('/autorizaciones/seguimientos/'),
+    pdf: (id) => apiBlob(`/autorizaciones/${id}/autorizacion_pdf/`),
+  },
+  procesosEntrenamiento: {
+    listar: (params = '') => apiFetch(`/procesos-entrenamiento/${params}`),
+    crear: (data) => apiFetch('/procesos-entrenamiento/', { method: 'POST', body: data }),
+    editar: (id, data) => apiFetch(`/procesos-entrenamiento/${id}/`, { method: 'PATCH', body: data }),
+    eliminar: (id) => apiFetch(`/procesos-entrenamiento/${id}/`, { method: 'DELETE' }),
+    pdf: (id) => apiBlob(`/procesos-entrenamiento/${id}/entrenamiento_pdf/`),
+    subirAdjunto: (formData) => apiUpload('/procesos-entrenamiento/subir_adjunto/', formData),
+  },
+  evaluacionesSeguimiento: {
+    listar: (params = '') => apiFetch(`/evaluaciones-seguimiento/${params}`),
+    crear: (data) => apiFetch('/evaluaciones-seguimiento/', { method: 'POST', body: data }),
+    editar: (id, data) => apiFetch(`/evaluaciones-seguimiento/${id}/`, { method: 'PATCH', body: data }),
+    eliminar: (id) => apiFetch(`/evaluaciones-seguimiento/${id}/`, { method: 'DELETE' }),
+    pdf: (id) => apiBlob(`/evaluaciones-seguimiento/${id}/seguimiento_pdf/`),
+  },
+
+  solicitudesCompetencia: {
+    listar: (params = '') => apiFetch(`/solicitudes-competencia/${params}`),
+    pendientesCount: () => apiFetch('/solicitudes-competencia/pendientes_count/'),
+    misDevueltasCount: () => apiFetch('/solicitudes-competencia/mis_devueltas_count/'),
+    aprobar: (id, observaciones = '') => apiFetch(`/solicitudes-competencia/${id}/aprobar/`, { method: 'POST', body: { observaciones } }),
+    devolver: (id, observaciones = '') => apiFetch(`/solicitudes-competencia/${id}/devolver/`, { method: 'POST', body: { observaciones } }),
+    rechazar: (id, observaciones = '') => apiFetch(`/solicitudes-competencia/${id}/rechazar/`, { method: 'POST', body: { observaciones } }),
+    reenviar: (id, payload = null) => apiFetch(`/solicitudes-competencia/${id}/reenviar/`, { method: 'POST', body: payload ? { payload } : {} }),
   },
   // Configuración del sistema (marca + licenciamiento de módulos)
   configPublica: () => apiFetch('/configuracion/publica/'),

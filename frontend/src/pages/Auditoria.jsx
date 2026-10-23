@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from 'react'
 import { ScrollText } from 'lucide-react'
 import { api } from '../lib/api.js'
+import { fechaHora } from '../lib/fecha.js'
+import TituloModulo from '../components/ui/TituloModulo.jsx'
 
 const ACCIONES = [
   '', 'LOGIN', 'LOGOUT', 'LOGIN_FALLIDO', 'CREAR', 'EDITAR', 'ELIMINAR',
@@ -28,8 +30,7 @@ export default function Auditoria() {
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2">
-        <ScrollText className="h-6 w-6 text-esynapse-500" />
-        <h1 className="text-2xl font-bold">Log de auditoría</h1>
+        <TituloModulo seccion="Administración" titulo="Log de auditoría" />
         <span className="text-sm text-slate-500 dark:text-slate-400">({total} entradas — inmutable)</span>
       </div>
 
@@ -44,9 +45,9 @@ export default function Auditoria() {
       </select>
 
       <div className="card-esynapse overflow-x-auto">
-        <table className="w-full text-xs">
+        <table className="tabla-sig w-full text-xs">
           <thead>
-            <tr className="border-b border-slate-200 text-left uppercase tracking-wide text-slate-500 dark:border-slate-800 dark:text-slate-400">
+            <tr className="border-b border-slate-200 text-slate-500 dark:border-slate-800 dark:text-slate-400">
               <th className="px-3 py-2">Timestamp</th>
               <th className="px-3 py-2">Usuario</th>
               <th className="px-3 py-2">Acción</th>
@@ -60,11 +61,11 @@ export default function Auditoria() {
             {entradas.map((e) => (
               <tr key={e.id} className="border-b border-slate-100 last:border-0 dark:border-slate-800/60">
                 <td className="whitespace-nowrap px-3 py-2 font-mono text-[11px]">
-                  {new Date(e.timestamp).toLocaleString('es-PE')}
+                  {fechaHora(e.timestamp)}
                 </td>
                 <td className="px-3 py-2">{e.usuario_nombre}</td>
                 <td className="px-3 py-2">
-                  <span className={`rounded px-1.5 py-0.5 text-[10px] font-medium ${
+                  <span className={`whitespace-nowrap rounded px-1.5 py-0.5 text-[11px] font-medium ${
                     e.accion === 'ACCESO_BLOQUEADO' || e.accion === 'LOGIN_FALLIDO'
                       ? 'bg-red-500/15 text-red-500'
                       : e.accion === 'CREAR'

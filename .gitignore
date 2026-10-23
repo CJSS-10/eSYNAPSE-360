@@ -3,6 +3,7 @@
 # Python / Django
 backend/venv/
 backend/db.sqlite3
+backend/*.sqlite3
 __pycache__/
 *.pyc
 
@@ -22,6 +23,7 @@ desktop.ini
 
 # Archivos subidos por usuarios (documentos, evidencias)
 backend/media/
+backend/media_pruebas/
 
 # Certificados digitales y llaves privadas — JAMAS al repositorio
 *.pfx
@@ -32,4 +34,15 @@ backend/certificados/
 
 # Respaldos locales de base de datos y archivos
 backend/backups/
+backups/
+*.bak
 obser.txt
+Guia.txt
+
+# Residuos del taller (se archivan, no se borran)
+backend/_renametest3/
+_archivo/
+
+# Carpeta canónica limpia (no versionar dentro del taller)
+eSYNAPSE 360 GitHub/
+_evicted_backups_*/

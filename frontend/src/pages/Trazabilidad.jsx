@@ -164,7 +164,7 @@ export default function Trazabilidad({ puedeEditar }) {
       {!sel && <p className="py-8 text-center text-sm text-slate-400">Selecciona o crea una carta para armar su árbol de trazabilidad.</p>}
 
       {sel && (
-        <div className="card-esynapse space-y-3">
+        <div className="card-esynapse space-y-3 p-5">
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-sm font-semibold">Carta de Trazabilidad — {sel.magnitud}</h3>
@@ -179,7 +179,7 @@ export default function Trazabilidad({ puedeEditar }) {
             ? <p className="py-6 text-center text-xs text-slate-400">Sin eslabones. Empieza por el patrón nacional/internacional (Nivel 1).</p>
             : niveles.map((lv) => (
               <div key={lv}>
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Nivel {lv}</p>
+                <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">Nivel {lv}</p>
                 <div className="mt-1 space-y-1">
                   {porNivel(lv).map((n) => (
                     <div key={n.id} className="flex items-center gap-1.5 rounded-md border border-slate-200 px-2 py-1.5 dark:border-slate-700">
@@ -187,7 +187,7 @@ export default function Trazabilidad({ puedeEditar }) {
                         <span className="text-sm font-medium">{n.entidad || n.descripcion || '(sin nombre)'}</span>
                         {n.descripcion && n.entidad && <span className="text-xs text-slate-500 dark:text-slate-400"> · {n.descripcion}</span>}
                         {n.codigo && <span className="ml-1 font-mono text-xs text-slate-500">[{n.codigo}]</span>}
-                        {n.equipo_codigo && <span className="ml-1 rounded bg-esynapse-500/10 px-1 text-[10px] text-esynapse-600 dark:text-esynapse-300">↳ {n.equipo_codigo}</span>}
+                        {n.equipo_codigo && <span className="ml-1 rounded bg-esynapse-500/10 px-1 text-[11px] text-esynapse-600 dark:text-esynapse-300">↳ {n.equipo_codigo}</span>}
                         {(n.padres || []).length > 0 && <span className="block text-[11px] text-slate-400">Es trazable a: {nombrePadres(n)}</span>}
                       </div>
                       {puedeEditar && (

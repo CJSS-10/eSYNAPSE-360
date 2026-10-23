@@ -18,6 +18,14 @@ from .views import (
     SolicitudCambioEquipoViewSet,
     PuntoIntervaloViewSet,
     ResultadoIntervaloViewSet,
+    MetodoCalibracionViewSet,
+    ControlValidezViewSet,
+    AutorizacionViewSet,
+    ProcesoEntrenamientoViewSet,
+    EvaluacionSeguimientoViewSet,
+    SolicitudCambioCompetenciaViewSet,
+    SolicitudCambioAuditoriaViewSet,
+    FormatoImpresoViewSet,
 )
 
 router = DefaultRouter()
@@ -35,6 +43,14 @@ router.register('clasificaciones-equipo', ClasificacionEquipoViewSet, basename='
 router.register('solicitudes-cambio-equipo', SolicitudCambioEquipoViewSet, basename='solicitudes-cambio-equipo')
 router.register('puntos-intervalo', PuntoIntervaloViewSet, basename='puntos-intervalo')
 router.register('resultados-intervalo', ResultadoIntervaloViewSet, basename='resultados-intervalo')
+router.register('metodos-calibracion', MetodoCalibracionViewSet, basename='metodos-calibracion')
+router.register('controles-validez', ControlValidezViewSet, basename='controles-validez')
+router.register('autorizaciones', AutorizacionViewSet, basename='autorizaciones')
+router.register('procesos-entrenamiento', ProcesoEntrenamientoViewSet, basename='procesos-entrenamiento')
+router.register('evaluaciones-seguimiento', EvaluacionSeguimientoViewSet, basename='evaluaciones-seguimiento')
+router.register('solicitudes-competencia', SolicitudCambioCompetenciaViewSet, basename='solicitudes-competencia')
+router.register('solicitudes-auditoria', SolicitudCambioAuditoriaViewSet, basename='solicitudes-auditoria')
+router.register('formatos-impresos', FormatoImpresoViewSet, basename='formatos-impresos')
 
 urlpatterns = [
     path('mis-tareas/', MisTareasView.as_view(), name='mis-tareas'),

@@ -6,11 +6,19 @@ import Dashboard from './pages/Dashboard.jsx'
 import Documentos from './pages/Documentos.jsx'
 import Hallazgos from './pages/Hallazgos.jsx'
 import AccionesCorrectivas from './pages/AccionesCorrectivas.jsx'
+import Quejas from './pages/Quejas.jsx'
+import Procesos from './pages/Procesos.jsx'
+import Cambios from './pages/Cambios.jsx'
+import Riesgos from './pages/Riesgos.jsx'
+import Legal from './pages/Legal.jsx'
+import Sst from './pages/Sst.jsx'
+import Organizacion from './pages/Organizacion.jsx'
 import Auditorias from './pages/Auditorias.jsx'
 import MisTareas from './pages/MisTareas.jsx'
 import Calendario from './pages/Calendario.jsx'
 import Configuracion from './pages/Configuracion.jsx'
 import Equipos from './pages/Equipos.jsx'
+import Competencia from './pages/Competencia.jsx'
 import Login from './pages/Login.jsx'
 import Roles from './pages/Roles.jsx'
 import Usuarios from './pages/Usuarios.jsx'
@@ -41,11 +49,19 @@ export default function App() {
         <Route path="/documentos" element={<Documentos />} />
         <Route path="/hallazgos" element={<Hallazgos />} />
         <Route path="/acciones-correctivas" element={<AccionesCorrectivas />} />
+        <Route path="/quejas" element={<Quejas />} />
+        <Route path="/procesos" element={<Procesos />} />
+        <Route path="/cambios" element={<Cambios />} />
+        <Route path="/riesgos" element={<Riesgos />} />
+        <Route path="/legal" element={<Legal />} />
+        <Route path="/sst" element={<Sst />} />
+        <Route path="/organizacion" element={<Organizacion />} />
         <Route path="/auditorias" element={<Auditorias />} />
         <Route path="/mis-tareas" element={<MisTareas />} />
         <Route path="/calendario" element={<Calendario />} />
         <Route path="/configuracion" element={<Configuracion />} />
         <Route path="/equipos" element={<Equipos />} />
+        <Route path="/competencia" element={<Competencia />} />
         <Route path="/usuarios" element={<Usuarios />} />
         <Route path="/roles" element={<Roles />} />
         <Route path="/auditoria" element={<Auditoria />} />

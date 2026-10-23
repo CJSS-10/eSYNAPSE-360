@@ -1,14 +1,16 @@
 import { useCallback, useEffect, useState } from 'react'
+import { useUltimaRespuesta } from '../lib/useUltimaRespuesta.js'
 import { ImagePlus, KeyRound, Pencil, Plus, RotateCcw, Search, UserX } from 'lucide-react'
 import Modal from '../components/Modal.jsx'
 import Avatar from '../components/ui/Avatar.jsx'
-import SelectConCrear from '../components/ui/SelectConCrear.jsx'
+import CampoSugerencias from '../components/CampoSugerencias.jsx'
 import { api } from '../lib/api.js'
 import { useAuth } from '../context/AuthContext.jsx'
+import TituloModulo from '../components/ui/TituloModulo.jsx'
 
 const FORM_VACIO = {
   username: '', first_name: '', last_name: '', email: '',
-  area: '', laboratorio: '', cargo: '', telefono: '', roles: [], foto: null,
+  area: '', laboratorio: '', cargo: '', sigla_cargo: '', telefono: '', roles: [], foto: null, trabajador: '',
 }
 
 export default function Usuarios() {
@@ -24,11 +26,12 @@ export default function Usuarios() {
   const [confirmar, setConfirmar] = useState(null)
   const [fotoPreview, setFotoPreview] = useState(null)
 
+  const ultima = useUltimaRespuesta()
   const cargar = useCallback(async () => {
     const params = new URLSearchParams()
     if (verInactivos) params.set('incluir_inactivos', '1')
     if (buscar) params.set('buscar', buscar)
-    const data = await api.usuarios.listar(`?${params}`)
+    const data = await ultima(api.usuarios.listar(`?${params}`))
     setUsuarios(data.results ?? data)
   }, [buscar, verInactivos])
 
@@ -36,13 +39,25 @@ export default function Usuarios() {
   useEffect(() => {
     api.roles.listar().then((d) => setRoles(d.results ?? d)).catch(() => {})
   }, [])
+  // Organización y personal: el usuario se vincula a su trabajador y toma cargo, sigla y área del puesto.
+  const [trabajadores, setTrabajadores] = useState([])
+  const [areasOrg, setAreasOrg] = useState([])
+  const [puestosOrg, setPuestosOrg] = useState([])
+  useEffect(() => {
+    if (!modal) return
+    api.org.trabajadores().then(setTrabajadores).catch(() => {})
+    api.org.areas().then(setAreasOrg).catch(() => {})
+    api.org.puestos().then(setPuestosOrg).catch(() => {})
+  }, [modal])
+  const trabSel = trabajadores.find((t) => t.id === Number(form.trabajador))
+  const trabDisponibles = trabajadores.filter((t) => !t.usuario || (modal && modal !== 'crear' && t.usuario === modal.id))
 
   const abrirCrear = () => { setForm(FORM_VACIO); setFotoPreview(null); setError(''); setModal('crear') }
   const abrirEditar = (u) => {
     setForm({
       username: u.username, first_name: u.first_name, last_name: u.last_name,
-      email: u.email, area: u.area, laboratorio: u.laboratorio, cargo: u.cargo,
-      telefono: u.telefono, roles: (u.roles || []).map((r) => r.id), foto: null,
+      email: u.email, area: u.area, laboratorio: u.laboratorio, cargo: u.cargo, sigla_cargo: u.sigla_cargo || '',
+      telefono: u.telefono, roles: (u.roles || []).map((r) => r.id), foto: null, trabajador: u.trabajador_info?.id || '',
     })
     setFotoPreview(u.foto_url || null)
     setError('')
@@ -54,10 +69,11 @@ export default function Usuarios() {
     setError('')
     try {
       if (modal === 'crear') {
-        const creado = await api.usuarios.crear(form)
+        const creado = await api.usuarios.crear({ ...form, trabajador: form.trabajador || null })
         if (creado.password_temporal) setPasswordTemporal({ usuario: creado.username, clave: creado.password_temporal })
       } else {
-        const { roles: rolesIds, username, foto, ...datos } = form
+        const { roles: rolesIds, username, foto, ...resto } = form
+        const datos = { ...resto, trabajador: resto.trabajador || null }
         if (foto) {
           const fd = new FormData()
           Object.entries(datos).forEach(([k, v]) => fd.append(k, v ?? ''))
@@ -106,7 +122,7 @@ export default function Usuarios() {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-bold">Usuarios</h1>
+        <TituloModulo seccion="Administración" titulo="Usuarios" descripcion="Cuentas de acceso al sistema, sus roles y su vínculo con el personal." />
         {tienePermiso('usuarios', 'crear') && (
           <button onClick={abrirCrear} className="btn-primary">
             <Plus className="h-4 w-4" /> Nuevo usuario
@@ -138,15 +154,15 @@ export default function Usuarios() {
       {error && !modal && <p className="rounded-lg bg-red-500/10 px-3 py-2 text-xs text-red-500">{error}</p>}
 
       <div className="card-esynapse overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="tabla-sig w-full text-sm">
           <thead>
-            <tr className="border-b border-slate-200 text-left text-xs uppercase tracking-wide text-slate-500 dark:border-slate-800 dark:text-slate-400">
+            <tr className="border-b border-slate-200 text-slate-500 dark:border-slate-800 dark:text-slate-400">
               <th className="px-4 py-3">Usuario</th>
               <th className="px-4 py-3">Nombre</th>
               <th className="px-4 py-3">Área / Lab</th>
               <th className="px-4 py-3">Cargo</th>
               <th className="px-4 py-3">Roles</th>
-              <th className="px-4 py-3">Estado</th>
+              <th className="px-4 py-3 text-center">Estado</th>
               <th className="px-4 py-3 text-right">Acciones</th>
             </tr>
           </thead>
@@ -167,19 +183,19 @@ export default function Usuarios() {
                 <td className="px-4 py-3">
                   <div className="flex flex-wrap gap-1">
                     {(u.roles || []).map((r) => (
-                      <span key={r.id} className="rounded bg-esynapse-600/15 px-1.5 py-0.5 text-[10px] font-medium text-esynapse-600 dark:text-esynapse-300">
+                      <span key={r.id} className="rounded bg-esynapse-600/15 px-1.5 py-0.5 text-[11px] font-medium text-esynapse-600 dark:text-esynapse-300">
                         {r.nombre}
                       </span>
                     ))}
                     {u.is_superuser && (
-                      <span className="rounded bg-amber-500/15 px-1.5 py-0.5 text-[10px] font-medium text-amber-600 dark:text-amber-400">
+                      <span className="rounded bg-amber-500/15 px-1.5 py-0.5 text-[11px] font-medium text-amber-600 dark:text-amber-400">
                         Superusuario
                       </span>
                     )}
                   </div>
                 </td>
-                <td className="px-4 py-3">
-                  <span className={`rounded px-1.5 py-0.5 text-[10px] font-medium ${
+                <td className="px-4 py-3 text-center">
+                  <span className={`whitespace-nowrap rounded px-1.5 py-0.5 text-[11px] font-medium ${
                     u.is_active
                       ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'
                       : 'bg-red-500/15 text-red-500'
@@ -187,7 +203,7 @@ export default function Usuarios() {
                     {u.is_active ? 'Activo' : 'Inactivo'}
                   </span>
                 </td>
-                <td className="px-4 py-3">
+                <td className="px-4 py-3 text-right">
                   <div className="flex justify-end gap-1">
                     {tienePermiso('usuarios', 'editar') && (
                       <button onClick={() => abrirEditar(u)} title="Editar"
@@ -230,9 +246,42 @@ export default function Usuarios() {
             {campo('Email', 'email', { type: 'email', required: true })}
             {campo('Nombres', 'first_name')}
             {campo('Apellidos', 'last_name')}
-            <SelectConCrear tipo="area" label="Área" value={form.area} onChange={(v) => setForm({ ...form, area: v })} required />
-            <SelectConCrear tipo="laboratorio" label="Laboratorio" value={form.laboratorio} onChange={(v) => setForm({ ...form, laboratorio: v })} />
-            {campo('Cargo', 'cargo', { required: true })}
+            <div className="col-span-2">
+              <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">Trabajador (Organización y personal)</label>
+              <select className="input-esynapse" value={String(form.trabajador || '')} onChange={(e) => setForm({ ...form, trabajador: e.target.value ? Number(e.target.value) : '' })}>
+                <option value="">— Sin trabajador (cuenta externa o de sistema) —</option>
+                {trabDisponibles.map((t) => <option key={t.id} value={t.id}>{t.nombre_completo} · {t.puesto_nombre}</option>)}
+              </select>
+            </div>
+            {trabSel ? (
+              <p className="col-span-2 rounded bg-esynapse-600/10 px-3 py-2 text-xs text-slate-600 dark:text-slate-300">
+                Cargo y firma: <strong>{trabSel.puesto_nombre}</strong>{trabSel.puesto_sigla ? ` (${trabSel.puesto_sigla})` : ''} · Área: <strong>{trabSel.area_nombre || '—'}</strong>. Se toman del puesto; para cambiarlos, edite el trabajador o el puesto en Organización y personal.
+              </p>
+            ) : (
+              <>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">Área</label>
+                  <select className="input-esynapse" required value={form.area} onChange={(e) => setForm({ ...form, area: e.target.value })}>
+                    <option value="">— Selecciona —</option>
+                    {form.area && !areasOrg.some((a) => a.nombre === form.area) && <option value={form.area}>{form.area}</option>}
+                    {areasOrg.filter((a) => a.tipo !== 'laboratorio').map((a) => <option key={a.id} value={a.nombre}>{a.nombre}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">Laboratorio</label>
+                  <select className="input-esynapse" value={form.laboratorio} onChange={(e) => setForm({ ...form, laboratorio: e.target.value })}>
+                    <option value="">—</option>
+                    {form.laboratorio && !areasOrg.some((a) => a.nombre === form.laboratorio) && <option value={form.laboratorio}>{form.laboratorio}</option>}
+                    {areasOrg.filter((a) => a.tipo === 'laboratorio').map((a) => <option key={a.id} value={a.nombre}>{a.nombre}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">Cargo</label>
+                  <CampoSugerencias value={form.cargo} opciones={puestosOrg.map((p) => p.nombre)} onChange={(v) => { const p = puestosOrg.find((x) => x.nombre === v); setForm({ ...form, cargo: v, sigla_cargo: p?.sigla || form.sigla_cargo }) }} />
+                </div>
+                {campo('Sigla del cargo (firma de formatos, ej. ASIG)', 'sigla_cargo', { maxLength: 12 })}
+              </>
+            )}
             {campo('Teléfono', 'telefono')}
           </div>
           {modal !== 'crear' && (

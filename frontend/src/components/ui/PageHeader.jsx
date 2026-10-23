@@ -1,17 +1,11 @@
-// Encabezado de página consistente: ícono + título + descripción + acciones.
-export default function PageHeader({ icon: Icon, title, subtitle, actions, className = '' }) {
+// Encabezado de página con el estilo del título estándar de módulo (ADR-0007):
+// título, descripción y acciones. El ícono ya no se muestra (se conserva el parámetro).
+export default function PageHeader({ icon, title, subtitle, actions, className = '' }) {  // eslint-disable-line no-unused-vars
   return (
-    <div className={`flex flex-wrap items-start justify-between gap-3 ${className}`}>
-      <div className="flex items-start gap-3">
-        {Icon && (
-          <span className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-esynapse-600/12 text-esynapse-600 dark:text-esynapse-300">
-            <Icon className="h-5 w-5" />
-          </span>
-        )}
-        <div>
-          <h1 className="page-title">{title}</h1>
-          {subtitle && <p className="mt-0.5 text-sm muted">{subtitle}</p>}
-        </div>
+    <div className={`flex flex-wrap items-end justify-between gap-4 ${className}`}>
+      <div className="min-w-0">
+        <h1 className="text-[26px] font-semibold leading-tight tracking-tight text-slate-900 dark:text-white">{title}</h1>
+        {subtitle && <p className="mt-1 max-w-2xl text-sm text-slate-500 dark:text-slate-400">{subtitle}</p>}
       </div>
       {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
     </div>

@@ -11,7 +11,7 @@ MODULOS = [
     ('riesgos', 'Riesgos y Oportunidades'),
     ('indicadores', 'Indicadores y Dashboards BI'),
     ('revision_direccion', 'Revisión por la Dirección'),
-    # Nivel 2 — Bloque A: SGI Core
+    # Nivel 2 — Bloque A: SIG Core
     ('documentos', 'Gestión Documental'),
     ('procesos', 'Gestión de Procesos'),
     ('hallazgos', 'Hallazgos'),
@@ -48,6 +48,7 @@ MODULOS = [
     ('ti', 'Tecnologías de la Información'),
     # Capa 0 — Administración del sistema
     ('usuarios', 'Gestión de Usuarios'),
+    ('organizacion', 'Organización y Personal'),
     ('configuracion', 'Configuración del Sistema'),
 ]
 
@@ -86,4 +87,4 @@ DEPENDENCIAS_MODULOS = {
 }
 
 # Módulos núcleo: siempre habilitados, no se venden por separado.
-MODULOS_NUCLEO = ['usuarios', 'configuracion']
+MODULOS_NUCLEO = ['usuarios', 'organizacion', 'configuracion']

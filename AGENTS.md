@@ -100,7 +100,7 @@ Usuarios · Roles · Permisos · Log de auditoría · Firma digital · Configura
 
 ### NIVEL 2 — Operativos
 
-**Bloque A — SGI Core:**
+**Bloque A — SIG Core:**
 | Módulo | Para qué |
 |--------|----------|
 | M6 Documentos | Control de versiones, aprobación, firma digital |
@@ -193,7 +193,7 @@ Nadie firma con credenciales de otro. Cada firma queda registrada con usuario, t
 | Fase | Contenido | Tiempo |
 |------|-----------|--------|
 | 0 | Cimientos: auth, roles, permisos, dashboard | Mes 1 |
-| 1 | SGI Core: M6, M8, M9, M10 | Mes 2-3 |
+| 1 | SIG Core: M6, M8, M9, M10 | Mes 2-3 |
 | 2 | Laboratorio 17025: M12-M16 | Mes 4-5 |
 | 3 | Cadena operativa: M24, Logística, M25, M30 | Mes 6-8 |
 | 4 | Complementarios: M3, M7, M11, M17, M18, M22, M23 | Mes 9-11 |

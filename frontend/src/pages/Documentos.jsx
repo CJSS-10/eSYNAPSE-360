@@ -1,13 +1,16 @@
 import { useCallback, useEffect, useState } from 'react'
+import { useUltimaRespuesta } from '../lib/useUltimaRespuesta.js'
 import {
   AlertTriangle, Archive, CheckCircle2, Download, Eye, FileText, FileUp, FolderOpen, Globe, Lock, Pencil, Plus,
   Save, Search, Send, ShieldQuestion, XCircle,
 } from 'lucide-react'
 import Modal from '../components/Modal.jsx'
+import SelectorProceso from '../components/SelectorProceso.jsx'
 import { api } from '../lib/api.js'
 import { useAuth } from '../context/AuthContext.jsx'
 import { useConfig } from '../context/ConfigContext.jsx'
-import { fechaHora } from '../lib/fecha.js'
+import { fecha, fechaHora } from '../lib/fecha.js'
+import TituloModulo from '../components/ui/TituloModulo.jsx'
 
 const TIPOS = [
   ['politica', 'Política'], ['manual', 'Manual'], ['reglamento', 'Reglamento'],
@@ -93,13 +96,14 @@ export default function Documentos() {
   const [retLibreFicha, setRetLibreFicha] = useState(false)
   const [guardandoFicha, setGuardandoFicha] = useState(false)
 
+  const ultima = useUltimaRespuesta()
   const cargar = useCallback(async () => {
     const params = new URLSearchParams()
     if (buscar) params.set('buscar', buscar)
     if (tipo) params.set('tipo', tipo)
     if (verInactivos) params.set('incluir_inactivos', '1')
     if (verArchivados) params.set('archivados', '1')
-    const data = await api.documentos.listar(`?${params}`)
+    const data = await ultima(api.documentos.listar(`?${params}`))
     setDocs(data.results ?? data)
   }, [buscar, tipo, verInactivos, verArchivados])
 
@@ -251,7 +255,7 @@ export default function Documentos() {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-bold">Gestión Documental</h1>
+        <TituloModulo seccion="Sistema de gestión" titulo="Documentos" descripcion="Documentos y formatos del SIG con su versión vigente, su flujo de aprobación y su próxima revisión." />
         {tienePermiso('documentos', 'crear') && (
           <button onClick={() => { setForm(FORM_VACIO); setArchivo(null); setError(''); setRetencionLibre(false); setModalCrear(true) }} className="btn-primary">
             <Plus className="h-4 w-4" /> Nuevo documento
@@ -312,21 +316,21 @@ export default function Documentos() {
       </div>
 
       <div className="card-esynapse overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="tabla-sig w-full text-sm">
           <thead>
-            <tr className="border-b border-slate-200 text-center text-xs uppercase tracking-wide text-slate-500 dark:border-slate-800 dark:text-slate-400">
+            <tr className="border-b border-slate-200 text-slate-500 dark:border-slate-800 dark:text-slate-400">
               <th className="px-4 py-3">Código</th>
               <th className="px-4 py-3">Título</th>
-              <th className="px-4 py-3">Tipo</th>
+              <th className="px-4 py-3 text-center">Tipo</th>
               <th className="px-4 py-3">Proceso</th>
-              <th className="px-4 py-3">Versión</th>
-              <th className="px-4 py-3">Normas</th>
-              <th className="px-4 py-3">Soporte</th>
-              <th className="px-4 py-3">Estado</th>
-              <th className="px-4 py-3">Aprobado</th>
-              <th className="px-4 py-3">Próx. revisión</th>
-              <th className="px-4 py-3">Retención</th>
-              <th className="px-4 py-3">Ver</th>
+              <th className="px-4 py-3 text-center">Versión</th>
+              <th className="px-4 py-3 text-center">Normas</th>
+              <th className="px-4 py-3 text-center">Soporte</th>
+              <th className="px-4 py-3 text-center">Estado</th>
+              <th className="px-4 py-3 text-right">Aprobado</th>
+              <th className="px-4 py-3 text-right">Próx. revisión</th>
+              <th className="px-4 py-3 text-right">Retención</th>
+              <th className="px-4 py-3 text-center">Ver</th>
             </tr>
           </thead>
           <tbody>
@@ -344,47 +348,47 @@ export default function Documentos() {
                   </span>
                 </td>
                 <td className="px-4 py-3">{d.titulo}</td>
-                <td className="px-4 py-3 text-slate-500 dark:text-slate-400">{d.tipo_display}</td>
+                <td className="px-4 py-3 text-slate-500 dark:text-slate-400 text-center">{d.tipo_display}</td>
                 <td className="px-4 py-3 text-slate-500 dark:text-slate-400">
                   {d.origen === 'externo' ? d.entidad_emisora : (d.proceso || '—')}
                 </td>
-                <td className="px-4 py-3">{d.version_actual ? `Ver. ${d.version_actual}` : '—'}</td>
-                <td className="px-4 py-3">
+                <td className="px-4 py-3 text-center">{d.version_actual ? `Ver. ${d.version_actual}` : '—'}</td>
+                <td className="px-4 py-3 text-center">
                   <div className="mx-auto flex max-w-[180px] flex-wrap justify-center gap-1">
                     {(d.normas_display || []).map((n) => (
-                      <span key={n} className={`rounded px-1.5 py-0.5 text-[10px] font-medium ${COLOR_NORMA[n] || 'bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-300'}`}>
+                      <span key={n} className={`whitespace-nowrap rounded px-1.5 py-0.5 text-[11px] font-medium ${COLOR_NORMA[n] || 'bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-300'}`}>
                         {n}
                       </span>
                     ))}
                     {(!d.normas_display || d.normas_display.length === 0) && <span className="text-xs text-slate-400">—</span>}
                   </div>
                 </td>
-                <td className="px-4 py-3 text-xs text-slate-500 dark:text-slate-400">{d.soporte_display}</td>
-                <td className="px-4 py-3">
-                  <span className={`rounded px-1.5 py-0.5 text-[10px] font-medium ${COLOR_ESTADO[d.estado_actual] || 'bg-slate-500/15'}`}>
+                <td className="px-4 py-3 text-xs text-slate-500 dark:text-slate-400 text-center">{d.soporte_display}</td>
+                <td className="px-4 py-3 text-center">
+                  <span className={`whitespace-nowrap rounded px-1.5 py-0.5 text-[11px] font-medium ${COLOR_ESTADO[d.estado_actual] || 'bg-slate-500/15'}`}>
                     {d.estado_actual}
                   </span>
                   {d.proceso_paralelo && (
-                    <span className="ml-1 rounded bg-amber-500/15 px-1.5 py-0.5 text-[10px] font-medium text-amber-600 dark:text-amber-400"
+                    <span className="ml-1 rounded bg-amber-500/15 px-1.5 py-0.5 text-[11px] font-medium text-amber-600 dark:text-amber-400"
                       title={`Nueva versión en proceso: Ver. ${d.proceso_paralelo.version}`}>
                       → Ver. {d.proceso_paralelo.version} {d.proceso_paralelo.estado.toLowerCase()}
                     </span>
                   )}
                   {d.archivado && (
-                    <span className="ml-1 rounded bg-slate-500/20 px-1.5 py-0.5 text-[10px] font-medium text-slate-500 dark:text-slate-400">
+                    <span className="ml-1 rounded bg-slate-500/20 px-1.5 py-0.5 text-[11px] font-medium text-slate-500 dark:text-slate-400">
                       Archivado
                     </span>
                   )}
                   {!d.is_active && (
-                    <span className="ml-1 rounded bg-red-500/15 px-1.5 py-0.5 text-[10px] font-medium text-red-500">
+                    <span className="ml-1 rounded bg-red-500/15 px-1.5 py-0.5 text-[11px] font-medium text-red-500">
                       Inactivo
                     </span>
                   )}
                 </td>
-                <td className="px-4 py-3 text-xs">{d.fecha_aprobacion || '—'}</td>
-                <td className="px-4 py-3 text-xs">{d.fecha_proxima_revision || '—'}</td>
-                <td className="px-4 py-3 text-xs text-slate-500 dark:text-slate-400">{retencionTexto(d.anos_retencion)}</td>
-                <td className="px-4 py-3">
+                <td className="px-4 py-3 text-xs text-right">{d.fecha_aprobacion || '—'}</td>
+                <td className="px-4 py-3 text-xs text-right">{d.fecha_proxima_revision || '—'}</td>
+                <td className="px-4 py-3 text-xs text-slate-500 dark:text-slate-400 text-right">{retencionTexto(d.anos_retencion)}</td>
+                <td className="px-4 py-3 text-center">
                   <button onClick={(e) => { e.stopPropagation(); abrirFicha(d) }} title="Ver documento"
                     className="mx-auto flex h-7 w-7 items-center justify-center rounded text-esynapse-600 hover:bg-esynapse-600/10 dark:text-esynapse-300">
                     <Eye className="h-4 w-4" />
@@ -460,7 +464,10 @@ export default function Documentos() {
             </div>
           ) : (
             <>
-              {campo('Proceso vinculado', 'proceso', { placeholder: 'Ej: Laboratorio Presión' })}
+              <div>
+                <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">Proceso vinculado</label>
+                <SelectorProceso value={form.proceso} onChange={(v) => setForm({ ...form, proceso: v })} />
+              </div>
               {campo('Objetivo', 'objetivo')}
               {campo('Alcance', 'alcance')}
             </>
@@ -555,11 +562,11 @@ export default function Documentos() {
 
       {/* Modal ficha — se abre con el ojo. Solo lectura, con opción de editar (previa contraseña). */}
       <Modal abierto={Boolean(ficha)} titulo={ficha ? `${ficha.codigo} — ${ficha.titulo}` : ''}
-        onCerrar={cerrarFicha} ancho="max-w-3xl">
+        onCerrar={cerrarFicha} panel ancho="max-w-3xl">
         {ficha && (
           <div className="space-y-4">
             <div className="mb-1 flex items-center justify-between">
-              <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Datos del documento</h3>
+              <h3 className="text-sm font-semibold text-slate-500 dark:text-slate-400">Datos del documento</h3>
               {!editFicha ? (
                 <div className="flex items-center gap-3">
                   <span className="flex items-center gap-1 text-xs font-medium text-amber-600 dark:text-amber-400"><Lock className="h-3.5 w-3.5" /> Solo lectura</span>
@@ -581,7 +588,7 @@ export default function Documentos() {
                   <Dato label="Código" valor={ficha.codigo} mono />
                   <CampoEdit label="Nombre" valor={fichaForm.titulo} onChange={(v) => setFichaForm({ ...fichaForm, titulo: v })} />
                   <div>
-                    <label className="mb-0.5 block text-[11px] font-medium uppercase tracking-wide text-slate-400">Tipo</label>
+                    <label className="mb-0.5 block text-xs font-medium text-slate-500 dark:text-slate-400">Tipo</label>
                     <select className="input-esynapse" value={fichaForm.tipo} onChange={(e) => setFichaForm({ ...fichaForm, tipo: e.target.value })}>
                       {TIPOS.map(([v, n]) => <option key={v} value={v}>{n}</option>)}
                     </select>
@@ -589,12 +596,17 @@ export default function Documentos() {
                   <Dato label="Origen" valor={ficha.origen_display} />
                   {ficha.origen === 'externo'
                     ? <CampoEdit label="Entidad emisora" valor={fichaForm.entidad_emisora} onChange={(v) => setFichaForm({ ...fichaForm, entidad_emisora: v })} />
-                    : <CampoEdit label="Proceso" valor={fichaForm.proceso} onChange={(v) => setFichaForm({ ...fichaForm, proceso: v })} />}
+                    : (
+                      <div>
+                        <label className="mb-0.5 block text-xs font-medium text-slate-500 dark:text-slate-400">Proceso</label>
+                        <SelectorProceso value={fichaForm.proceso} onChange={(v) => setFichaForm({ ...fichaForm, proceso: v })} />
+                      </div>
+                    )}
                   <Dato label="Versión" valor={ficha.version_actual ? `Ver. ${ficha.version_actual}` : '—'} />
                   <Dato label="Situación" valor={ficha.estado_actual} />
                   {ficha.origen === 'externo' ? (
                     <div>
-                      <label className="mb-0.5 block text-[11px] font-medium uppercase tracking-wide text-slate-400">Fecha de aprobación (del emisor)</label>
+                      <label className="mb-0.5 block text-xs font-medium text-slate-500 dark:text-slate-400">Fecha de aprobación (del emisor)</label>
                       <input type="date" className="input-esynapse" value={fichaForm.fecha_aprobacion}
                         onChange={(e) => setFichaForm({ ...fichaForm, fecha_aprobacion: e.target.value })} />
                     </div>
@@ -602,7 +614,7 @@ export default function Documentos() {
                     <Dato label="Fecha de aprobación" valor={ficha.fecha_aprobacion || '—'} />
                   )}
                   <div>
-                    <label className="mb-0.5 block text-[11px] font-medium uppercase tracking-wide text-slate-400">Tiempo de retención</label>
+                    <label className="mb-0.5 block text-xs font-medium text-slate-500 dark:text-slate-400">Tiempo de retención</label>
                     <select className="input-esynapse"
                       value={[0, 1, 2, 3, 5, 7, 10].includes(fichaForm.anos_retencion) && !retLibreFicha ? fichaForm.anos_retencion : 'otro'}
                       onChange={(e) => {
@@ -625,7 +637,7 @@ export default function Documentos() {
                     )}
                   </div>
                   <div>
-                    <label className="mb-0.5 block text-[11px] font-medium uppercase tracking-wide text-slate-400">Soporte</label>
+                    <label className="mb-0.5 block text-xs font-medium text-slate-500 dark:text-slate-400">Soporte</label>
                     <select className="input-esynapse" value={fichaForm.soporte} onChange={(e) => setFichaForm({ ...fichaForm, soporte: e.target.value })}>
                       <option value="digital">Digital</option>
                       <option value="fisico">Físico</option>
@@ -634,7 +646,7 @@ export default function Documentos() {
                   <Dato label="Estado" valor={ficha.is_active ? 'Activo' : 'Inactivo'} />
                   {ficha.origen === 'externo' && (
                     <div>
-                      <label className="mb-0.5 block text-[11px] font-medium uppercase tracking-wide text-slate-400">Verificación cada</label>
+                      <label className="mb-0.5 block text-xs font-medium text-slate-500 dark:text-slate-400">Verificación cada</label>
                       <select className="input-esynapse" value={fichaForm.dias_verificacion}
                         onChange={(e) => setFichaForm({ ...fichaForm, dias_verificacion: Number(e.target.value) })}>
                         <option value={7}>7 días</option>
@@ -648,7 +660,7 @@ export default function Documentos() {
 
                 {['formato', 'registro', 'pets', 'instructivo'].includes(fichaForm.tipo) && (
                   <div>
-                    <label className="mb-0.5 block text-[11px] font-medium uppercase tracking-wide text-slate-400">Documento padre (al que pertenece)</label>
+                    <label className="mb-0.5 block text-xs font-medium text-slate-500 dark:text-slate-400">Documento padre (al que pertenece)</label>
                     <select className="input-esynapse" value={fichaForm.padre} onChange={(e) => setFichaForm({ ...fichaForm, padre: e.target.value })}>
                       <option value="">— Ninguno —</option>
                       {docs.filter((d) => d.id !== ficha.id).map((d) => <option key={d.id} value={d.id}>{d.codigo} — {d.titulo}</option>)}
@@ -657,7 +669,7 @@ export default function Documentos() {
                 )}
 
                 <div>
-                  <label className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-slate-400">Normas aplicables</label>
+                  <label className="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Normas aplicables</label>
                   <div className="flex flex-wrap gap-2">
                     {NORMAS.map(([clave, nombre]) => (
                       <label key={clave} className={`flex cursor-pointer items-center rounded-lg border px-2.5 py-1.5 text-xs transition ${
@@ -703,10 +715,10 @@ export default function Documentos() {
                   {ficha.origen === 'externo' && <Dato label="Verificación cada" valor={`${ficha.dias_verificacion} días`} />}
                 </div>
                 <div>
-                  <p className="mb-1 text-[11px] font-medium uppercase tracking-wide text-slate-400">Normas aplicables</p>
+                  <p className="mb-1 text-xs font-medium text-slate-500 dark:text-slate-400">Normas aplicables</p>
                   <div className="flex flex-wrap gap-1">
                     {(ficha.normas_display || []).map((n) => (
-                      <span key={n} className={`rounded px-1.5 py-0.5 text-[10px] font-medium ${COLOR_NORMA[n] || 'bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-300'}`}>{n}</span>
+                      <span key={n} className={`whitespace-nowrap rounded px-1.5 py-0.5 text-[11px] font-medium ${COLOR_NORMA[n] || 'bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-300'}`}>{n}</span>
                     ))}
                     {(!ficha.normas_display || ficha.normas_display.length === 0) && <span className="text-xs text-slate-400">—</span>}
                   </div>
@@ -724,7 +736,7 @@ export default function Documentos() {
 
       {/* Modal detalle */}
       <Modal abierto={Boolean(detalle)} titulo={detalle ? `${detalle.codigo} — ${detalle.titulo}` : ''}
-        onCerrar={() => setDetalle(null)} ancho="max-w-2xl">
+        onCerrar={() => setDetalle(null)} panel ancho="max-w-2xl">
         {detalle && (
           <div className="space-y-4 text-sm">
             <div className="grid grid-cols-2 gap-2 text-xs text-slate-500 dark:text-slate-400">
@@ -737,7 +749,7 @@ export default function Documentos() {
               {externo && (
                 <p className="col-span-2">
                   <strong className="text-slate-700 dark:text-slate-200">Última verificación:</strong>{' '}
-                  {detalle.ultima_verificacion ? new Date(detalle.ultima_verificacion).toLocaleString('es-PE') : 'Nunca'}
+                  {detalle.ultima_verificacion ? fechaHora(detalle.ultima_verificacion) : 'Nunca'}
                   {' · '}cada {detalle.dias_verificacion} días
                 </p>
               )}
@@ -775,11 +787,7 @@ export default function Documentos() {
                         }`}>
                           {completado ? '✓' : i + 1}
                         </div>
-                        <span className={`text-center text-[10px] leading-tight ${
-                          esActual ? 'font-semibold text-esynapse-600 dark:text-esynapse-300'
-                          : completado ? 'text-emerald-600 dark:text-emerald-400'
-                          : 'text-slate-400 dark:text-slate-500'
-                        }`}>
+                        <span className={`text-center text-[11px] leading-tight ${ esActual ? 'font-semibold text-esynapse-600 dark:text-esynapse-300' : completado ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400 dark:text-slate-500' }`}>
                           {esActual ? `▸ ${nombre}` : nombre}
                         </span>
                       </div>
@@ -797,8 +805,14 @@ export default function Documentos() {
               </p>
             )}
 
+            {detalle.archivado && (
+              <p className="rounded-lg bg-slate-500/10 px-3 py-2 text-xs text-slate-500 dark:text-slate-400">
+                Documento archivado: se consulta, pero no se firma, versiona ni modifica. Desarchívelo para volver a trabajar con él.
+              </p>
+            )}
+
             {/* Flujo interno */}
-            {!externo && (
+            {!externo && !detalle.archivado && (
               <>
                 <div className="flex flex-wrap gap-2">
                   {obsPendientes.length > 0 && (
@@ -808,7 +822,7 @@ export default function Documentos() {
                       </p>
                       {obsPendientes.map((o) => (
                         <div key={o.id} className="text-xs text-slate-600 dark:text-slate-300">
-                          <span className="font-medium">{o.etapa_display}</span> por {o.autor} ({new Date(o.created_at).toLocaleDateString('es-PE')}): {o.comentarios}
+                          <span className="font-medium">{o.etapa_display}</span> por {o.autor} ({fecha(o.created_at)}): {o.comentarios}
                           {o.archivo_url && (
                             <a href={o.archivo_url} target="_blank" rel="noreferrer"
                               className="ml-2 inline-flex items-center gap-1 rounded bg-amber-500/20 px-2 py-0.5 font-medium text-amber-700 hover:bg-amber-500/30 dark:text-amber-300">
@@ -826,7 +840,7 @@ export default function Documentos() {
                       </p>
                       {obsResueltas.map((o) => (
                         <div key={o.id} className="text-xs text-slate-500 dark:text-slate-400">
-                          <span className="font-medium">{o.etapa_display}</span> por {o.autor} ({new Date(o.created_at).toLocaleDateString('es-PE')}): {o.comentarios}
+                          <span className="font-medium">{o.etapa_display}</span> por {o.autor} ({fecha(o.created_at)}): {o.comentarios}
                           {o.archivo_url && (
                             <a href={o.archivo_url} target="_blank" rel="noreferrer"
                               className="ml-2 inline-flex items-center gap-1 rounded bg-emerald-500/15 px-2 py-0.5 font-medium text-emerald-700 hover:bg-emerald-500/25 dark:text-emerald-300">
@@ -932,7 +946,7 @@ export default function Documentos() {
                   <div className="max-h-28 space-y-1 overflow-y-auto pt-1">
                     {detalle.verificaciones.map((vf) => (
                       <p key={vf.id} className="text-[11px] text-slate-500 dark:text-slate-400">
-                        {new Date(vf.created_at).toLocaleString('es-PE')} — {vf.vigente ? '✓ vigente' : '✗ desactualizado'}
+                        {fechaHora(vf.created_at)} — {vf.vigente ? '✓ vigente' : '✗ desactualizado'}
                         {vf.verificado_por ? ` — ${vf.verificado_por}` : ''}{vf.observaciones ? ` — ${vf.observaciones}` : ''}
                       </p>
                     ))}
@@ -942,7 +956,7 @@ export default function Documentos() {
             )}
 
             {/* Nueva versión / edición */}
-            {((!externo && !vp && vv) || (externo && vv)) && tienePermiso('documentos', 'crear') && (
+            {!detalle.archivado && ((!externo && !vp && vv) || (externo && vv)) && tienePermiso('documentos', 'crear') && (
               <div className="space-y-2 rounded-lg border border-dashed border-slate-300 p-3 dark:border-slate-700">
                 <p className="flex items-center gap-2 text-xs font-medium">
                   <FileUp className="h-4 w-4 text-esynapse-500" />
@@ -956,7 +970,7 @@ export default function Documentos() {
                   <input className="input-esynapse" placeholder="Edición del emisor (ej: 2024)" value={edicionNV}
                     onChange={(e) => setEdicionNV(e.target.value)} />
                 )}
-                <input className="input-esynapse" placeholder="Resumen de cambios" value={resumenNV} onChange={(e) => setResumenNV(e.target.value)} />
+                <input className="input-esynapse" placeholder="Resumen de cambios" autoComplete="off" name="resumen_cambios_version" value={resumenNV} onChange={(e) => setResumenNV(e.target.value)} />
                 <button disabled={!archivoNV || (externo && !edicionNV)} onClick={() => accion(subirNuevaVersion)} className="btn-primary !py-1.5 text-xs">
                   {externo ? 'Registrar edición' : 'Crear versión'}
                 </button>
@@ -1004,7 +1018,7 @@ export default function Documentos() {
 
             {/* Historial de versiones */}
             <div>
-              <p className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+              <p className="mb-2 flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400">
                 <FileText className="h-4 w-4" /> Historial de versiones
               </p>
               <div className="space-y-2">
@@ -1013,7 +1027,7 @@ export default function Documentos() {
                     <div className="text-xs">
                       <p className="font-medium">
                         Ver. {v.version}{' '}
-                        <span className={`ml-1 rounded px-1.5 py-0.5 text-[10px] font-medium ${COLOR_ESTADO[v.estado_display] || 'bg-slate-500/15'}`}>
+                        <span className={`ml-1 whitespace-nowrap rounded px-1.5 py-0.5 text-[11px] font-medium ${COLOR_ESTADO[v.estado_display] || 'bg-slate-500/15'}`}>
                           {v.estado_display}
                         </span>
                       </p>
@@ -1028,8 +1042,8 @@ export default function Documentos() {
                         <div className="mt-1 space-y-1">
                           {v.observaciones.map((o) => (
                             <p key={o.id} className={o.resuelta ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'}>
-                              ↩ {o.etapa_display} — {o.accion_display} por {o.autor} ({new Date(o.created_at).toLocaleDateString('es-PE')}): {o.comentarios}
-                              {' '}<span className={`rounded px-1 py-0.5 text-[9px] font-medium ${o.resuelta ? 'bg-emerald-500/15' : 'bg-amber-500/15'}`}>{o.resuelta ? '✓ resuelta' : '⏳ pendiente'}</span>
+                              ↩ {o.etapa_display} — {o.accion_display} por {o.autor} ({fecha(o.created_at)}): {o.comentarios}
+                              {' '}<span className={`rounded px-1 py-0.5 text-[11px] font-medium ${o.resuelta ? 'bg-emerald-500/15' : 'bg-amber-500/15'}`}>{o.resuelta ? '✓ resuelta' : '⏳ pendiente'}</span>
                               {o.archivo_url && (
                                 <a href={o.archivo_url} target="_blank" rel="noreferrer"
                                   className="ml-1 underline hover:text-amber-500">[archivo anotado]</a>
@@ -1045,11 +1059,11 @@ export default function Documentos() {
                       )}
                       {(v.historial_archivos || []).length > 0 && (
                         <div className="mt-1 rounded-lg bg-slate-100 p-2 dark:bg-slate-800/60">
-                          <p className="mb-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-400">Bitácora de archivos</p>
+                          <p className="mb-0.5 text-xs font-semibold text-slate-500 dark:text-slate-400">Bitácora de archivos</p>
                           {v.historial_archivos.map((a) => (
                             <p key={a.id} className="text-[11px] text-slate-500 dark:text-slate-400">
                               <FileText className="mr-1 inline h-3 w-3" />{a.origen_display}
-                              {a.autor ? ` · ${a.autor}` : ''} ({new Date(a.created_at).toLocaleDateString('es-PE')})
+                              {a.autor ? ` · ${a.autor}` : ''} ({fecha(a.created_at)})
                               {a.archivo_url && (
                                 <a href={a.archivo_url} target="_blank" rel="noreferrer"
                                   className="ml-1 text-esynapse-500 underline hover:text-esynapse-400">descargar</a>
@@ -1059,7 +1073,7 @@ export default function Documentos() {
                         </div>
                       )}
                       {v.hash_publicado && (
-                        <p className="font-mono text-[10px] text-slate-400" title={v.hash_publicado}>
+                        <p className="font-mono text-[11px] text-slate-500 dark:text-slate-400" title={v.hash_publicado}>
                           SHA-256: {v.hash_publicado.slice(0, 16)}…
                         </p>
                       )}
@@ -1140,7 +1154,7 @@ export default function Documentos() {
 function Dato({ label, valor, mono = false }) {
   return (
     <div>
-      <p className="mb-0.5 text-[11px] font-medium uppercase tracking-wide text-slate-400">{label}</p>
+      <p className="mb-0.5 text-xs font-medium text-slate-500 dark:text-slate-400">{label}</p>
       <p className={`rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 ${mono ? 'font-mono' : ''}`}>{valor || '—'}</p>
     </div>
   )
@@ -1149,7 +1163,7 @@ function Dato({ label, valor, mono = false }) {
 function CampoEdit({ label, valor, onChange }) {
   return (
     <div>
-      <label className="mb-0.5 block text-[11px] font-medium uppercase tracking-wide text-slate-400">{label}</label>
+      <label className="mb-0.5 block text-xs font-medium text-slate-500 dark:text-slate-400">{label}</label>
       <input className="input-esynapse" value={valor} onChange={(e) => onChange(e.target.value)} />
     </div>
   )

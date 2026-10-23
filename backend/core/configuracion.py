@@ -24,11 +24,29 @@ def _abs(url, request):
     return url
 
 
+def version_sistema():
+    """Versión instalada, leída del archivo VERSION junto a manage.py."""
+    from django.conf import settings
+    try:
+        return (settings.BASE_DIR / 'VERSION').read_text(encoding='utf-8').strip()
+    except OSError:
+        return 'desconocida'
+
+
 def _config_dict(cfg, request):
+    from django.conf import settings
     return {
+        'version': version_sistema(),
+        'modo_pruebas': getattr(settings, 'MODO_PRUEBAS', False),
         'nombre_sistema': cfg.nombre_sistema,
         'nombre_corto': cfg.nombre_corto or cfg.nombre_sistema,
         'subtitulo': cfg.subtitulo,
+        'direccion': cfg.direccion,
+        'responsable_sig': cfg.responsable_sig,
+        'razon_social': cfg.razon_social,
+        'ruc': cfg.ruc,
+        'actividad_economica': cfg.actividad_economica,
+        'aseguradora_sctr': cfg.aseguradora_sctr,
         'logo_url': _abs(cfg.logo.url if cfg.logo else None, request),
         'logo_empresa_url': _abs(cfg.logo_empresa.url if cfg.logo_empresa else None, request),
         'color_primario': cfg.color_primario,
@@ -75,8 +93,10 @@ class ConfigSistemaView(APIView):
                 cfg.logo = request.FILES['logo']
         # Datos de la EMPRESA cliente (subtítulo y su logo): los ajusta el
         # administrador de sistema del cliente; se replican en sus formatos.
-        if 'subtitulo' in request.data:
-            cfg.subtitulo = request.data.get('subtitulo') or ''
+        for campo in ('subtitulo', 'direccion', 'responsable_sig', 'razon_social', 'ruc', 'actividad_economica',
+                      'aseguradora_sctr'):
+            if campo in request.data:
+                setattr(cfg, campo, request.data.get(campo) or '')
         if request.FILES.get('logo_empresa'):
             cfg.logo_empresa = request.FILES['logo_empresa']
         # Formato de Hoja de Vida (Equipos): documento vinculado + siglas de firmas.

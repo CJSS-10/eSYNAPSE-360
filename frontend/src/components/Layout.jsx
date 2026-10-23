@@ -7,6 +7,7 @@ import { useEffect, useRef, useState } from 'react'
 import Sidebar from './Sidebar.jsx'
 import { api } from '../lib/api.js'
 import { useAuth } from '../context/AuthContext.jsx'
+import { useConfig } from '../context/ConfigContext.jsx'
 
 const ICONO_MODULO = {
   'Hallazgos': AlertOctagon, 'Acciones Correctivas': Wrench, 'Documentos': FileText, 'Auditorías': ClipboardList, 'Equipos': Ruler,
@@ -23,6 +24,7 @@ const guardarLeidas = (set) => localStorage.setItem('esynapse_tareas_leidas', JS
 
 export default function Layout() {
   const { usuario, logout } = useAuth()
+  const { config } = useConfig()
   const navigate = useNavigate()
   const location = useLocation()
   const [oscuro, setOscuro] = useState(document.documentElement.classList.contains('dark'))
@@ -34,7 +36,13 @@ export default function Layout() {
   const alternarTema = () => {
     const nuevo = !oscuro
     setOscuro(nuevo)
-    document.documentElement.classList.toggle('dark', nuevo)
+    // Sin transiciones durante el cambio: con tablas grandes, animar el color de cada
+    // celda congelaba la página varios segundos.
+    const raiz = document.documentElement
+    raiz.classList.add('sin-transicion')
+    raiz.classList.toggle('dark', nuevo)
+    void raiz.offsetHeight
+    requestAnimationFrame(() => requestAnimationFrame(() => raiz.classList.remove('sin-transicion')))
     localStorage.setItem('esynapse_tema', nuevo ? 'dark' : 'light')
   }
 
@@ -78,6 +86,12 @@ export default function Layout() {
       <Sidebar />
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="flex h-14 shrink-0 items-center justify-end gap-3 border-b border-slate-200 bg-white px-4 dark:border-slate-800 dark:bg-slate-900">
+          {config.modo_pruebas && (
+            <span className="mr-auto rounded-md border border-amber-500/40 bg-amber-500/15 px-2.5 py-1 text-xs font-bold tracking-wide text-amber-700 dark:text-amber-300"
+              title="Copia de la base: lo que se registre aquí no afecta los datos reales">
+              MODO PRUEBAS · copia de la base
+            </span>
+          )}
           <div className="relative" ref={buzonRef}>
             <button
               onClick={() => { setAbierto(!abierto); if (!abierto) cargarTareas() }}
@@ -87,7 +101,7 @@ export default function Layout() {
             >
               <Bell className="h-4 w-4" />
               {noLeidas.length > 0 && (
-                <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[9px] font-bold text-white">
+                <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[11px] font-bold text-white">
                   {noLeidas.length > 99 ? '99+' : noLeidas.length}
                 </span>
               )}
@@ -98,7 +112,7 @@ export default function Layout() {
                   <p className="text-sm font-semibold">Notificaciones</p>
                   {noLeidas.length > 0 && (
                     <button onClick={marcarTodas} title="Marcar todas como leídas"
-                      className="flex items-center gap-1 text-[10px] font-medium text-esynapse-600 hover:underline dark:text-esynapse-300">
+                      className="flex items-center gap-1 text-[11px] font-medium text-esynapse-600 hover:underline dark:text-esynapse-300">
                       <CheckCheck className="h-3 w-3" /> Marcar todas
                     </button>
                   )}
@@ -116,7 +130,7 @@ export default function Layout() {
                             <span className="min-w-0 flex-1">
                               <span className="block truncate text-xs font-medium">{t.codigo} <span className="font-normal text-slate-400">· {t.estado}</span></span>
                               <span className="block truncate text-[11px] text-slate-500 dark:text-slate-400">{t.titulo}</span>
-                              {t.fecha && <span className="flex items-center gap-1 text-[10px] text-amber-600 dark:text-amber-400"><Calendar className="h-2.5 w-2.5" /> {t.fecha}</span>}
+                              {t.fecha && <span className="flex items-center gap-1 text-[11px] text-amber-600 dark:text-amber-400"><Calendar className="h-2.5 w-2.5" /> {t.fecha}</span>}
                             </span>
                           </button>
                         </li>

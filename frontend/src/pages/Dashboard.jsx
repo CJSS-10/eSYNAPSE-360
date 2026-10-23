@@ -1,183 +1,318 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import {
-  Boxes, CalendarClock, FileWarning, AlertOctagon, ArrowRight, LayoutDashboard, Inbox,
-} from 'lucide-react'
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts'
 import { api } from '../lib/api.js'
 import { useAuth } from '../context/AuthContext.jsx'
-import PageHeader from '../components/ui/PageHeader.jsx'
-import KpiCard from '../components/ui/KpiCard.jsx'
 import { SkeletonText } from '../components/ui/Skeleton.jsx'
+import { NormaBadge, EstadoBadge } from '../components/ui/Badge.jsx'
+import { SEVERIDAD } from '../lib/severidad.js'
 
-const ESTADO_EQUIPO = {
-  operativo: { label: 'Operativo', color: '#1d60f1' },
-  calibrado: { label: 'Calibrado', color: '#10b981' },
-  inoperativo: { label: 'Inoperativo', color: '#f59e0b' },
-  baja: { label: 'De baja', color: '#ef4444' },
+// Tablero del SIG (ADR-0007): vencimientos de todos los módulos en una vista, el estado de cada
+// módulo y las tareas de la persona. Todo sale de los datos del sistema; un módulo sin permiso
+// o sin respuesta simplemente no aparece.
+
+const COLUMNAS = [
+  ['vencido', 'Vencido'], ['d7', 'Próximos 7 días'], ['d30', '8 a 30 días'], ['d60', '31 a 60 días'], ['d90', '61 a 90 días'],
+]
+// Filas de vencimientos: [clave, nombre visible, ruta]
+const FILAS = [
+  ['quejas', 'Quejas', '/quejas'],
+  ['Acciones Correctivas', 'Acciones correctivas', '/acciones-correctivas'],
+  ['riesgos', 'Riesgos y oportunidades', '/riesgos'],
+  ['Equipos', 'Calibración de equipos', '/equipos'],
+  ['Documentos', 'Revisión de documentos', '/documentos'],
+  ['Competencia Técnica', 'Seguimiento de competencia', '/competencia'],
+  ['Auditorías', 'Auditorías programadas', '/auditorias'],
+]
+const PASOS_SAC = [
+  ['registrada', 'Registro', 'bg-slate-500/15 text-slate-700 dark:text-slate-200'],
+  ['en_analisis', 'Análisis', 'bg-amber-500/15 text-amber-700 dark:text-amber-300'],
+  ['en_implementacion', 'Implem.', 'bg-esynapse-600/15 text-esynapse-700 dark:text-esynapse-300'],
+  ['en_verificacion', 'Verif.', 'bg-violet-500/15 text-violet-700 dark:text-violet-300'],
+  ['cerrada', 'Cerradas', 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300'],
+]
+const NIVELES_IPERC = [['T', 'Trivial', 1], ['TO', 'Tolerable', 2], ['M', 'Moderado', 3], ['IM', 'Importante', 4], ['IT', 'Intolerable', 5]]
+
+const hoyISO = () => { const d = new Date(); d.setHours(0, 0, 0, 0); return d }
+const columnaDe = (fecha) => {
+  if (!fecha) return null
+  const dias = Math.round((new Date(`${fecha.slice(0, 10)}T00:00:00`) - hoyISO()) / 86400000)
+  if (dias < 0) return 'vencido'
+  if (dias <= 7) return 'd7'
+  if (dias <= 30) return 'd30'
+  if (dias <= 60) return 'd60'
+  if (dias <= 90) return 'd90'
+  return null
 }
-
-const ICONO_TAREA = { Hallazgos: AlertOctagon, Documentos: FileWarning, Equipos: Boxes }
+const fechaCorta = (f) => new Date(`${f.slice(0, 10)}T00:00:00`).toLocaleDateString('es-PE', { day: 'numeric', month: 'short' })
+const saludo = () => { const h = new Date().getHours(); return h < 12 ? 'Buenos días' : h < 19 ? 'Buenas tardes' : 'Buenas noches' }
+const lista = (r) => (r?.results ?? r ?? [])
 
 export default function Dashboard() {
   const { usuario } = useAuth()
   const [cargando, setCargando] = useState(true)
-  const [d, setD] = useState({
-    equiposPorEstado: {}, equiposTotal: 0, equiposPorVencer: 0,
-    docsPorRevisar: 0, hallazgosAbiertos: 0, tareas: [],
-  })
+  const [d, setD] = useState({ celdas: {}, filas: [], tareas: [], modulos: {} })
 
   useEffect(() => {
     let vivo = true
-    const num = (r) => (r?.count ?? (Array.isArray(r) ? r.length : (Array.isArray(r?.results) ? r.results.length : 0)))
     Promise.allSettled([
-      api.equipos.resumen(),
-      api.documentos.porVencer(),
-      api.hallazgos.listar(),
-      api.misTareas(),
-    ]).then(([eq, dv, ha, mt]) => {
+      api.calendario(), api.quejas.listar('?abiertas=1'), api.riesgos.listar(), api.misTareas(),
+      api.sac.listar(), api.hallazgos.resumen(), api.equipos.resumen(), api.documentos.porVencer(), api.sst.resumen(),
+    ]).then(([cal, que, rie, tar, sac, hal, equ, doc, ipe]) => {
       if (!vivo) return
-      const por = eq.status === 'fulfilled' ? (eq.value.por_estado || {}) : {}
-      const total = Object.values(por).reduce((a, b) => a + b, 0)
+      const ok = (r) => r.status === 'fulfilled'
+      const celdas = {}
+      const poner = (fila, col, item) => {
+        if (!col) return
+        const k = `${fila}|${col}`
+        ;(celdas[k] = celdas[k] || []).push(item)
+      }
+      const filasActivas = new Set()
+      if (ok(cal)) {
+        for (const e of cal.value.eventos || []) {
+          filasActivas.add(e.modulo)
+          poner(e.modulo, columnaDe(e.fecha), { texto: e.titulo, fecha: e.fecha, ruta: e.ruta })
+        }
+        // Las filas de módulos generales se muestran aunque no tengan fechas en el periodo
+        ;['Acciones Correctivas', 'Equipos', 'Documentos', 'Competencia Técnica', 'Auditorías'].forEach((m) => filasActivas.add(m))
+      }
+      if (ok(que)) {
+        filasActivas.add('quejas')
+        for (const q of lista(que.value)) {
+          if (q.alerta?.estado === 'vencido') poner('quejas', 'vencido', { texto: `${q.codigo}: ${q.alerta.nombre}`, ruta: '/quejas' })
+        }
+      }
+      if (ok(rie)) {
+        filasActivas.add('riesgos')
+        for (const r of lista(rie.value)) {
+          if (r.vencidas > 0) poner('riesgos', 'vencido', { texto: `${r.codigo}: ${r.vencidas} acción${r.vencidas > 1 ? 'es' : ''} del plan`, ruta: '/riesgos' })
+        }
+      }
+      const modulos = {}
+      if (ok(sac)) {
+        const s = lista(sac.value)
+        const cuenta = Object.fromEntries(PASOS_SAC.map(([k]) => [k, 0]))
+        s.forEach((x) => { cuenta[x.estado.startsWith('cerrada') ? 'cerrada' : x.estado] = (cuenta[x.estado.startsWith('cerrada') ? 'cerrada' : x.estado] || 0) + 1 })
+        modulos.sac = { total: s.length, abiertas: s.length - cuenta.cerrada, cuenta }
+      }
+      if (ok(hal)) modulos.hallazgos = hal.value
+      if (ok(equ)) modulos.equipos = equ.value
+      if (ok(doc)) modulos.documentos = Array.isArray(doc.value) ? doc.value.length : 0
+      if (ok(que)) modulos.quejas = { abiertas: lista(que.value).length, vencidas: lista(que.value).filter((q) => q.alerta?.estado === 'vencido').length }
+      if (ok(rie)) modulos.riesgos = { total: lista(rie.value).length, conVencidas: lista(rie.value).filter((r) => r.vencidas > 0).length }
+      if (ok(ipe)) {
+        const niveles = {}
+        ;(ipe.value.areas || []).forEach((a) => Object.entries(a.niveles || {}).forEach(([k, v]) => { niveles[k] = (niveles[k] || 0) + v }))
+        modulos.iperc = { total: ipe.value.total, niveles }
+      }
       setD({
-        equiposPorEstado: por,
-        equiposTotal: total,
-        equiposPorVencer: eq.status === 'fulfilled' ? (eq.value.por_vencer_30 ?? 0) : 0,
-        docsPorRevisar: dv.status === 'fulfilled' ? (Array.isArray(dv.value) ? dv.value.length : 0) : 0,
-        hallazgosAbiertos: ha.status === 'fulfilled' ? num(ha.value) : 0,
-        tareas: mt.status === 'fulfilled' ? (mt.value.tareas || []) : [],
+        celdas,
+        filas: FILAS.filter(([k]) => filasActivas.has(k)),
+        tareas: ok(tar) ? (tar.value.tareas || []) : [],
+        modulos,
       })
       setCargando(false)
     })
     return () => { vivo = false }
   }, [])
 
-  const chart = Object.entries(d.equiposPorEstado)
-    .filter(([, v]) => v > 0)
-    .map(([k, v]) => ({ name: ESTADO_EQUIPO[k]?.label || k, value: v, color: ESTADO_EQUIPO[k]?.color || '#94a3b8' }))
-
-  const kpis = [
-    { label: 'Equipos registrados', value: d.equiposTotal, icon: Boxes, tono: 'azul', hint: 'Inventario total' },
-    { label: 'Por calibrar (30 días)', value: d.equiposPorVencer, icon: CalendarClock, tono: d.equiposPorVencer ? 'ambar' : 'verde', hint: 'Próximos vencimientos' },
-    { label: 'Documentos por revisar', value: d.docsPorRevisar, icon: FileWarning, tono: d.docsPorRevisar ? 'ambar' : 'verde', hint: 'Revisión próxima o vencida' },
-    { label: 'Hallazgos abiertos', value: d.hallazgosAbiertos, icon: AlertOctagon, tono: d.hallazgosAbiertos ? 'rojo' : 'verde', hint: 'En registro o tratamiento' },
-  ]
+  const n = (col) => d.filas.reduce((s, [k]) => s + (d.celdas[`${k}|${col}`]?.length || 0), 0)
+  const tienePlazos = ([k]) => COLUMNAS.some(([c]) => d.celdas[`${k}|${c}`]?.length)
+  const conPlazos = d.filas.filter(tienePlazos)
+  const sinPlazos = d.filas.filter((f) => !tienePlazos(f))
+  const vencidos = n('vencido')
+  const semana = n('d7')
+  const m = d.modulos
+  const nombre = usuario?.first_name || usuario?.nombre_completo?.split(' ')[0] || usuario?.username || ''
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        icon={LayoutDashboard}
-        title={`Hola, ${usuario?.first_name || usuario?.username || ''}`.trim()}
-        subtitle={`${usuario?.cargo ? usuario.cargo + ' · ' : ''}${usuario?.area || 'eSYNAPSE 360°'}`}
-      />
-
-      {/* KPIs */}
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {kpis.map((k) => (
-          <KpiCard key={k.label} {...k} value={cargando ? '—' : k.value} />
-        ))}
-      </div>
-
-      {/* Gráfico + pendientes */}
-      <div className="grid gap-4 lg:grid-cols-3">
-        {/* Equipos por estado */}
-        <div className="card-esynapse lg:col-span-2">
-          <div className="card-head">
-            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-esynapse-600/12 text-esynapse-600 dark:text-esynapse-300">
-              <Boxes className="h-5 w-5" />
-            </span>
-            <div>
-              <h2 className="font-semibold">Equipos por estado</h2>
-              <p className="text-xs muted">Distribución del inventario de equipos</p>
-            </div>
+      <header className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h1 className="text-[26px] font-semibold leading-tight tracking-tight">{saludo()}, {nombre}</h1>
+          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+            {new Date().toLocaleDateString('es-PE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).replace(/^./, (c) => c.toUpperCase())}
+          </p>
+        </div>
+        {!cargando && (
+          <div className="flex flex-wrap gap-2 text-[13px] font-semibold">
+            {vencidos > 0 && <span className="rounded-full bg-red-500/10 px-3 py-1 text-red-700 dark:text-red-300">{vencidos} vencido{vencidos > 1 ? 's' : ''}</span>}
+            {semana > 0 && <span className="rounded-full bg-amber-500/15 px-3 py-1 text-amber-700 dark:text-amber-300">{semana} vence{semana > 1 ? 'n' : ''} esta semana</span>}
+            <Link to="/mis-tareas" className="rounded-full border border-slate-200 bg-white px-3 py-1 text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800">
+              {d.tareas.length} tarea{d.tareas.length === 1 ? '' : 's'} asignada{d.tareas.length === 1 ? '' : 's'} a ti
+            </Link>
           </div>
-          <div className="card-pad">
-            {cargando ? (
-              <SkeletonText lines={4} />
-            ) : chart.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-10 text-center">
-                <Boxes className="h-10 w-10 text-slate-300 dark:text-slate-700" />
-                <p className="mt-2 text-sm muted">Aún no hay equipos registrados.</p>
-                <Link to="/equipos" className="btn-primary mt-3 !py-1.5 text-xs">Registrar equipo</Link>
-              </div>
-            ) : (
-              <div className="flex flex-col items-center gap-4 sm:flex-row">
-                <div className="h-48 w-48 shrink-0">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie data={chart} dataKey="value" nameKey="name" innerRadius={52} outerRadius={80} paddingAngle={2} stroke="none">
-                        {chart.map((e) => <Cell key={e.name} fill={e.color} />)}
-                      </Pie>
-                      <Tooltip
-                        contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 10px 30px -10px rgba(15,23,42,.25)', fontSize: 12 }}
-                      />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
-                <ul className="flex-1 space-y-2">
-                  {chart.map((e) => (
-                    <li key={e.name} className="flex items-center justify-between text-sm">
-                      <span className="flex items-center gap-2">
-                        <span className="h-2.5 w-2.5 rounded-full" style={{ background: e.color }} />
-                        {e.name}
-                      </span>
-                      <span className="font-semibold">{e.value}</span>
-                    </li>
-                  ))}
-                  <li className="flex items-center justify-between border-t border-slate-100 pt-2 text-sm dark:border-slate-800">
-                    <span className="muted">Total</span>
-                    <span className="font-bold">{d.equiposTotal}</span>
-                  </li>
-                </ul>
-              </div>
+        )}
+      </header>
+
+      {/* Vencimientos */}
+      <section className="card-esynapse" aria-labelledby="t-venc">
+        <div className="flex flex-wrap items-baseline justify-between gap-3 px-5 pb-3 pt-4">
+          <div>
+            <h2 id="t-venc" className="text-[17px] font-semibold">Vencimientos</h2>
+            <p className="text-[13px] text-slate-500 dark:text-slate-400">Plazos de todos los módulos en una sola vista. La primera columna es lo que ya venció.</p>
+          </div>
+          <Link to="/calendario" className="text-[13px] font-semibold text-esynapse-600 hover:underline dark:text-esynapse-300">Abrir calendario</Link>
+        </div>
+        {cargando ? <div className="px-5 pb-5"><SkeletonText lines={5} /></div> : (
+          <div className="overflow-x-auto border-t border-slate-200 dark:border-slate-800">
+            <div className="grid min-w-[900px] grid-cols-[minmax(170px,1.3fr)_repeat(5,minmax(130px,1fr))] text-[13px]">
+              <div className="border-b border-slate-200 bg-slate-50 px-4 py-2.5 font-condensada font-semibold text-slate-500 dark:border-slate-800 dark:bg-slate-900/60 dark:text-slate-400">Módulo</div>
+              {COLUMNAS.map(([k, t]) => (
+                <div key={k} className={`border-b border-l border-slate-200 px-3 py-2.5 font-condensada font-semibold dark:border-slate-800 ${k === 'vencido' ? 'bg-red-500/[0.06] text-red-700 dark:text-red-300' : 'bg-slate-50 text-slate-500 dark:bg-slate-900/60 dark:text-slate-400'}`}>{t}</div>
+              ))}
+              {conPlazos.map(([k, nombreFila, ruta]) => (
+                <Fila key={k} clave={k} nombre={nombreFila} ruta={ruta} celdas={d.celdas} />
+              ))}
+            </div>
+            {conPlazos.length === 0 && (
+              <p className="px-5 py-4 text-[13px] text-slate-500 dark:text-slate-400">Nada vence en los próximos 90 días.</p>
+            )}
+            {sinPlazos.length > 0 && (
+              <p className="border-t border-slate-200 px-5 py-2.5 text-[13px] text-slate-500 dark:border-slate-800 dark:text-slate-400">
+                Sin vencimientos en los próximos 90 días:{' '}
+                {sinPlazos.map(([k, nombreFila, ruta], i) => (
+                  <span key={k}>{i > 0 && ', '}<Link to={ruta} className="font-medium text-slate-700 hover:underline dark:text-slate-200">{nombreFila}</Link></span>
+                ))}.
+              </p>
             )}
           </div>
-        </div>
+        )}
+      </section>
 
-        {/* Pendientes */}
-        <div className="card-esynapse">
-          <div className="card-head">
-            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-500/15 text-amber-600 dark:text-amber-300">
-              <Inbox className="h-5 w-5" />
-            </span>
-            <div>
-              <h2 className="font-semibold">Mis pendientes</h2>
-              <p className="text-xs muted">Tareas que requieren tu atención</p>
-            </div>
-          </div>
-          <div className="card-pad">
-            {cargando ? (
-              <SkeletonText lines={4} />
-            ) : d.tareas.length === 0 ? (
-              <div className="py-8 text-center">
-                <p className="text-sm muted">Estás al día. Sin pendientes.</p>
+      <div className="flex flex-wrap items-start gap-6">
+        {/* Estado por módulo */}
+        <section aria-label="Estado por módulo" className="grid min-w-0 flex-[999_1_560px] grid-cols-[repeat(auto-fill,minmax(250px,1fr))] gap-4">
+          {cargando && [1, 2, 3].map((i) => <div key={i} className="card-esynapse p-4"><SkeletonText lines={3} /></div>)}
+          {m.sac && (
+            <Tarjeta titulo="Acciones correctivas" norma="ISO 9001" ruta="/acciones-correctivas" numero={m.sac.abiertas} unidad={`abiertas de ${m.sac.total}`}>
+              <div className="flex gap-1" aria-label="Solicitudes por etapa">
+                {PASOS_SAC.map(([k, t, cls]) => (
+                  <div key={k} className="flex-1 text-center">
+                    <div className={`rounded py-1 text-xs font-semibold ${m.sac.cuenta[k] ? cls : 'border border-dashed border-slate-200 text-slate-400 dark:border-slate-700'}`}>{m.sac.cuenta[k] || 0}</div>
+                    <div className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">{t}</div>
+                  </div>
+                ))}
               </div>
-            ) : (
-              <ul className="space-y-1">
-                {d.tareas.slice(0, 5).map((t, i) => {
-                  const Ico = ICONO_TAREA[t.modulo] || Inbox
-                  return (
-                    <li key={i}>
-                      <Link to={t.ruta || '/mis-tareas'} className="flex items-start gap-2 rounded-lg px-2 py-2 transition hover:bg-slate-100 dark:hover:bg-slate-800">
-                        <Ico className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" />
-                        <span className="min-w-0 flex-1">
-                          <span className="block truncate text-sm font-medium">{t.codigo} <span className="font-normal muted">· {t.estado}</span></span>
-                          <span className="block truncate text-xs muted">{t.titulo}</span>
-                        </span>
-                      </Link>
-                    </li>
-                  )
-                })}
-                <li>
-                  <Link to="/mis-tareas" className="mt-1 flex items-center justify-center gap-1 rounded-lg py-2 text-xs font-medium text-esynapse-600 hover:bg-slate-100 dark:text-esynapse-300 dark:hover:bg-slate-800">
-                    Ver todas <ArrowRight className="h-3.5 w-3.5" />
+            </Tarjeta>
+          )}
+          {m.hallazgos && (
+            <Tarjeta titulo="Hallazgos" norma="NTP ISO/IEC 17025" ruta="/hallazgos" numero={m.hallazgos.abiertos} unidad="abiertos">
+              <p className="text-[13px] text-slate-500 dark:text-slate-400">
+                {m.hallazgos.por_estado?.registrado || 0} registrados, {m.hallazgos.por_estado?.en_tratamiento || 0} en tratamiento y {m.hallazgos.por_estado?.derivado || 0} derivados a riesgos y oportunidades.
+              </p>
+            </Tarjeta>
+          )}
+          {m.quejas && (
+            <Tarjeta titulo="Quejas" norma="NTP ISO/IEC 17025" ruta="/quejas" numero={m.quejas.abiertas} unidad="abiertas" alerta={m.quejas.vencidas > 0}>
+              <p className="text-[13px] text-slate-500 dark:text-slate-400">
+                {m.quejas.vencidas > 0 ? `${m.quejas.vencidas} con un plazo vencido.` : 'Todas dentro de plazo.'}
+              </p>
+            </Tarjeta>
+          )}
+          {m.iperc && (
+            <Tarjeta titulo="Matriz IPERC" norma="ISO 45001 / Ley 29783" ruta="/sst" numero={m.iperc.total} unidad="filas vigentes">
+              <div className="flex flex-wrap gap-1.5">
+                {NIVELES_IPERC.filter(([k]) => m.iperc.niveles[k]).map(([k, t, nivel]) => (
+                  <span key={k} className={`whitespace-nowrap rounded px-1.5 py-0.5 text-[11px] font-semibold ${SEVERIDAD[nivel].chip}`}>{t} {m.iperc.niveles[k]}</span>
+                ))}
+              </div>
+            </Tarjeta>
+          )}
+          {m.equipos && (
+            <Tarjeta titulo="Equipos" norma="NTP ISO/IEC 17025" ruta="/equipos"
+              numero={Object.values(m.equipos.por_estado || {}).reduce((a, b) => a + b, 0)} unidad="registrados" alerta={m.equipos.vencidos > 0}>
+              <p className="text-[13px] text-slate-500 dark:text-slate-400">
+                {m.equipos.vencidos > 0 ? `${m.equipos.vencidos} con la calibración vencida. ` : ''}
+                {m.equipos.por_vencer_30 ? `${m.equipos.por_vencer_30} por calibrar en 30 días.` : 'Ninguna calibración vence en los próximos 30 días.'}
+              </p>
+            </Tarjeta>
+          )}
+          {m.riesgos && (
+            <Tarjeta titulo="Riesgos y oportunidades" norma="ISO 9001" ruta="/riesgos" numero={m.riesgos.conVencidas} unidad="con acciones vencidas" alerta={m.riesgos.conVencidas > 0}>
+              <p className="text-[13px] text-slate-500 dark:text-slate-400">De {m.riesgos.total} registros en la matriz.</p>
+            </Tarjeta>
+          )}
+          {m.documentos !== undefined && (
+            <Tarjeta titulo="Documentos" ruta="/documentos" numero={m.documentos} unidad="por revisar" alerta={m.documentos > 0}>
+              <p className="text-[13px] text-slate-500 dark:text-slate-400">Con la revisión próxima o vencida.</p>
+            </Tarjeta>
+          )}
+        </section>
+
+        {/* Mis pendientes */}
+        <section className="card-esynapse min-w-0 flex-[1_1_300px] lg:max-w-sm" aria-labelledby="t-pend">
+          <div className="px-5 pb-2 pt-4">
+            <h2 id="t-pend" className="text-[17px] font-semibold">Tus pendientes</h2>
+            <p className="text-[13px] text-slate-500 dark:text-slate-400">Lo que espera una acción tuya</p>
+          </div>
+          {cargando ? <div className="px-5 pb-5"><SkeletonText lines={4} /></div> : d.tareas.length === 0 ? (
+            <p className="px-5 pb-6 pt-2 text-sm text-slate-500 dark:text-slate-400">No tienes tareas pendientes.</p>
+          ) : (
+            <ul className="px-2 pb-2">
+              {d.tareas.slice(0, 6).map((t, i) => (
+                <li key={i}>
+                  <Link to={t.ruta || '/mis-tareas'} className="flex flex-col gap-1 rounded-lg px-3 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-800/60">
+                    <span className="flex flex-wrap items-center gap-2">
+                      <span className="text-sm font-semibold">{t.codigo}</span>
+                      <EstadoBadge estado={t.estado} />
+                      {t.fecha && <span className="text-xs text-slate-500 dark:text-slate-400">vence {fechaCorta(t.fecha)}</span>}
+                    </span>
+                    <span className="line-clamp-1 text-[13px] text-slate-500 dark:text-slate-400">{t.titulo}</span>
                   </Link>
                 </li>
-              </ul>
-            )}
-          </div>
-        </div>
+              ))}
+            </ul>
+          )}
+          <Link to="/mis-tareas" className="block border-t border-slate-200 py-2.5 text-center text-[13px] font-semibold text-esynapse-600 hover:bg-slate-50 dark:border-slate-800 dark:text-esynapse-300 dark:hover:bg-slate-800/60">
+            Ver todas mis tareas
+          </Link>
+        </section>
       </div>
     </div>
+  )
+}
+
+function Fila({ clave, nombre, ruta, celdas }) {
+  return (
+    <>
+      <div className="flex items-center border-b border-slate-100 px-4 py-2.5 font-semibold dark:border-slate-800/60">
+        <Link to={ruta} className="hover:underline">{nombre}</Link>
+      </div>
+      {COLUMNAS.map(([col]) => {
+        const items = celdas[`${clave}|${col}`] || []
+        return (
+          <div key={col} className={`flex flex-wrap content-center items-center gap-1.5 border-b border-l border-slate-100 px-3 py-2 dark:border-slate-800/60 ${col === 'vencido' && items.length ? 'bg-red-500/[0.06]' : ''}`}>
+            {items.length === 0 && <span className="text-slate-300 dark:text-slate-600" aria-label="Ninguno">—</span>}
+            {items.slice(0, 3).map((it, i) => {
+              const codigo = it.texto.includes(':') ? it.texto.split(':')[0] : it.texto
+              return (
+                <Link key={i} to={it.ruta || ruta} title={`${it.texto}${it.fecha ? ` · ${fechaCorta(it.fecha)}` : ''}`}
+                  className={`inline-flex max-w-full items-baseline gap-1.5 truncate rounded-md border px-2 py-0.5 text-xs hover:underline ${col === 'vencido' ? 'border-red-300 bg-white text-red-800 dark:border-red-500/40 dark:bg-slate-900 dark:text-red-300' : 'border-slate-200 bg-white text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200'}`}>
+                  <span className="font-mono font-medium">{codigo.length > 18 ? `${codigo.slice(0, 17)}…` : codigo}</span>
+                  {it.fecha && <span className="text-slate-500 dark:text-slate-400">{fechaCorta(it.fecha)}</span>}
+                </Link>
+              )
+            })}
+            {items.length > 3 && <Link to={ruta} className="text-xs font-semibold text-esynapse-600 hover:underline dark:text-esynapse-300">y {items.length - 3} más</Link>}
+          </div>
+        )
+      })}
+    </>
+  )
+}
+
+function Tarjeta({ titulo, norma, ruta, numero, unidad, alerta = false, children }) {
+  return (
+    <Link to={ruta} className="card-esynapse card-hover flex flex-col gap-3 p-4">
+      <span className="flex items-start justify-between gap-2">
+        <span className="text-[15px] font-semibold">{titulo}</span>
+        {norma && <NormaBadge nombre={norma} />}
+      </span>
+      <span className="flex items-baseline gap-2">
+        <span className={`text-3xl font-semibold leading-none ${alerta ? 'text-red-700 dark:text-red-300' : ''}`}>{numero ?? '—'}</span>
+        <span className="text-[13px] text-slate-500 dark:text-slate-400">{unidad}</span>
+      </span>
+      {children}
+    </Link>
   )
 }

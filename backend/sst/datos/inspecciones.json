@@ -1,0 +1,1190 @@
+{
+ "plantillas": [
+  {
+   "nombre": "Inspección de botiquines",
+   "codigo_formato": "SIG-PRO-06-r01",
+   "familia": "contenido",
+   "tipo_elemento": "botiquin",
+   "escala": "c_nc_na",
+   "contenido_base": [
+    {
+     "producto": "Sulfadiazina de plata",
+     "cantidad": 1,
+     "unidad": "Tubo",
+     "vencimiento": ""
+    },
+    {
+     "producto": "Algodón",
+     "cantidad": 1,
+     "unidad": "Paquete",
+     "vencimiento": ""
+    },
+    {
+     "producto": "Alcohol de 96°",
+     "cantidad": 1,
+     "unidad": "Botella",
+     "vencimiento": ""
+    },
+    {
+     "producto": "Curitas",
+     "cantidad": 10,
+     "unidad": "Und.",
+     "vencimiento": ""
+    },
+    {
+     "producto": "Tijera",
+     "cantidad": 1,
+     "unidad": "Und.",
+     "vencimiento": ""
+    },
+    {
+     "producto": "Esparadrapo",
+     "cantidad": 2,
+     "unidad": "Rollo",
+     "vencimiento": ""
+    },
+    {
+     "producto": "Gasas 7,5",
+     "cantidad": 2,
+     "unidad": "Und.",
+     "vencimiento": ""
+    },
+    {
+     "producto": "Guantes 7 1/2",
+     "cantidad": 2,
+     "unidad": "Und.",
+     "vencimiento": ""
+    },
+    {
+     "producto": "Venda 4",
+     "cantidad": 1,
+     "unidad": "Und.",
+     "vencimiento": ""
+    },
+    {
+     "producto": "Venda 6",
+     "cantidad": 1,
+     "unidad": "Und.",
+     "vencimiento": ""
+    },
+    {
+     "producto": "Agua oxigenada",
+     "cantidad": 1,
+     "unidad": "Botella",
+     "vencimiento": ""
+    },
+    {
+     "producto": "Mascarillas",
+     "cantidad": 10,
+     "unidad": "Und.",
+     "vencimiento": ""
+    },
+    {
+     "producto": "Termómetro",
+     "cantidad": 1,
+     "unidad": "Und.",
+     "vencimiento": ""
+    },
+    {
+     "producto": "Gasa 10*10",
+     "cantidad": 1,
+     "unidad": "Und.",
+     "vencimiento": ""
+    }
+   ],
+   "frecuencia": "mensual",
+   "objetivo": "Verificar el contenido mínimo, estado, ubicación, accesibilidad, codificación y señalización del botiquín.",
+   "nota": "Ante una observación en el mes de revisión indique la letra de la no conformidad: E = estado, U = ubicación, A = accesibilidad, C = codificación, S = señalización.",
+   "version_formato": "01",
+   "fecha_formato": "2026-01-27",
+   "elaborado": "ASIG",
+   "revisado": "GSIG / GG",
+   "aprobado": "GG"
+  },
+  {
+   "nombre": "Inspección de extintores",
+   "codigo_formato": "SIG-PRO-06-r02",
+   "familia": "elementos",
+   "tipo_elemento": "extintor",
+   "escala": "c_nc_na",
+   "criterios": [
+    {
+     "grupo": "",
+     "nombre": "Libre de obstáculos",
+     "invertido": false
+    },
+    {
+     "grupo": "",
+     "nombre": "Manómetro y presión",
+     "invertido": false
+    },
+    {
+     "grupo": "",
+     "nombre": "Precinto de seguridad",
+     "invertido": false
+    },
+    {
+     "grupo": "",
+     "nombre": "Recipiente",
+     "invertido": false
+    },
+    {
+     "grupo": "",
+     "nombre": "Manija",
+     "invertido": false
+    },
+    {
+     "grupo": "",
+     "nombre": "Manguera",
+     "invertido": false
+    },
+    {
+     "grupo": "",
+     "nombre": "Señalización",
+     "invertido": false
+    }
+   ],
+   "frecuencia": "mensual",
+   "objetivo": "Verificar las condiciones de los extintores.",
+   "version_formato": "01",
+   "fecha_formato": "2026-01-27",
+   "elaborado": "ASIG",
+   "revisado": "GSIG/GG",
+   "aprobado": "GG"
+  },
+  {
+   "nombre": "Inspección de luces de emergencia",
+   "codigo_formato": "SIG-PRO-06-r03",
+   "familia": "elementos",
+   "tipo_elemento": "luz_emergencia",
+   "escala": "c_nc_na",
+   "criterios": [
+    {
+     "grupo": "",
+     "nombre": "Posicionamiento",
+     "invertido": false
+    },
+    {
+     "grupo": "",
+     "nombre": "Cable en buen estado",
+     "invertido": false
+    },
+    {
+     "grupo": "",
+     "nombre": "Batería cargada",
+     "invertido": false
+    },
+    {
+     "grupo": "",
+     "nombre": "Pulsador de prueba",
+     "invertido": false
+    },
+    {
+     "grupo": "",
+     "nombre": "Estado general",
+     "invertido": false
+    },
+    {
+     "grupo": "",
+     "nombre": "Señalización",
+     "invertido": false
+    }
+   ],
+   "frecuencia": "mensual",
+   "objetivo": "Verificar las condiciones de las luces de emergencia.",
+   "version_formato": "01",
+   "fecha_formato": "2026-01-25",
+   "elaborado": "ASIG",
+   "revisado": "GSIG/GG",
+   "aprobado": "GG"
+  },
+  {
+   "nombre": "Inspección interna de seguridad y salud en el trabajo y medio ambiente",
+   "codigo_formato": "SIG-PRO-06-r04",
+   "familia": "preguntas",
+   "tipo_elemento": "",
+   "escala": "si_no_na",
+   "secciones": [
+    {
+     "titulo": "Mobiliario",
+     "preguntas": [
+      "¿Los muebles (mesas, escritorios, sillas) están en buen estado (las sillas o muebles no están rotos, las sillas, escritorios o muebles no son estables, otros)?",
+      "¿Se tienen sillas ergonómicas?",
+      "¿Se han encontrado todos los cajones de escritorio y puertas de estantes cerrados?",
+      "¿Se tiene un espacio adecuado para trabajar cómodamente? (no están congestionados y/o saturados)",
+      "¿Los escritorios y gabinetes presentan los lados lisos (no filosos)?",
+      "Otros:"
+     ]
+    },
+    {
+     "titulo": "Equipos de Cómputo e impresoras",
+     "preguntas": [
+      "¿Las conexiones de las computadoras / impresoras y otros equipos son adecuadas? (sin cables sueltos o desordenados)?",
+      "¿Pantalla y/o monitor en buen estado?",
+      "¿Distancia recomendada de la persona al monitor es adecuada?",
+      "¿La impresora se encuentra libre de derrames de tonner, tinta?",
+      "Otros:"
+     ]
+    },
+    {
+     "titulo": "Instalaciones Eléctricas (Enchufes, Tomacorrientes, Otros)",
+     "preguntas": [
+      "Los tomacorrientes están en buenas condiciones. (sin rajaduras, las placas no están rotas o dañadas)",
+      "¿Se tiene la cantidad suficiente de tomacorrientes para conectar los aparatos eléctricos? (se usa supresor de picos, no se tiene extensiones eléctricas, múltiples o \"T\" permanentes, no hay extensiones eléctricas improvisadas)",
+      "¿Los cables eléctricos están debidamente protegidos? (No hay cables expuestos en las zonas de tránsito, no hay cables sueltos, pelados o dañados)",
+      "Otros:"
+     ]
+    },
+    {
+     "titulo": "Luminarias",
+     "preguntas": [
+      "¿Se tiene todas las luminarias aseguradas?",
+      "¿Se tiene todas las luminarias completas?",
+      "Otros:"
+     ]
+    },
+    {
+     "titulo": "Medio Ambiente",
+     "preguntas": [
+      "¿El lugar cuenta con tachos suficientes para disponer adecuadamente sus residuos sólidos?",
+      "¿El área realiza la segregación adecuada de residuos sólidos? (respetando el color de segregación)",
+      "Otros:"
+     ]
+    },
+    {
+     "titulo": "Orden y Limpieza",
+     "preguntas": [
+      "¿Se tiene limpia el área de trabajo?",
+      "¿Se tiene ordenado el área de trabajo?",
+      "¿Se tiene limpios los pisos?",
+      "Otros:"
+     ]
+    },
+    {
+     "titulo": "Instalaciones",
+     "preguntas": [
+      "¿Las instalaciones y predios están adecuadamente conservados? (no se tiene los pisos y paredes rotos o rajados, las puertas no están rotas ni rajados, ni con las chapas defectuosas)",
+      "¿Las vías de acceso a las instalaciones están en buen estado? (sin grietas, rotas, o quiñadas)",
+      "¿Las ventanas, mamparas o puertas de vidrio están en buen estado? (No están quiñadas, rotas o rajadas)",
+      "Otros (Aire acondicionado, extractores, etc.) ¿están en buenas condiciones?:"
+     ]
+    },
+    {
+     "titulo": "Servicios higiénicos — Instalaciones",
+     "preguntas": [
+      "¿Los baños poseen identificación adecuada?",
+      "¿Los sanitarios y lavatorios están abastecidos de papel higiénico?",
+      "¿El baño posee dosificador de jabón líquido?",
+      "¿Se tiene las instalaciones conservadas adecuadamente? (sin losetas rotas, sin espejos rotos, otros)",
+      "¿Se tiene los pisos limpios y secos para evitar caídas? (no están resbalosos o mojados)",
+      "¿Se tiene ordenada la zona?",
+      "Otros:"
+     ]
+    },
+    {
+     "titulo": "Servicios higiénicos — Medio Ambiente",
+     "preguntas": [
+      "¿El lugar se encuentra libre de derrames o filtraciones?",
+      "¿Se observa que el lugar se encuentra libre de pérdidas de agua?"
+     ]
+    },
+    {
+     "titulo": "Servicios higiénicos — Luminarias",
+     "preguntas": [
+      "¿Se tiene todas las luminarias aseguradas?",
+      "¿Se tiene todas las luminarias completas?",
+      "Otros:"
+     ]
+    },
+    {
+     "titulo": "Buen uso y almacenamiento de los productos de limpieza — Orden y limpieza",
+     "preguntas": [
+      "¿Los productos de limpieza se encuentran almacenados en un lugar destinado exclusivamente para ellos?",
+      "¿En el lugar de almacenamiento, los productos de limpieza se encuentran dentro del contenedor destinado para ellos, de modo tal que se eviten futuros derrames?",
+      "¿Todos los productos de limpieza se encuentran correctamente cerrados?",
+      "¿Todos los productos de limpieza se encuentran correctamente rotulados o cuentan con sus etiquetas originales legibles, de modo que sean fácilmente identificados?",
+      "¿Se cuenta con las Hojas de Seguridad correctas de los insumos de limpieza se encuentran impresas en el lugar de almacenamiento?",
+      "Otros:"
+     ]
+    },
+    {
+     "titulo": "Buen uso y almacenamiento de los productos de limpieza — Organización",
+     "preguntas": [
+      "¿Las personas conocen y saben identificar como contribuyen para cumplir con la Política del Sistema Integrado de Gestión (Calidad y Seguridad y Salud en el Trabajo?",
+      "¿Las personas saben dónde encontrar los documentos de la empresa (procedimientos, manuales e instrucciones)?",
+      "¿Las personas tienen conocimiento del contenido de los documentos del SIG, documentos relacionado al proceso que desempeña?",
+      "Otros:"
+     ]
+    },
+    {
+     "titulo": "Buen uso y almacenamiento de los productos de limpieza — Identificación de peligros y evaluación de riesgos y controles operacionales",
+     "preguntas": [
+      "¿La Matriz IPERC se encuentra actualizada?",
+      "¿Los controles establecidos en la matriz IPERC se cumplen? (Verificar con la Matriz IPERC)"
+     ]
+    },
+    {
+     "titulo": "Buen uso y almacenamiento de los productos de limpieza — Respuesta ante emergencia",
+     "preguntas": [
+      "¿La Lista del cuerpo de brigadas de emergencia está difundida y actualizada?",
+      "¿El personal de la lista de brigadas de emergencia se encuentra capacitado?",
+      "¿El plan de emergencia, La lista de brigadistas y la guía telefónica de emergencias se encuentran actualizados y vigentes?",
+      "¿Han participado en simulacros?"
+     ]
+    },
+    {
+     "titulo": "Buen uso y almacenamiento de los productos de limpieza — Equipamientos de seguridad y atención a emergencias",
+     "preguntas": [
+      "¿Los productos del botiquín se encuentran almacenados en un lugar exclusivamente para ellos?",
+      "¿Todos los productos se encuentran correctamente cerrados?",
+      "¿El botiquín cuenta con lo minimo establecido?",
+      "¿El botiquín de primeros auxilios cuenta con cartilla de inspección?",
+      "¿Se tiene completas las inspecciones mensuales de los extintores en las cartillas de inspección?",
+      "¿Las rutas de evacuación tiene luces de emergencia?",
+      "¿Las luces de emergencia están operativas?",
+      "¿Todas las puertas de emergencia abren en el sentido de la salida?",
+      "¿La(s) ruta(s) de escape se encuentra despejadas para el libre tránsito? (no están obstruidas)",
+      "¿La señalización está en buenas condiciones, permitiendo una completa lectura de la información de la misma?",
+      "¿La señalizaciones en general están organizadas y visibles?",
+      "Otros:"
+     ]
+    }
+   ],
+   "frecuencia": "mensual",
+   "objetivo": "Todas las áreas de la empresa",
+   "nota": "Sí: hay cumplimiento. No: hay incumplimiento. NA: no aplica.",
+   "version_formato": "02",
+   "fecha_formato": "2026-04-15",
+   "elaborado": "GSIG",
+   "revisado": "GSIG/GG",
+   "aprobado": "GG"
+  },
+  {
+   "nombre": "Inspección de detectores de humo",
+   "codigo_formato": "SIG-PRO-06-r05",
+   "familia": "elementos",
+   "tipo_elemento": "detector_humo",
+   "escala": "c_nc_na",
+   "criterios": [
+    {
+     "grupo": "",
+     "nombre": "Cabeza del detector",
+     "invertido": false
+    },
+    {
+     "grupo": "",
+     "nombre": "Falda de montaje",
+     "invertido": false
+    },
+    {
+     "grupo": "",
+     "nombre": "Indicador LED",
+     "invertido": false
+    },
+    {
+     "grupo": "",
+     "nombre": "Sonido de alarma",
+     "invertido": false
+    },
+    {
+     "grupo": "",
+     "nombre": "Estado general",
+     "invertido": false
+    },
+    {
+     "grupo": "",
+     "nombre": "Señalización",
+     "invertido": false
+    }
+   ],
+   "frecuencia": "mensual",
+   "objetivo": "Verificar las condiciones de los detectores de humo.",
+   "version_formato": "00",
+   "fecha_formato": "2025-01-10",
+   "elaborado": "ASIG",
+   "revisado": "GSIG",
+   "aprobado": "GG"
+  },
+  {
+   "nombre": "Inspección de equipos de protección personal",
+   "codigo_formato": "SIG-PRO-06-r06",
+   "familia": "trabajadores",
+   "tipo_elemento": "",
+   "escala": "bueno_mal",
+   "criterios": [
+    {
+     "grupo": "Zapato de seguridad",
+     "nombre": "Estado",
+     "invertido": false
+    },
+    {
+     "grupo": "Zapato de seguridad",
+     "nombre": "Punta de acero",
+     "invertido": false
+    },
+    {
+     "grupo": "Zapato de seguridad",
+     "nombre": "Requiere cambio",
+     "invertido": true
+    },
+    {
+     "grupo": "Lentes de seguridad",
+     "nombre": "Estado",
+     "invertido": false
+    },
+    {
+     "grupo": "Lentes de seguridad",
+     "nombre": "Visibles",
+     "invertido": false
+    },
+    {
+     "grupo": "Lentes de seguridad",
+     "nombre": "Requiere cambio",
+     "invertido": true
+    },
+    {
+     "grupo": "Casco",
+     "nombre": "Estado",
+     "invertido": false
+    },
+    {
+     "grupo": "Casco",
+     "nombre": "Limpieza",
+     "invertido": false
+    },
+    {
+     "grupo": "Casco",
+     "nombre": "Requiere cambio",
+     "invertido": true
+    },
+    {
+     "grupo": "Guantes",
+     "nombre": "Estado",
+     "invertido": false
+    },
+    {
+     "grupo": "Guantes",
+     "nombre": "Sin daños",
+     "invertido": false
+    },
+    {
+     "grupo": "Guantes",
+     "nombre": "Requiere cambio",
+     "invertido": true
+    },
+    {
+     "grupo": "Tapones de oído",
+     "nombre": "Estado",
+     "invertido": false
+    },
+    {
+     "grupo": "Tapones de oído",
+     "nombre": "Limpieza",
+     "invertido": false
+    },
+    {
+     "grupo": "Tapones de oído",
+     "nombre": "Requiere cambio",
+     "invertido": true
+    },
+    {
+     "grupo": "Respirador / cartucho",
+     "nombre": "Estado",
+     "invertido": false
+    },
+    {
+     "grupo": "Respirador / cartucho",
+     "nombre": "Sin daños",
+     "invertido": false
+    },
+    {
+     "grupo": "Respirador / cartucho",
+     "nombre": "Requiere cambio",
+     "invertido": true
+    },
+    {
+     "grupo": "Chaleco",
+     "nombre": "Limpieza",
+     "invertido": false
+    },
+    {
+     "grupo": "Chaleco",
+     "nombre": "Estado",
+     "invertido": false
+    },
+    {
+     "grupo": "Chaleco",
+     "nombre": "Requiere cambio",
+     "invertido": true
+    },
+    {
+     "grupo": "Arnés",
+     "nombre": "Estado",
+     "invertido": false
+    },
+    {
+     "grupo": "Arnés",
+     "nombre": "Funcional",
+     "invertido": false
+    },
+    {
+     "grupo": "Arnés",
+     "nombre": "Requiere cambio",
+     "invertido": true
+    }
+   ],
+   "frecuencia": "bimestral",
+   "objetivo": "Verificar el estado de los EPP del personal.",
+   "nota": "✔ Bueno / Sí · X Mal / No. En «Requiere cambio», ✔ indica que el EPP debe cambiarse.",
+   "version_formato": "02",
+   "fecha_formato": "2026-02-13",
+   "elaborado": "ASIG",
+   "revisado": "GSIG / GG",
+   "aprobado": "GG"
+  },
+  {
+   "nombre": "Inspección de kit antiderrame",
+   "codigo_formato": "SIG-PRO-06-r10",
+   "familia": "contenido",
+   "tipo_elemento": "kit_antiderrame",
+   "escala": "si_no_na",
+   "contenido_base": [
+    {
+     "producto": "Máscara de protección respiratoria",
+     "cantidad": 1,
+     "unidad": "Und.",
+     "vencimiento": ""
+    },
+    {
+     "producto": "Gafas de seguridad con rejilla de ventilación directa",
+     "cantidad": 1,
+     "unidad": "Und.",
+     "vencimiento": ""
+    },
+    {
+     "producto": "Salchicha (contención)",
+     "cantidad": 1,
+     "unidad": "Und.",
+     "vencimiento": ""
+    },
+    {
+     "producto": "Bandeja",
+     "cantidad": 1,
+     "unidad": "Und.",
+     "vencimiento": ""
+    },
+    {
+     "producto": "Guante de nitrilo (según las sustancias químicas a manejar)",
+     "cantidad": 1,
+     "unidad": "Und.",
+     "vencimiento": ""
+    },
+    {
+     "producto": "Guante de neopreno (según las sustancias químicas a manejar)",
+     "cantidad": 1,
+     "unidad": "Und.",
+     "vencimiento": ""
+    },
+    {
+     "producto": "Paño absorbente",
+     "cantidad": 1,
+     "unidad": "Und.",
+     "vencimiento": ""
+    },
+    {
+     "producto": "Bolsa roja",
+     "cantidad": 1,
+     "unidad": "Und.",
+     "vencimiento": ""
+    }
+   ],
+   "frecuencia": "mensual",
+   "objetivo": "Verificar que el kit de control de derrames esté completo y operativo.",
+   "version_formato": "00",
+   "fecha_formato": "2025-01-10",
+   "elaborado": "ASIG",
+   "revisado": "GSIG",
+   "aprobado": "GG"
+  },
+  {
+   "nombre": "Inspección de escaleras",
+   "codigo_formato": "SIG-PRO-06-r11",
+   "familia": "elementos",
+   "tipo_elemento": "escalera",
+   "escala": "c_nc_na",
+   "criterios": [
+    {
+     "grupo": "",
+     "nombre": "Largueros",
+     "invertido": false
+    },
+    {
+     "grupo": "",
+     "nombre": "Peldaños",
+     "invertido": false
+    },
+    {
+     "grupo": "",
+     "nombre": "Plataforma",
+     "invertido": false
+    },
+    {
+     "grupo": "",
+     "nombre": "Topes de seguridad",
+     "invertido": false
+    },
+    {
+     "grupo": "",
+     "nombre": "Zapatas antideslizantes",
+     "invertido": false
+    },
+    {
+     "grupo": "",
+     "nombre": "Estabilidad de posicionamiento",
+     "invertido": false
+    },
+    {
+     "grupo": "",
+     "nombre": "Estructura sin dobleces ni rajaduras",
+     "invertido": false
+    },
+    {
+     "grupo": "",
+     "nombre": "Piezas de ajuste (tornillos, pernos, otros)",
+     "invertido": false
+    },
+    {
+     "grupo": "",
+     "nombre": "Brazos de unión antiapertura (escaleras tipo tijera)",
+     "invertido": false
+    },
+    {
+     "grupo": "",
+     "nombre": "Cinta del mes",
+     "invertido": false
+    },
+    {
+     "grupo": "",
+     "nombre": "Elementos metálicos en buen estado",
+     "invertido": false
+    },
+    {
+     "grupo": "",
+     "nombre": "Libre de pintura, astillamientos, rajaduras, óxidos, etc.",
+     "invertido": false
+    }
+   ],
+   "frecuencia": "trimestral",
+   "objetivo": "Verificar las condiciones de las escaleras.",
+   "version_formato": "00",
+   "fecha_formato": "2025-01-10",
+   "elaborado": "ASIG",
+   "revisado": "GSIG",
+   "aprobado": "GG"
+  },
+  {
+   "nombre": "Inspección SST de movilidad",
+   "codigo_formato": "SIG-PRO-06-r12",
+   "familia": "preguntas",
+   "tipo_elemento": "vehiculo",
+   "escala": "optimo_mal_na",
+   "secciones": [
+    {
+     "titulo": "Documentación y Control (Legal)",
+     "preguntas": [
+      "Licencia de conducir vigente y categoría correcta",
+      "SOAT vigente (Físico o Digital)",
+      "Tarjeta de Identificación Vehicular (Propiedad)",
+      "Certificado de Inspección Técnica Vehicular (si aplica)"
+     ]
+    },
+    {
+     "titulo": "Revisiones",
+     "preguntas": [
+      "Nivel de aceite de motor",
+      "Nivel de líquido de freno",
+      "Filtro de admición (Diario)",
+      "Caja de cambio",
+      "Barra antivuelco interior/exterior",
+      "Limpieza interior",
+      "Estado general de la carrocería",
+      "Cinturón de seguridad",
+      "Neumáticos delanteros",
+      "Neumáticos traseros",
+      "Bocina",
+      "Alarma de retroceso",
+      "Luces altas",
+      "Luces bajas",
+      "Luces de freno",
+      "Luces de retroceso",
+      "Luces intermitentes",
+      "Espejos laterales",
+      "Espejos retrovisores",
+      "Limpia parabrisas",
+      "Freno de pie",
+      "Frenos de mano",
+      "Tuercas/pernos que sujetan el neumático",
+      "Neumáticos de repuestos"
+     ]
+    },
+    {
+     "titulo": "Equipo de Emergencia",
+     "preguntas": [
+      "Triángulo",
+      "Extintor",
+      "Botiquín",
+      "Llave de rueda",
+      "Gata hicdraúlica",
+      "Cuñas de estacionamiento"
+     ]
+    }
+   ],
+   "frecuencia": "mensual",
+   "objetivo": "Verificar las condiciones del vehículo y su documentación.",
+   "version_formato": "00",
+   "fecha_formato": "2025-01-28",
+   "elaborado": "ASIG",
+   "revisado": "GSIG",
+   "aprobado": "GG"
+  },
+  {
+   "nombre": "Inspección SST de moto lineal",
+   "codigo_formato": "SIG-PRO-06-r13",
+   "familia": "preguntas",
+   "tipo_elemento": "moto",
+   "escala": "optimo_mal_na",
+   "secciones": [
+    {
+     "titulo": "Documentación y Control (Legal)",
+     "preguntas": [
+      "Licencia de conducir vigente y categoría correcta",
+      "SOAT vigente (Físico o Digital)",
+      "Tarjeta de Identificación Vehicular (Propiedad)",
+      "Certificado de Inspección Técnica Vehicular (si aplica)"
+     ]
+    },
+    {
+     "titulo": "Equipos de Protección Personal (EPP)",
+     "preguntas": [
+      "Casco reglamentario (sin golpes, visor y correa OK)",
+      "Guantes de protección (sin roturas y antideslizantes)",
+      "Calzado de seguridad (suela con agarre, sin cordones)",
+      "Chaqueta o chaleco con cintas reflectivas visibles",
+      "Protecciones auxiliares (rodilleras y coderas)"
+     ]
+    },
+    {
+     "titulo": "Sistemas Críticos (Seguridad Activa)",
+     "preguntas": [
+      "Neumáticos: Presión de aire y profundidad de cocada",
+      "Frenos: Respuesta, tensión de manigueta y niveles",
+      "Luces: Alta, baja, direccionales y luz de freno (stop)",
+      "Transmisión: Tensión, limpieza y lubricación de cadena"
+     ]
+    },
+    {
+     "titulo": "Estado Mecánico y Estructural",
+     "preguntas": [
+      "Espejos retrovisores (Izquierdo y Derecho)",
+      "Niveles: Aceite de motor y líquido refrigerante",
+      "Mandos: Bocina, acelerador y panel de instrumentos",
+      "Suspensión: Sin fugas en telescópicas o amortiguador",
+      "Fugas: Ausencia de goteos de fluidos bajo la moto",
+      "Estructura: Chasis, posapiés y soportes sin fisuras"
+     ]
+    }
+   ],
+   "frecuencia": "mensual",
+   "objetivo": "Verificar las condiciones de la moto, su documentación y el EPP del conductor.",
+   "version_formato": "00",
+   "fecha_formato": "2025-01-28",
+   "elaborado": "ASIG",
+   "revisado": "GSIG",
+   "aprobado": "GG"
+  },
+  {
+   "nombre": "Inspección de herramientas portátiles",
+   "codigo_formato": "SIG-PRO-06-r14",
+   "familia": "elementos",
+   "tipo_elemento": "",
+   "escala": "c_nc_na",
+   "columnas_datos": [
+    "Cantidad",
+    "Tipo / clase de herramienta"
+   ],
+   "criterios": [
+    {
+     "grupo": "",
+     "nombre": "¿Las herramientas manuales tienen mangos o sujetadores en buen estado y firmes?",
+     "invertido": false
+    },
+    {
+     "grupo": "",
+     "nombre": "¿Las puntas o superficies de trabajo no presentan desgaste, roturas ni desprendimientos?",
+     "invertido": false
+    },
+    {
+     "grupo": "",
+     "nombre": "¿Las herramientas para trabajos eléctricos cuentan con aislamiento íntegro, sin cortes ni fallas?",
+     "invertido": false
+    },
+    {
+     "grupo": "",
+     "nombre": "¿Las herramientas eléctricas tienen cables y conexiones en buen estado, sin roturas visibles?",
+     "invertido": false
+    },
+    {
+     "grupo": "",
+     "nombre": "¿Las herramientas o equipos que requieren funda o cobertor lo utilizan correctamente?",
+     "invertido": false
+    },
+    {
+     "grupo": "",
+     "nombre": "¿Las herramientas o equipos rotativos cuentan con su guarda de protección instalada?",
+     "invertido": false
+    },
+    {
+     "grupo": "",
+     "nombre": "¿Los puntos de contacto de las herramientas manuales están libres de roturas o deformaciones?",
+     "invertido": false
+    },
+    {
+     "grupo": "",
+     "nombre": "¿Las herramientas y equipos se encuentran limpios y libres de suciedad o grasa?",
+     "invertido": false
+    },
+    {
+     "grupo": "",
+     "nombre": "¿Las herramientas están almacenadas adecuadamente, en lugares accesibles y protegidos?",
+     "invertido": false
+    }
+   ],
+   "frecuencia": "trimestral",
+   "objetivo": "Verificar las condiciones de uso de las herramientas portátiles.",
+   "nota": "Colores de cinta: setiembre, diciembre, marzo y junio. La revisión de cada herramienta es trimestral aunque no se haya usado en el periodo; si presenta falla o defecto se cambia o reemplaza de inmediato. Antes de usar una herramienta manual es requisito inspeccionarla.",
+   "version_formato": "01",
+   "fecha_formato": "2026-03-02",
+   "elaborado": "GSIG",
+   "revisado": "GSIG / GG",
+   "aprobado": "GG"
+  }
+ ],
+ "monitoreos": {
+  "programas": [
+   {
+    "anio": 2025,
+    "fecha_actualizacion": "2025-12-01",
+    "items": [
+     {
+      "agente": "ergonomico",
+      "detalle": "",
+      "fecha": "2025-12-05",
+      "meses": [
+       12
+      ],
+      "comentarios": "Se reprogramó el monitoreo porque se definió con Gerencia realizar todos los monitoreos juntos, según la disponibilidad de la empresa que los desarrolla; los tres monitoreos se ejecutaron el 05/12/2025."
+     },
+     {
+      "agente": "fisico",
+      "detalle": "Iluminación",
+      "fecha": "2025-12-05",
+      "meses": [
+       12
+      ],
+      "comentarios": ""
+     },
+     {
+      "agente": "psicosocial",
+      "detalle": "",
+      "fecha": "2025-12-05",
+      "meses": [
+       12
+      ],
+      "comentarios": ""
+     }
+    ]
+   },
+   {
+    "anio": 2026,
+    "fecha_actualizacion": "2025-12-01",
+    "items": [
+     {
+      "agente": "ergonomico",
+      "detalle": "",
+      "fecha": "2026-12-05",
+      "meses": [
+       12
+      ],
+      "comentarios": ""
+     },
+     {
+      "agente": "fisico",
+      "detalle": "Iluminación",
+      "fecha": "2026-12-05",
+      "meses": [
+       12
+      ],
+      "comentarios": ""
+     },
+     {
+      "agente": "psicosocial",
+      "detalle": "",
+      "fecha": "2026-12-05",
+      "meses": [
+       12
+      ],
+      "comentarios": ""
+     }
+    ]
+   }
+  ],
+  "monitoreo": {
+   "fecha": "2025-12-05",
+   "area": "Oficina y laboratorios",
+   "frecuencia": "anual",
+   "tipo_riesgo": "Agente físico: iluminación y ruido por sonometría. Agente disergonómico. Agente psicosocial.",
+   "n_expuestos": 30,
+   "organizacion": "MANAGEMENT SYSTEMS CONSULTANTS S.A.C.",
+   "resultados": [
+    {
+     "agente": "Ergonómico",
+     "resultado": "Método ERGO IBV: porcentaje de cumplimiento entre 84.62% y 97.44% (nivel de riesgo BAJO). Método REBA: 04 puestos con nivel de riesgo BAJO y 02 puestos con nivel de riesgo MEDIO.",
+     "valor": "",
+     "lmp": "",
+     "dentro_lmp": true
+    },
+    {
+     "agente": "Psicosocial",
+     "resultado": "Nivel de riesgo ALTO en tres dimensiones (exigencias psicológicas, inseguridad sobre el futuro y doble presencia); nivel de riesgo BAJO en control sobre el trabajo, apoyo social y calidad de liderazgo y estima.",
+     "valor": "",
+     "lmp": "",
+     "dentro_lmp": false
+    },
+    {
+     "agente": "Físico: iluminación",
+     "resultado": "La estación monitoreada se encuentra dentro de los límites permitidos, salvo un punto en el que se está cambiando la luminaria y se volverá a medir.",
+     "valor": "",
+     "lmp": "500 lux (R.M. 375-2008-TR)",
+     "dentro_lmp": false
+    },
+    {
+     "agente": "Físico: ruido por sonometría",
+     "resultado": "La estación monitoreada se encuentra dentro de los límites permitidos.",
+     "valor": "",
+     "lmp": "",
+     "dentro_lmp": true
+    }
+   ],
+   "causas": "ERGONÓMICO: desconocimiento de las posturas correctas para trabajos de laboratorio. PSICOSOCIAL: se realizará una evaluación más profunda para analizar la causa raíz de las dimensiones en riesgo. ILUMINACIÓN: cambiar o limpiar una luminaria; el resto de puntos salió conforme.",
+   "conclusiones": "ERGONÓMICO: los puestos evaluados con ERGO IBV oficina presentan un cumplimiento de 84.62% a 97.44%, dentro del rango de riesgo BAJO (80% a 100%); por el método REBA se identificaron 02 puestos con riesgo MEDIO. Se tomarán las recomendaciones del informe. PSICOSOCIAL: se determinaron dimensiones en riesgo, al representar más del 50% del nivel de riesgo alto (exigencias psicológicas, inseguridad sobre el futuro, doble presencia). ILUMINACIÓN: continuar con el monitoreo de iluminación después de la subsanación y en el siguiente periodo.",
+   "firma": {
+    "nombre": "César Soto",
+    "cargo": "Presidente del Comité de SST",
+    "fecha": "2025-12-20T00:00:00",
+    "origen": "Carga del registro en Excel"
+   }
+  },
+  "recomendaciones": [
+   {
+    "agente": "Agente Físico: Iluminación",
+    "orden": 1,
+    "actividad": "Evaluar la instalación, reubicación o sustitución de luminarias en el punto de monitoreo IL-06, a fin de alcanzar el nivel mínimo exigido por la R.M. N.° 375-2008-TR (500 Lux para el puesto evaluado).",
+    "fecha": "2025-12-27",
+    "programacion": "",
+    "estado": "en_proceso",
+    "ejecutado_dic_2025": false,
+    "observaciones": "Se realizara el cambio de luminaria y se realizara otra medición"
+   },
+   {
+    "agente": "Agente Físico: Iluminación",
+    "orden": 2,
+    "actividad": "Realizar mantenimiento periódico de las luminarias, incluyendo limpieza, revisión de conexiones y reemplazo de equipos deteriorados o fuera de servicio, para garantizar una iluminación adecuada y uniforme.",
+    "fecha": "",
+    "programacion": "Mensual",
+    "estado": "pendiente",
+    "ejecutado_dic_2025": false,
+    "observaciones": "Mensual mediante inspección SSTMA"
+   },
+   {
+    "agente": "Agente Físico: Iluminación",
+    "orden": 3,
+    "actividad": "Verificar que no existan obstrucciones (estantes altos, instrumentos, sombras proyectadas, etc.) que reduzcan la iluminación directa en las áreas de trabajo.",
+    "fecha": "",
+    "programacion": "Mensual",
+    "estado": "pendiente",
+    "ejecutado_dic_2025": false,
+    "observaciones": "Mensual mediante inspección SSTMA"
+   },
+   {
+    "agente": "Agente Físico: Iluminación",
+    "orden": 4,
+    "actividad": "Continuar con el programa de monitoreo ocupacional, a fin de garantizar el control continuo de los niveles de iluminación y confirmar la eficacia de las acciones correctivas aplicadas.",
+    "fecha": "2026-12-02",
+    "programacion": "",
+    "estado": "pendiente",
+    "ejecutado_dic_2025": false,
+    "observaciones": "Se programará para diciembre 2026"
+   },
+   {
+    "agente": "Agente Físico: Ruido por Sonometría",
+    "orden": 1,
+    "actividad": "Ejecutar el monitoreo para el siguiente período",
+    "fecha": "",
+    "programacion": "",
+    "estado": "pendiente",
+    "ejecutado_dic_2025": false,
+    "observaciones": "Se programará para diciembre 2026"
+   },
+   {
+    "agente": "Agente Disergonómico",
+    "orden": 1,
+    "actividad": "Mientras se permanezca sentado en el uso de laptop o computadora de escritorio, utilizar el respaldo de la silla; evitando flexionar la espalda y sentarse en la mitad delantera del asiento, de esta manera se protegerá la zona lumbar de la espalda.",
+    "fecha": "2025-12-22",
+    "programacion": "",
+    "estado": "ejecutada",
+    "ejecutado_dic_2025": true,
+    "observaciones": "Se envío comunicado a todo el personal sobre las recomendaciones"
+   },
+   {
+    "agente": "Agente Disergonómico",
+    "orden": 2,
+    "actividad": "Regular el equipo de cómputo de manera que este se encuentre al nivel de los ojos del colaborador y el campo visual a partir de la línea horizontal se encuentre conformado por un ángulo entre 30º a 35º.",
+    "fecha": "2025-12-22",
+    "programacion": "",
+    "estado": "ejecutada",
+    "ejecutado_dic_2025": true,
+    "observaciones": "Se envío comunicado a todo el personal sobre las recomendaciones"
+   },
+   {
+    "agente": "Agente Disergonómico",
+    "orden": 3,
+    "actividad": "Regular la silla de modo que le permita al colaborador contar con los codos al nivel de la mesa y así mantener una postura adecuada.",
+    "fecha": "2025-12-22",
+    "programacion": "",
+    "estado": "ejecutada",
+    "ejecutado_dic_2025": true,
+    "observaciones": "Se envío comunicado a todo el personal sobre las recomendaciones"
+   },
+   {
+    "agente": "Agente Disergonómico",
+    "orden": 4,
+    "actividad": "Para el personal que hace uso de lentes con medida, cuando se encuentra frente a las pantallas de visualización de datos, se recomienda realizar ejercicios oculares para relajar y descansar la vista y así evitar la fatiga visual. (Ver Anexo 1).",
+    "fecha": "2025-12-22",
+    "programacion": "",
+    "estado": "ejecutada",
+    "ejecutado_dic_2025": true,
+    "observaciones": "Se envío comunicado a todo el personal sobre las recomendaciones"
+   },
+   {
+    "agente": "Agente Disergonómico",
+    "orden": 5,
+    "actividad": "Por otro lado, se recomienda implementar la realización de pausas activas, ya sean individuales o colectivas que les permitan a los colaboradores, a través de diferentes técnicas, a reducir la fatiga laboral y/o las molestias posturales.",
+    "fecha": "2025-12-22",
+    "programacion": "",
+    "estado": "ejecutada",
+    "ejecutado_dic_2025": true,
+    "observaciones": "Se implemento flayer de pausas activas y se difundio al personal"
+   },
+   {
+    "agente": "Agente Disergonómico",
+    "orden": 6,
+    "actividad": "Para el personal que hace uso de laptop’s y no cuentan con un teclado regulable, evaluar la posibilidad de adquirir un teclado separado y/o cooler regulable como se muestra en las siguientes imágenes.",
+    "fecha": "",
+    "programacion": "En evaluación",
+    "estado": "en_proceso",
+    "ejecutado_dic_2025": false,
+    "observaciones": "En proceso de evaluación"
+   },
+   {
+    "agente": "Agente Disergonómico",
+    "orden": 7,
+    "actividad": "Adecuar la altura de las mesas y superficies de trabajo o que el personal se adecue con asientos ergonómicos para evitar la flexión excesiva del cuello y tronco durante las actividades de calibración y verificación.",
+    "fecha": "2025-12-19",
+    "programacion": "",
+    "estado": "ejecutada",
+    "ejecutado_dic_2025": true,
+    "observaciones": "Se compro sillas ergonomicas para laboratorio"
+   },
+   {
+    "agente": "Agente Disergonómico",
+    "orden": 8,
+    "actividad": "Implementar el uso de asientos ergonómicos regulables con respaldo y apoyo para pies, en reemplazo de bancos altos, a fin de brindar soporte lumbar y mejorar la estabilidad postural durante trabajos prolongados.",
+    "fecha": "2025-12-19",
+    "programacion": "",
+    "estado": "ejecutada",
+    "ejecutado_dic_2025": true,
+    "observaciones": "Se compro sillas ergonomicas para laboratorio"
+   },
+   {
+    "agente": "Agente Disergonómico",
+    "orden": 9,
+    "actividad": "Promover la alternancia de posturas (sentado y de pie) y la realización de pausas activas, evitando la permanencia prolongada en una misma posición.",
+    "fecha": "",
+    "programacion": "Enero / Mayo y septiembre",
+    "estado": "ejecutada",
+    "ejecutado_dic_2025": false,
+    "observaciones": "Se cuenta con flayer de pausas activas"
+   },
+   {
+    "agente": "Agente Disergonómico",
+    "orden": 10,
+    "actividad": "Organizar el puesto de trabajo ubicando los instrumentos y equipos dentro del campo visual y zona de alcance, reduciendo posturas forzadas y movimientos repetitivos de las extremidades superiores.",
+    "fecha": "",
+    "programacion": "Enero / Mayo y septiembre",
+    "estado": "en_proceso",
+    "ejecutado_dic_2025": false,
+    "observaciones": "En proceso de evaluación"
+   },
+   {
+    "agente": "Agente Disergonómico",
+    "orden": 11,
+    "actividad": "Capacitar al personal en buenas prácticas ergonómicas aplicadas al trabajo en laboratorio, para prevenir la fatiga y trastornos musculoesqueléticos.",
+    "fecha": "2026-02-10",
+    "programacion": "",
+    "estado": "en_proceso",
+    "ejecutado_dic_2025": false,
+    "observaciones": "Se programo con médico ocupacional Capacitación sobre buenas practicas ergonomicas en laboratorio"
+   },
+   {
+    "agente": "Agente Disergonómico",
+    "orden": 12,
+    "actividad": "Se recomienda adicionalmente programar y ejecutar una capacitación de ergonomía para mejorar las posturas del personal.",
+    "fecha": "2026-02-10",
+    "programacion": "",
+    "estado": "en_proceso",
+    "ejecutado_dic_2025": false,
+    "observaciones": "Se programo capacitación de ergonomía para todo personal administrativo"
+   },
+   {
+    "agente": "Agente Psicosocial",
+    "orden": 1,
+    "actividad": "Dimensión exigencias psicológicas Se recomienda adecuar la cantidad de trabajo al tiempo disponible para su correcta ejecución, evitando al trabajador sensaciones de urgencia y apremio de tiempo. Por ejemplo: • Lograr una buena planificación como base de la asignación de tareas; averiguar por qué los tiempos asignados para realizar las tareas son escasos e introducir los cambios necesarios para el ajuste adecuado. • Contar con la plantilla necesaria para realizar el trabajo y con la mejora de los procesos productivos o de servicio. • Evitar una estructura salarial demasiado centrada en la parte variable, sobre todo cuando el salario base es bajo. ENTRE OTROS",
+    "fecha": "2026-02-14",
+    "programacion": "",
+    "estado": "en_proceso",
+    "ejecutado_dic_2025": false,
+    "observaciones": "Se coordino con la Dra. Janeth y va capacitar en la segunda semana de febrero 2026 en esta dimesión de resultado alto"
+   },
+   {
+    "agente": "Agente Psicosocial",
+    "orden": 2,
+    "actividad": "Dimensión Inseguridad sobre el Futuro Reducir la inseguridad en el trabajo. Por ejemplo: • Proporcionar estabilidad en el empleo y limitar la temporalidad. • Evitar los cambios de las condiciones de trabajo contra la voluntad del trabajador y negociar dichos cambios (tareas, horario, salario, forma de pago, etc.).",
+    "fecha": "2026-02-14",
+    "programacion": "",
+    "estado": "en_proceso",
+    "ejecutado_dic_2025": false,
+    "observaciones": "Se coordino con la Dra. Janeth y va capacitar en la segunda semana de febrero 2026 en esta dimesión de resultado alto"
+   },
+   {
+    "agente": "Agente Psicosocial",
+    "orden": 3,
+    "actividad": "Dimensión Doble Presencia En relación con la doble presencia (coexistencia simultanea de exigencias laborales y familiares), aplicar medidas para facilitar la conciliación de la vida familiar y laboral. Por ejemplo: • Flexibilizar los horarios de entrada y salida y las jornadas de trabajo de acuerdo con las necesidades de las personas. • Considerar el uso de las denominadas “bolsas” o “bancos” de horas de trabajo a disposición del trabajador (cantidad de tiempo de trabajo que el trabajador puede realizar en aquellos períodos menos perjudiciales para la conciliación de su vida familiar y laboral, y de los que después podrá disponer libremente).",
+    "fecha": "2026-02-14",
+    "programacion": "",
+    "estado": "en_proceso",
+    "ejecutado_dic_2025": false,
+    "observaciones": "Se coordino con la Dra. Janeth y va capacitar en la segunda semana de febrero 2026 en esta dimesión de resultado alto"
+   }
+  ]
+ }
+}

@@ -45,6 +45,9 @@ class Usuario(AbstractUser):
     area = models.CharField('Área', max_length=100)
     laboratorio = models.CharField('Laboratorio', max_length=100, blank=True)
     cargo = models.CharField('Cargo', max_length=100)
+    # Sigla del cargo tal como se imprime en la caja de control de los formatos
+    # (ej. ASIG, GSIG, GT, GG). La usan las firmas de elaboró / revisó / aprobó.
+    sigla_cargo = models.CharField('Sigla del cargo', max_length=12, blank=True)
     telefono = models.CharField('Teléfono', max_length=20, blank=True)
     foto = models.FileField('Foto de perfil', upload_to='usuarios/fotos/', null=True, blank=True)
     # is_active ya viene en AbstractUser — se usa para soft delete
@@ -224,6 +227,13 @@ class ConfiguracionSistema(models.Model):
     nombre_sistema = models.CharField('Nombre del sistema', max_length=100, default='eSYNAPSE 360°')
     nombre_corto = models.CharField('Nombre corto / sigla', max_length=30, default='eSYNAPSE 360°', blank=True)
     subtitulo = models.CharField('Subtítulo / empresa', max_length=150, default='Metrindust S.A.C.', blank=True)
+    direccion = models.CharField('Dirección de la empresa', max_length=200, blank=True)
+    # Datos del empleador que imprimen los registros oficiales de SST.
+    razon_social = models.CharField('Razón social', max_length=200, blank=True)
+    ruc = models.CharField('RUC', max_length=11, blank=True)
+    actividad_economica = models.CharField('Actividad económica', max_length=200, blank=True)
+    aseguradora_sctr = models.CharField('Aseguradora del SCTR', max_length=150, blank=True)
+    responsable_sig = models.CharField('Responsable del Sistema Integrado de Gestión', max_length=150, blank=True)
     logo = models.FileField('Logo del producto', upload_to='config/', null=True, blank=True)
     logo_empresa = models.FileField('Logo de la empresa (cliente)', upload_to='config/', null=True, blank=True)
     color_primario = models.CharField('Color primario (hex)', max_length=7, blank=True)

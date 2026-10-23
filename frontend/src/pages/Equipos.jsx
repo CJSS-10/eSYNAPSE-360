@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { useUltimaRespuesta } from '../lib/useUltimaRespuesta.js'
 import {
   Gauge, Plus, Search, Power, Trash2, Paperclip, RotateCcw, Truck, FileText, SlidersHorizontal,
   ClipboardCheck, Check, X,
@@ -11,7 +12,8 @@ import IntervaloCalibracion from './IntervaloCalibracion.jsx'
 import { api } from '../lib/api.js'
 import { useAuth } from '../context/AuthContext.jsx'
 import { useConfirm } from '../context/ConfirmContext.jsx'
-import { fechaHora } from '../lib/fecha.js'
+import { fecha, fechaHora } from '../lib/fecha.js'
+import TituloModulo from '../components/ui/TituloModulo.jsx'
 
 const MAGNITUDES = [
   ['masa', 'Masa'], ['temperatura', 'Temperatura'], ['electricidad', 'Electricidad'],
@@ -141,13 +143,14 @@ export default function Equipos() {
   useEffect(() => { cargarCatalogos() }, [cargarCatalogos])
   useEffect(() => { localStorage.setItem('equipos_vista', vista) }, [vista])
 
+  const ultima = useUltimaRespuesta()
   const cargar = useCallback(async () => {
     const p = new URLSearchParams()
     if (buscar) p.set('buscar', buscar)
     if (laboratorio) p.set('laboratorio', laboratorio)
     if (estado) p.set('estado', estado)
     if (soloVencidos) p.set('vencidos', '1')
-    const d = await api.equipos.listar(`?${p}`)
+    const d = await ultima(api.equipos.listar(`?${p}`))
     setItems(d.results ?? d)
   }, [buscar, laboratorio, estado, soloVencidos])
   useEffect(() => { cargar().catch(() => {}) }, [cargar])
@@ -327,11 +330,13 @@ export default function Equipos() {
       })
       if (!ok) return
     } else {
-      obs = window.prompt(
-        tipo === 'devolver'
-          ? 'Motivo de la devolución (indica qué se debe corregir):'
-          : 'Motivo del rechazo (opcional):', '')
-      if (obs === null) return  // canceló el prompt
+      obs = await confirmar({
+        titulo: tipo === 'devolver' ? 'Devolver para corrección' : 'Rechazar cambio',
+        mensaje: `“${sol.resumen}” — solicitado por ${sol.solicitante}.`,
+        textoConfirmar: tipo === 'devolver' ? 'Devolver' : 'Rechazar', peligro: tipo === 'rechazar',
+        entrada: { etiqueta: tipo === 'devolver' ? 'Qué debe corregir' : 'Motivo del rechazo', multilinea: true, obligatorio: tipo === 'devolver' },
+      })
+      if (obs === null) return  // canceló
     }
     try {
       if (tipo === 'aprobar') await api.solicitudesEquipo.aprobar(sol.id)
@@ -348,11 +353,7 @@ export default function Equipos() {
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <Gauge className="h-6 w-6 text-esynapse-500" />
-          <div>
-            <h1 className="text-2xl font-bold">Equipos e Instrumentos</h1>
-            <p className="text-xs text-slate-500 dark:text-slate-400">Inventario y hoja de vida del equipamiento del laboratorio</p>
-          </div>
+          <TituloModulo seccion="Laboratorio" titulo="Equipos e instrumentos" descripcion="Inventario y hoja de vida del equipamiento del laboratorio." />
         </div>
         <div className="flex items-center gap-2">
           {puedeAprobar && (
@@ -422,23 +423,23 @@ export default function Equipos() {
 
       {/* INVENTARIO — vista general */}
       <div className="card-esynapse overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="tabla-sig w-full text-sm">
           <thead>
-            <tr className="border-b border-slate-200 text-center text-xs uppercase tracking-wide text-slate-500 dark:border-slate-800 dark:text-slate-400">
+            <tr className="border-b border-slate-200 text-slate-500 dark:border-slate-800 dark:text-slate-400">
               <th className="px-3 py-3">Código</th>
               <th className="px-3 py-3">Descripción</th>
-              <th className="px-3 py-3">Clasificación</th>
+              <th className="px-3 py-3 text-center">Clasificación</th>
               <th className="px-3 py-3">Marca</th>
               <th className="px-3 py-3">Modelo</th>
               <th className="px-3 py-3">N° Serie</th>
               <th className="px-3 py-3">Alcance / Valor nominal</th>
-              <th className="px-3 py-3">Clase</th>
+              <th className="px-3 py-3 text-center">Clase</th>
               <th className="px-3 py-3">Resolución / División de escala (d) / verificación (e)</th>
               <th className="px-3 py-3">N° Certificado</th>
-              <th className="px-3 py-3">Period. (días)</th>
-              <th className="px-3 py-3">Últ. calib.</th>
-              <th className="px-3 py-3">Calib. requerida</th>
-              <th className="px-3 py-3">Estado</th>
+              <th className="px-3 py-3 text-right">Period. (días)</th>
+              <th className="px-3 py-3 text-right">Últ. calib.</th>
+              <th className="px-3 py-3 text-center">Calib. requerida</th>
+              <th className="px-3 py-3 text-center">Estado</th>
               <th className="px-3 py-3">Proveedor calib.</th>
               <th className="px-3 py-3">Observaciones</th>
             </tr>
@@ -450,21 +451,21 @@ export default function Equipos() {
                 <tr key={e.id} onClick={() => abrir(e.id)} className="cursor-pointer border-b border-slate-100 text-center align-middle transition last:border-0 hover:bg-slate-50 dark:border-slate-800/60 dark:hover:bg-slate-800/40">
                   <td className="whitespace-nowrap px-3 py-2.5 font-mono text-xs font-semibold text-esynapse-600 dark:text-esynapse-300">{e.codigo}</td>
                   <td className="min-w-[12rem] max-w-[18rem] whitespace-normal break-words px-3 py-2.5" title={e.nombre}>{e.nombre}</td>
-                  <td className="px-3 py-2.5 text-xs text-slate-500 dark:text-slate-400">{e.clasificacion_display}</td>
+                  <td className="px-3 py-2.5 text-xs text-slate-500 dark:text-slate-400 text-center">{e.clasificacion_display}</td>
                   <td className="px-3 py-2.5 text-slate-500 dark:text-slate-400">{e.marca || '—'}</td>
                   <td className="px-3 py-2.5 text-slate-500 dark:text-slate-400">{e.modelo || '—'}</td>
                   <td className="px-3 py-2.5 text-xs text-slate-500 dark:text-slate-400">{e.serie || '—'}</td>
                   <td className="px-3 py-2.5 text-xs text-slate-500 dark:text-slate-400">{e.cantidad || '—'}</td>
-                  <td className="px-3 py-2.5 text-xs text-slate-500 dark:text-slate-400">{e.clase_exactitud || '—'}</td>
+                  <td className="px-3 py-2.5 text-xs text-slate-500 dark:text-slate-400 text-center">{e.clase_exactitud || '—'}</td>
                   <td className="px-3 py-2.5 text-xs text-slate-500 dark:text-slate-400">{e.resolucion || '—'}</td>
                   <td className="px-3 py-2.5 text-xs text-slate-500 dark:text-slate-400">{e.n_certificado || '—'}</td>
-                  <td className="px-3 py-2.5 text-center text-xs text-slate-500 dark:text-slate-400">{e.periodicidad_dias || '—'}</td>
-                  <td className="px-3 py-2.5 text-xs text-slate-500 dark:text-slate-400">{e.fecha_ultima_calibracion || '—'}</td>
-                  <td className="whitespace-nowrap px-3 py-2.5 text-xs">
+                  <td className="px-3 py-2.5 text-xs text-slate-500 dark:text-slate-400 text-right">{e.periodicidad_dias || '—'}</td>
+                  <td className="px-3 py-2.5 text-xs text-slate-500 dark:text-slate-400 text-right">{e.fecha_ultima_calibracion || '—'}</td>
+                  <td className="whitespace-nowrap px-3 py-2.5 text-xs text-center">
                     <span className="text-slate-500 dark:text-slate-400">{e.fecha_proxima_calibracion || '—'}</span>
-                    {bc && <span className={`ml-1.5 rounded px-1.5 py-0.5 text-[10px] font-medium ${bc[1]}`}>{bc[0]}</span>}
+                    {bc && <span className={`ml-1.5 whitespace-nowrap rounded px-1.5 py-0.5 text-[11px] font-medium ${bc[1]}`}>{bc[0]}</span>}
                   </td>
-                  <td className="px-3 py-2.5"><span className={`rounded-full px-2 py-0.5 text-xs font-medium ${COLOR_ESTADO[e.estado_display] || ''}`}>{e.estado_display}</span></td>
+                  <td className="px-3 py-2.5 text-center"><span className={`rounded-full px-2 py-0.5 text-xs font-medium ${COLOR_ESTADO[e.estado_display] || ''}`}>{e.estado_display}</span></td>
                   <td className="px-3 py-2.5 text-xs text-slate-500 dark:text-slate-400">{e.proveedor_calibracion || '—'}</td>
                   <td className="min-w-[12rem] max-w-[18rem] whitespace-normal break-words px-3 py-2.5 text-xs text-slate-500 dark:text-slate-400" title={e.observaciones || ''}>{e.observaciones || '—'}</td>
                 </tr>
@@ -541,7 +542,7 @@ export default function Equipos() {
       </Modal>
 
       {/* HOJA DE VIDA — modal con pestañas que calcan el Excel */}
-      <Modal abierto={!!detalle} titulo={detalle ? detalle.nombre : ''} onCerrar={() => setDetalle(null)} ancho="max-w-5xl">
+      <Modal abierto={!!detalle} titulo={detalle ? detalle.nombre : ''} onCerrar={() => setDetalle(null)} panel ancho="max-w-5xl">
         {detalle && (
           <div className="space-y-4">
             <div className="flex flex-wrap items-center gap-2">
@@ -677,9 +678,9 @@ export default function Equipos() {
                     <tr key={m.id} className="border-b border-slate-100 last:border-0 dark:border-slate-800/60">
                       <td className="px-3 py-2">{m.motivo_display}</td>
                       <td className="px-3 py-2 text-slate-500 dark:text-slate-400">{m.destino || '—'}</td>
-                      <td className="px-3 py-2 text-xs">{m.fecha_salida ? new Date(m.fecha_salida).toLocaleDateString() : '—'}</td>
+                      <td className="px-3 py-2 text-xs">{m.fecha_salida ? fecha(m.fecha_salida) : '—'}</td>
                       <td className="px-3 py-2 text-xs">{m.estado_salida_display || '—'}{m.estado_retorno_display ? ` → ${m.estado_retorno_display}` : ''}</td>
-                      <td className="px-3 py-2 text-xs">{m.fecha_retorno ? new Date(m.fecha_retorno).toLocaleDateString() : <span className="text-amber-500">Fuera</span>}</td>
+                      <td className="px-3 py-2 text-xs">{m.fecha_retorno ? fecha(m.fecha_retorno) : <span className="text-amber-500">Fuera</span>}</td>
                       <td className="px-3 py-2 text-right">
                         {puedeEditar && !m.fecha_retorno && (
                           <button onClick={() => accion(() => api.equipos.registrarRetorno(detalle.id, { movimiento_id: m.id, estado_retorno: 'bueno', responsable_retorno: '' }))} className="btn-ghost text-xs">Registrar retorno</button>
@@ -757,7 +758,7 @@ export default function Equipos() {
                 <div className="min-w-0">
                   <p className="text-sm font-medium">{s.resumen || `${s.operacion_display} · ${s.entidad_display}`}</p>
                   <p className="text-xs text-slate-500 dark:text-slate-400">
-                    {s.equipo_codigo ? `${s.equipo_codigo} · ` : ''}Solicitado por {s.solicitante} · {new Date(s.created_at).toLocaleString()}
+                    {s.equipo_codigo ? `${s.equipo_codigo} · ` : ''}Solicitado por {s.solicitante} · {fechaHora(s.created_at)}
                   </p>
                   {s.payload && Object.keys(s.payload).length > 0 && (
                     <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Campos propuestos: {Object.keys(s.payload).join(', ')}</p>
@@ -797,7 +798,7 @@ export default function Equipos() {
                   <div className="min-w-0">
                     <p className="text-sm font-medium">{s.resumen || `${s.operacion_display} · ${s.entidad_display}`}</p>
                     <p className="text-xs text-slate-500 dark:text-slate-400">
-                      Enviado {new Date(s.created_at).toLocaleString()}{s.resuelto_at ? ` · resuelto ${new Date(s.resuelto_at).toLocaleString()}` : ''}
+                      Enviado {fechaHora(s.created_at)}{s.resuelto_at ? ` · resuelto ${fechaHora(s.resuelto_at)}` : ''}
                     </p>
                     {s.observaciones && (
                       <p className="mt-1 text-xs text-slate-600 dark:text-slate-300"><span className="font-medium">Motivo:</span> {s.observaciones}</p>
@@ -824,7 +825,7 @@ function Tabla({ cabeceras, children }) {
     <div className="overflow-x-auto rounded-lg border border-slate-200 dark:border-slate-800">
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-slate-200 bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500 dark:border-slate-800 dark:bg-slate-800/40 dark:text-slate-400">
+          <tr className="border-b border-slate-200 bg-slate-50 text-left text-xs text-slate-500 dark:border-slate-800 dark:bg-slate-800/40 dark:text-slate-400">
             {cabeceras.map((c, i) => <th key={i} className="px-3 py-2">{c}</th>)}
           </tr>
         </thead>

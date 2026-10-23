@@ -1,0 +1,387 @@
+[
+ {
+  "clase": "Físico",
+  "codigo": "Físico - 001",
+  "peligro": "Ruido",
+  "riesgo": "Exposición a Ruido",
+  "consecuencia": "Pérdida Auditiva Inducida por Ruido, Nerviosismo"
+ },
+ {
+  "clase": "Físico",
+  "codigo": "Físico - 002",
+  "peligro": "Vibraciones",
+  "riesgo": "Exposición a vibraciones",
+  "consecuencia": "Afecciones de los músculos, de los tendones, de los huesos, de las articulaciones, de los vasos sanguíneos periféricos o de los nervios periféricos"
+ },
+ {
+  "clase": "Físico",
+  "codigo": "Físico - 003",
+  "peligro": "Radiaciones No Ionizantes",
+  "riesgo": "Exposición a radiaciones no ionizantes",
+  "consecuencia": "Efecto de la Radiación, Problemas Neurológicos, Lesión de Retina"
+ },
+ {
+  "clase": "Físico",
+  "codigo": "Físico - 004",
+  "peligro": "Frío / calor",
+  "riesgo": "Exposición",
+  "consecuencia": "Frio: Hipotermia, gripes, molestias en la garganta, faringitis\nCalor: Quemaduras, insolación, deshidratación, fatiga, irritación de los ojos."
+ },
+ {
+  "clase": "Físico",
+  "codigo": "Físico - 005",
+  "peligro": "Corrientes de aire",
+  "riesgo": "Exposición a corrientes de aire",
+  "consecuencia": "Molestias en la garganta, faringitis, afecciones respiratorias, somnolencia, dolor de cabeza, problemas cutáneos e irritación de los ojos."
+ },
+ {
+  "clase": "Físico",
+  "codigo": "Físico - 006",
+  "peligro": "Ventilación",
+  "riesgo": "Exposición a ventilación deficiente",
+  "consecuencia": "Molestias en la garganta, faringitis, afecciones respiratorias, somnolencia, dolor de cabeza, problemas cutáneos e irritación de los ojos."
+ },
+ {
+  "clase": "Físico",
+  "codigo": "Físico - 007",
+  "peligro": "Humedad",
+  "riesgo": "Exposición Excesiva a Humedad",
+  "consecuencia": "Enfermedades Contagiosas o Infecciosas, Dermatosis, Resfriados, Alergias"
+ },
+ {
+  "clase": "Físico",
+  "codigo": "Físico - 008",
+  "peligro": "Presión Atmosférica",
+  "riesgo": "Exposición a Baja Presión Atmosférica",
+  "consecuencia": "Aumento de Presión Arterial, Soroche."
+ },
+ {
+  "clase": "Físico",
+  "codigo": "Físico - 009",
+  "peligro": "Radiaciones Ionizantes",
+  "riesgo": "Exposición a radiaciones ionizantes",
+  "consecuencia": "Quemaduras, Efectos de la Radiación, Lesiones de Retina"
+ },
+ {
+  "clase": "Químico",
+  "codigo": "Químico - 001",
+  "peligro": "Sustancias Químicas, Vapores, Compuestos o productos químicos en general",
+  "riesgo": "Contacto de la vista con sustancias o agentes dañinos.",
+  "consecuencia": "Irritación, Conjuntivitis Química, Quemadura"
+ },
+ {
+  "clase": "Químico",
+  "codigo": "Químico - 002",
+  "peligro": "Sustancias Químicas, Vapores, Compuestos o productos químicos en general",
+  "riesgo": "Contacto de la piel con sustancias o agentes dañinos.",
+  "consecuencia": "Dermatitis de contacto, Quemaduras, Envenenamiento"
+ },
+ {
+  "clase": "Químico",
+  "codigo": "Químico - 003",
+  "peligro": "Sustancias Químicas, Vapores, Compuestos o productos químicos en general",
+  "riesgo": "Inhalación de sustancias o agentes dañinos",
+  "consecuencia": "Asfixia, Intoxicación, Irritación, Neumoconiosis, problemas del aparato respiratorio, dolencias hepáticas, renales y neurológicas"
+ },
+ {
+  "clase": "Químico",
+  "codigo": "Químico - 004",
+  "peligro": "Sustancias Químicas, Vapores, Compuestos o productos químicos en general",
+  "riesgo": "Ingestión de sustancias o agentes dañinos",
+  "consecuencia": "Intoxicación, Neumonía Química, Dolencias hepáticas, renales y neurológicas"
+ },
+ {
+  "clase": "Químico",
+  "codigo": "Químico - 005",
+  "peligro": "Polvo (Material Particulado)",
+  "riesgo": "Inhalación de polvo (material particulado)",
+  "consecuencia": "Neumoconiosis, irritación, intoxicación y problemas alérgicos"
+ },
+ {
+  "clase": "Químico",
+  "codigo": "Químico - 006",
+  "peligro": "Sustancias Químicas (Fluidos)",
+  "riesgo": "Contacto de la vista / Contacto de la piel",
+  "consecuencia": "Irritación, Conjuntivitis Química\nDermatitis de contacto"
+ },
+ {
+  "clase": "Químico",
+  "codigo": "Químico - 007",
+  "peligro": "Humos / Gases",
+  "riesgo": "Contacto de la vista",
+  "consecuencia": "Irritación, Conjuntivitis Química"
+ },
+ {
+  "clase": "Químico",
+  "codigo": "Químico - 008",
+  "peligro": "Humos / Gases",
+  "riesgo": "Inhalación de sustancias o agentes dañinos",
+  "consecuencia": "Asfixia, Intoxicación, Irritación, Neumoconiosis, problemas del aparato respiratorio, dolencias hepáticas, renales y neurológicas"
+ },
+ {
+  "clase": "Biológico",
+  "codigo": "Biológico - 001",
+  "peligro": "Agentes Biológicos",
+  "riesgo": "Exposición a agentes biológicos",
+  "consecuencia": "Enfermedades infecciosas o parasitarias."
+ },
+ {
+  "clase": "Biológico",
+  "codigo": "Biológico - 002",
+  "peligro": "Animales / Insectos",
+  "riesgo": "Picadura de animales",
+  "consecuencia": "Lesiones de piel, Envenenamiento"
+ },
+ {
+  "clase": "Ergonómico",
+  "codigo": "Ergonómico - 001",
+  "peligro": "Movimientos Repetitivos",
+  "riesgo": "Ergonómico por movimientos repetitivos",
+  "consecuencia": "Cervicalgía, Dorsalgía, Escoliosis, Síndrome de Túnel Carpiano, Lumbalgias, Bursitis, Celulitis, Cuello u hombro tensos, Dedo engatillado, Epicondilitis, Ganglios, Osteoartritis, tendinitis, Tenosinovitis."
+ },
+ {
+  "clase": "Ergonómico",
+  "codigo": "Ergonómico - 002",
+  "peligro": "Espacio Inadecuado de Trabajo",
+  "riesgo": "Ergonómico por espacio inadecuado de trabajo",
+  "consecuencia": "Distensión, Torsión, Fatiga y DORT (disturbios osteo-musculares relacionados al trabajo)"
+ },
+ {
+  "clase": "Ergonómico",
+  "codigo": "Ergonómico - 003",
+  "peligro": "Iluminación Inadecuada",
+  "riesgo": "Ergonómico por condiciones de iluminación inadecuadas",
+  "consecuencia": "Disminución de la agudeza visual, asteopía, miopía, cefálea."
+ },
+ {
+  "clase": "Ergonómico",
+  "codigo": "Ergonómico - 004",
+  "peligro": "Sobreesfuerzo Muscular",
+  "riesgo": "Ergonómico por sobreesfuerzo.",
+  "consecuencia": "Distensión, Torsión, Fatiga y DORT (disturbios osteo-musculares relacionados al trabajo)"
+ },
+ {
+  "clase": "Ergonómico",
+  "codigo": "Ergonómico - 005",
+  "peligro": "Postura Inadecuada",
+  "riesgo": "Ergonómico por postura inadecuada",
+  "consecuencia": "Distensión, Torsión, Fatiga y DORT (disturbios osteo-musculares relacionados al trabajo)"
+ },
+ {
+  "clase": "Ergonómico",
+  "codigo": "Ergonómico - 006",
+  "peligro": "Sobreesfuerzo Visual",
+  "riesgo": "Ergonómico por sobreesfuerzo.",
+  "consecuencia": "Tensión ocular, fatiga \nocular, irritación, sensación de ardor, enrojecimiento, visión borrosa, visión doble y dolres de cabeza."
+ },
+ {
+  "clase": "Mecánico",
+  "codigo": "Mecánico - 001",
+  "peligro": "Vehículo Motorizado",
+  "riesgo": "Accidente Vehicular",
+  "consecuencia": "Fractura, Contusiones, Lesiones, Muerte"
+ },
+ {
+  "clase": "Mecánico",
+  "codigo": "Mecánico - 002",
+  "peligro": "Pieza en movimiento",
+  "riesgo": "Atrapado por pieza en movimiento",
+  "consecuencia": "Fractura, Contusiones, Lesiones"
+ },
+ {
+  "clase": "Mecánico",
+  "codigo": "Mecánico - 003",
+  "peligro": "Atmosfera Peligrosa",
+  "riesgo": "Exposición a atmósfera peligrosa",
+  "consecuencia": "Asfixia, Intoxicación, Muerte"
+ },
+ {
+  "clase": "Mecánico",
+  "codigo": "Mecánico - 004",
+  "peligro": "Superficie Resbaladiza, Irregular, Obstáculos en el piso",
+  "riesgo": "Caída al mismo nivel",
+  "consecuencia": "Escoriaciones, Abrasiones (Lesiones Superficial), Fracturas y Contusiones"
+ },
+ {
+  "clase": "Mecánico",
+  "codigo": "Mecánico - 005",
+  "peligro": "Trabajos en altura (encima de 1.80 metros)",
+  "riesgo": "Caída a distinto nivel",
+  "consecuencia": "Fractura, Contusiones, Muerte"
+ },
+ {
+  "clase": "Mecánico",
+  "codigo": "Mecánico - 006",
+  "peligro": "Superficies/Material a elevadas temperaturas",
+  "riesgo": "Contacto con superficies a elevadas temperaturas",
+  "consecuencia": "Quemaduras"
+ },
+ {
+  "clase": "Mecánico",
+  "codigo": "Mecánico - 007",
+  "peligro": "Superficies Punzo Cortantes",
+  "riesgo": "Cortado por superficies punzo cortantes",
+  "consecuencia": "Cortes, Escoriaciones, Amputaciones, Muerte"
+ },
+ {
+  "clase": "Mecánico",
+  "codigo": "Mecánico - 008",
+  "peligro": "Objetos Almacenados en Altura",
+  "riesgo": "Golpeado por caída de materiales almacenados en altura",
+  "consecuencia": "Contusión, Aplastamiento (Superficie Cutánea Intacta), Traumatismo, Muerte"
+ },
+ {
+  "clase": "Mecánico",
+  "codigo": "Mecánico - 009",
+  "peligro": "Carga en Movimiento",
+  "riesgo": "Golpeado por caída de cargas en movimiento",
+  "consecuencia": "Contusión, Aplastamiento (Superficie Cutánea Intacta), Traumatismo, Muerte"
+ },
+ {
+  "clase": "Mecánico",
+  "codigo": "Mecánico - 010",
+  "peligro": "Manipulación de Herramientas/objetos",
+  "riesgo": "Golpeado por caída de herramientas / objetos (manipulación)",
+  "consecuencia": "Traumatismo, Contusiones"
+ },
+ {
+  "clase": "Mecánico",
+  "codigo": "Mecánico - 011",
+  "peligro": "Fluidos a Presión, Equipo Presurizado",
+  "riesgo": "Golpeado por fluidos a presión",
+  "consecuencia": "Traumatismo, Contusiones"
+ },
+ {
+  "clase": "Mecánico",
+  "codigo": "Mecánico - 012",
+  "peligro": "Objetos/Equipos",
+  "riesgo": "Golpeado contra objetos / equipos",
+  "consecuencia": "Traumatismo, Contusiones, Muerte"
+ },
+ {
+  "clase": "Mecánico",
+  "codigo": "Mecánico - 013",
+  "peligro": "Partículas en Proyección",
+  "riesgo": "Contacto con partículas en proyección",
+  "consecuencia": "Contusiones, Lesiones"
+ },
+ {
+  "clase": "Mecánico",
+  "codigo": "Mecánico - 014",
+  "peligro": "Proyeción de Chispas\n(Corte con esmeril o amoladora, soldadura y maquina de oxicorte u otros)",
+  "riesgo": "Conato de incendio, Incendio",
+  "consecuencia": "Quemaduras, Asfixia"
+ },
+ {
+  "clase": "Mecánico",
+  "codigo": "Mecánico - 016",
+  "peligro": "Proyeción de Chispas\n(Corte con esmeril o amoladora, soldadura y maquina de oxicorte u otros)",
+  "riesgo": "Contacto con chispas en proyección",
+  "consecuencia": "Quemaduras"
+ },
+ {
+  "clase": "Mecánico",
+  "codigo": "Mecánico - 015",
+  "peligro": "Aire comprimido",
+  "riesgo": "Roturas o fugas",
+  "consecuencia": "Contusiones, Lesiones en el ojo"
+ },
+ {
+  "clase": "Eléctrico",
+  "codigo": "Eléctrico - 001",
+  "peligro": "Energía Eléctrica (Directo o Indirecto)",
+  "riesgo": "Contacto con electricidad",
+  "consecuencia": "Shock eléctrico, paro cardio-respiratorio, Quemaduras I, II, III.\nElectrizamiento"
+ },
+ {
+  "clase": "Locativo",
+  "codigo": "Locativo - 001",
+  "peligro": "Material Inflamable",
+  "riesgo": "Incendio",
+  "consecuencia": "Quemaduras, Asfixia, Muerte"
+ },
+ {
+  "clase": "Locativo",
+  "codigo": "Locativo - 002",
+  "peligro": "Fuga de gases / Gas comprimido",
+  "riesgo": "Explosión",
+  "consecuencia": "Quemaduras, Traumatismos, Contusiones, Asfixia, Muerte"
+ },
+ {
+  "clase": "Psicosocial",
+  "codigo": "Psicosocial - 001",
+  "peligro": "Condiciones de trabajo: Tipo de trabajo, grado de autonomía, aislamiento, promoción, estilo de dirección, turnicidad, ritmos y jornadas de trabajo y acoso psicológico)",
+  "riesgo": "Trastornos Biológicos y Sociales por Condiciones de Trabajo",
+  "consecuencia": "Ansiedad, Nerviosismo, Fatiga, Irritabilidad, Estrés, Burnout, etc"
+ },
+ {
+  "clase": "Psicosocial",
+  "codigo": "Psicosocial - 002",
+  "peligro": "Trabajo en Turno Nocturno, Monotonía y/o Repetibilidad, Jornada de Trabajo Prolongada",
+  "riesgo": "Trastornos Biológicos y Sociales por Jornada de Trabajo Prolongada",
+  "consecuencia": "Ansiedad, Nerviosismo, Stress"
+ },
+ {
+  "clase": "Psicosocial",
+  "codigo": "Psicosocial - 003",
+  "peligro": "Trabajo en Turno Nocturno, Monotonía y/o Repetibilidad, Jornada de Trabajo Prolongada",
+  "riesgo": "Trastornos Biológicos y Sociales por Jornada de Trabajo Prolongada",
+  "consecuencia": "(acoso sexual, acoso psicológicos, malos tratos)"
+ },
+ {
+  "clase": "Otros",
+  "codigo": "Otro - 001",
+  "peligro": "Manifestación Publica/Toma de Instalaciones",
+  "riesgo": "Golpeado o agredido",
+  "consecuencia": "Contusiones, Lesiones, Muerte"
+ },
+ {
+  "clase": "Otros",
+  "codigo": "Otro - 002",
+  "peligro": "Movilización/Desplazamiento de personal",
+  "riesgo": "Accidente",
+  "consecuencia": "Traumatismo, Contusiones, Muerte"
+ },
+ {
+  "clase": "Otros",
+  "codigo": "Otro - 003",
+  "peligro": "Potencial Incendio",
+  "riesgo": "Incendio",
+  "consecuencia": "Quemaduras, Asfixia, Muerte"
+ },
+ {
+  "clase": "Otros",
+  "codigo": "Otro - 004",
+  "peligro": "Potencial Sismo / Terremoto",
+  "riesgo": "Sismo / Terremoto",
+  "consecuencia": "Heridas, contusiones, muerte"
+ },
+ {
+  "clase": "Otros",
+  "codigo": "Otro - 005",
+  "peligro": "Tsunami",
+  "riesgo": "Inundación / destrucción",
+  "consecuencia": "Muerte, caídas, contusiones."
+ },
+ {
+  "clase": "Otros",
+  "codigo": "Otro - 006",
+  "peligro": "Posible embarazo\n (Mujer Gestante)",
+  "riesgo": "Aborto",
+  "consecuencia": "Hemorragias e infecciones"
+ },
+ {
+  "clase": "Otros",
+  "codigo": "Otro - 007",
+  "peligro": "Vehículo Motorizado en movimiento",
+  "riesgo": "- Choque\n- Atropellos",
+  "consecuencia": "Fractura, Contusiones, Lesiones, muerte"
+ },
+ {
+  "clase": "Otros",
+  "codigo": "Otro - 008",
+  "peligro": "Asalto",
+  "riesgo": "- Robo del carro \n- Robo de objetos personales",
+  "consecuencia": "- Pérdida del vehículo\n- Perdida de objetos personales\n- Contusiones lesiones"
+ }
+]

@@ -7,7 +7,7 @@
 
 ## 1. Qué es
 
-**eSYNAPSE 360°** es un Sistema Integrado de Gestión Empresarial (SGI) construido a la
+**eSYNAPSE 360°** es un Sistema Integrado de Gestión Empresarial (SIG) construido a la
 medida de **Metrindust S.A.C.** (laboratorio de calibración multimagnitud acreditado
 ISO/IEC 17025:2017 ante INACAL, Lima–Perú) con el objetivo doble de:
 

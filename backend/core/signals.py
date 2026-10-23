@@ -55,6 +55,9 @@ ENTIDAD_MODULO = {
     'MovimientoEquipo': 'equipos',
     'InformeEquipo': 'equipos',
     'CartaTrazabilidad': 'equipos',
+    'Area': 'organizacion',
+    'Puesto': 'organizacion',
+    'Trabajador': 'organizacion',
 }
 
 # Campos que nunca se registran en el log (sensibles o ruido)
@@ -72,7 +75,7 @@ def _es_auditable(instance) -> bool:
     """Solo se auditan modelos de las apps del SIGE, nunca el propio log."""
     if instance.__class__.__name__ == 'LogAuditoria':
         return False
-    return instance._meta.app_label in ('core', 'esynapse_sig')
+    return instance._meta.app_label in ('core', 'esynapse_sig', 'organizacion')
 
 
 def _datos_usuario():

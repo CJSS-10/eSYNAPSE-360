@@ -1,26 +1,60 @@
-import { useState } from 'react'
-import { NavLink } from 'react-router-dom'
-import { ChevronsLeft, ChevronsRight, Atom, Lock } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { NavLink, useLocation } from 'react-router-dom'
+import { ChevronDown, ChevronsLeft, ChevronsRight, Atom, Lock } from 'lucide-react'
 import { GRUPOS_MODULOS } from '../lib/modulos.js'
+import { api } from '../lib/api.js'
 import { useAuth } from '../context/AuthContext.jsx'
 import { useConfig } from '../context/ConfigContext.jsx'
 
+// Menú lateral (ADR-0007): grupos por área de trabajo, con los pendientes de cada módulo al lado.
+// Los módulos aún no construidos se reúnen al final en «Por construir», plegado.
+const lista = (r) => (r?.results ?? r ?? [])
+
 export default function Sidebar() {
   const [colapsado, setColapsado] = useState(false)
+  const [verFuturos, setVerFuturos] = useState(false)
+  const [conteos, setConteos] = useState({})
   const { usuario, tienePermiso } = useAuth()
   const { config } = useConfig()
+  const location = useLocation()
   const habilitados = new Set(config.modulos_habilitados || [])
   const esAdmin = usuario?.is_superuser || (usuario?.roles || []).includes('Administrador del Sistema')
 
   const visible = (item) => {
     if (item.libre || item.clave === 'dashboard') return true
     const modulo = item.modulo || item.clave
-    // Licenciamiento: módulo no habilitado en esta instalación → oculto
-    if (habilitados.size > 0 && !habilitados.has(modulo)) return false
-    if (item.fase !== 0) return true // se muestra deshabilitado
+    if (habilitados.size > 0 && !habilitados.has(modulo)) return false   // licenciamiento
+    if (item.fase !== 0) return true
     if (item.soloAdmin) return esAdmin
     return tienePermiso(modulo, 'leer')
   }
+
+  // Pendientes por módulo: tus tareas, hallazgos abiertos, solicitudes y quejas abiertas.
+  useEffect(() => {
+    let vivo = true
+    const cargar = () => {
+      const pedidos = [
+        ['mis_tareas', api.misTareas().then((d) => (d.tareas || []).length)],
+        tienePermiso('hallazgos', 'leer') && ['hallazgos', api.hallazgos.resumen().then((d) => d.abiertos)],
+        tienePermiso('acciones_correctivas', 'leer') && ['acciones_correctivas', api.sac.listar('?abiertas=1').then((d) => lista(d).length)],
+        tienePermiso('quejas', 'leer') && ['quejas', api.quejas.listar('?abiertas=1').then((d) => lista(d).length)],
+      ].filter(Boolean)
+      Promise.allSettled(pedidos.map(([, p]) => p)).then((rs) => {
+        if (!vivo) return
+        const c = {}
+        rs.forEach((r, i) => { if (r.status === 'fulfilled' && r.value) c[pedidos[i][0]] = r.value })
+        setConteos(c)
+      })
+    }
+    cargar()
+    const t = setInterval(cargar, 120000)
+    return () => { vivo = false; clearInterval(t) }
+  }, [location.pathname])  // eslint-disable-line react-hooks/exhaustive-deps
+
+  const grupos = GRUPOS_MODULOS
+    .map((g) => ({ ...g, activos: g.items.filter((i) => i.fase === 0 && visible(i)) }))
+    .filter((g) => g.activos.length > 0)
+  const futuros = GRUPOS_MODULOS.flatMap((g) => g.items.filter((i) => i.fase !== 0 && visible(i)))
 
   return (
     <aside
@@ -30,50 +64,26 @@ export default function Sidebar() {
       {/* Marca */}
       <div className="flex h-14 items-center gap-2 border-b border-slate-200 px-4 dark:border-slate-800">
         {config.logo_url
-          ? <img src={config.logo_url} alt="logo" className={`${colapsado ? 'h-8 w-8' : 'h-10 w-10'} shrink-0 rounded object-contain`} />
+          ? <img src={config.logo_url} alt="" className={`${colapsado ? 'h-8 w-8' : 'h-10 w-10'} shrink-0 rounded object-contain`} />
           : <Atom className={`${colapsado ? 'h-8 w-8' : 'h-9 w-9'} shrink-0 text-esynapse-500`} />}
         {!colapsado && (
           <div className="leading-tight">
-            <p className="text-sm font-bold tracking-wide">{config.nombre_corto || 'eSYNAPSE 360°'}</p>
-            <p className="text-[10px] text-slate-500 dark:text-slate-400">{config.subtitulo}</p>
+            <p className="text-sm font-bold">{config.nombre_corto || 'eSYNAPSE 360°'}</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">{config.subtitulo}</p>
           </div>
         )}
       </div>
 
-      {/* Módulos */}
-      <nav className="flex-1 overflow-y-auto px-2 py-3">
-        {GRUPOS_MODULOS.map((grupo) => (
+      <nav aria-label="Menú principal" className="flex-1 overflow-y-auto px-2 py-3">
+        {grupos.map((grupo) => (
           <div key={grupo.titulo} className="mb-4">
             {!colapsado && (
-              <p className="px-2 pb-1 text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                {grupo.titulo}
-              </p>
+              <p className="px-2 pb-1 text-xs font-semibold text-slate-500 dark:text-slate-400">{grupo.titulo}</p>
             )}
             <ul className="space-y-0.5">
-              {grupo.items.filter(visible).map((item) => {
+              {grupo.activos.map((item) => {
                 const Icono = item.icono
-                const habilitado = item.fase === 0
-                if (!habilitado) {
-                  return (
-                    <li key={item.clave}>
-                      <div
-                        title={`${item.nombre} — disponible en Fase ${item.fase}`}
-                        className="flex cursor-not-allowed items-center gap-3 rounded-lg px-2 py-1.5
-                          text-sm text-slate-400 opacity-60 dark:text-slate-600"
-                      >
-                        <Icono className="h-4 w-4 shrink-0" />
-                        {!colapsado && (
-                          <span className="flex-1 truncate">{item.nombre}</span>
-                        )}
-                        {!colapsado && (
-                          <span className="flex items-center gap-0.5 rounded bg-slate-200 px-1 text-[9px] font-medium dark:bg-slate-700/70">
-                            <Lock className="h-2.5 w-2.5" /> F{item.fase}
-                          </span>
-                        )}
-                      </div>
-                    </li>
-                  )
-                }
+                const n = conteos[item.clave]
                 return (
                   <li key={item.clave}>
                     <NavLink
@@ -83,13 +93,17 @@ export default function Sidebar() {
                       className={({ isActive }) =>
                         `flex items-center gap-3 rounded-lg px-2 py-2 text-sm transition-colors ${
                           isActive
-                            ? 'bg-esynapse-600/12 font-semibold text-esynapse-700 ring-1 ring-inset ring-esynapse-600/20 dark:bg-esynapse-500/15 dark:text-esynapse-300 dark:ring-esynapse-400/20'
+                            ? 'bg-esynapse-600/15 font-semibold text-esynapse-700 dark:bg-esynapse-500/15 dark:text-esynapse-300'
                             : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white'
                         }`
                       }
                     >
                       <Icono className="h-4 w-4 shrink-0" />
-                      {!colapsado && <span className="truncate">{item.nombre}</span>}
+                      {!colapsado && <span className="flex-1 truncate">{item.nombre}</span>}
+                      {!colapsado && n > 0 && (
+                        <span className="rounded-full bg-slate-100 px-1.5 text-xs font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300"
+                          aria-label={`${n} pendientes`}>{n > 99 ? '99+' : n}</span>
+                      )}
                     </NavLink>
                   </li>
                 )
@@ -97,14 +111,40 @@ export default function Sidebar() {
             </ul>
           </div>
         ))}
+
+        {futuros.length > 0 && !colapsado && (
+          <div className="border-t border-slate-200 pt-2 dark:border-slate-800">
+            <button type="button" onClick={() => setVerFuturos(!verFuturos)} aria-expanded={verFuturos}
+              className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left text-xs font-semibold text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800">
+              <Lock className="h-3.5 w-3.5" />
+              <span className="flex-1">Por construir ({futuros.length})</span>
+              <ChevronDown className={`h-3.5 w-3.5 transition-transform ${verFuturos ? 'rotate-180' : ''}`} />
+            </button>
+            {verFuturos && (
+              <ul className="mt-1 space-y-0.5">
+                {futuros.map((item) => {
+                  const Icono = item.icono
+                  return (
+                    <li key={item.clave} title={`Disponible en la fase ${item.fase}`}
+                      className="flex items-center gap-3 px-2 py-1.5 text-sm text-slate-400 dark:text-slate-500">
+                      <Icono className="h-4 w-4 shrink-0" />
+                      <span className="flex-1 truncate">{item.nombre}</span>
+                      <span className="text-xs">Fase {item.fase}</span>
+                    </li>
+                  )
+                })}
+              </ul>
+            )}
+          </div>
+        )}
       </nav>
 
-      {/* Colapsar */}
       <button
         onClick={() => setColapsado(!colapsado)}
         className="flex h-11 items-center justify-center border-t border-slate-200 text-slate-500
           transition hover:bg-slate-100 dark:border-slate-800 dark:hover:bg-slate-800"
-        title={colapsado ? 'Expandir' : 'Colapsar'}
+        title={colapsado ? 'Expandir el menú' : 'Contraer el menú'}
+        aria-label={colapsado ? 'Expandir el menú' : 'Contraer el menú'}
       >
         {colapsado ? <ChevronsRight className="h-4 w-4" /> : <ChevronsLeft className="h-4 w-4" />}
       </button>

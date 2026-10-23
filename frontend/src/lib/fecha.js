@@ -4,6 +4,9 @@
 
 export function fecha(iso) {
   if (!iso) return ''
+  // Una fecha sin hora ('2026-10-14') se devuelve tal cual: convertirla a Date
+  // la interpretaría en UTC y en Perú (UTC-5) retrocedería un día.
+  if (typeof iso === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(iso)) return iso
   const d = new Date(iso)
   if (isNaN(d.getTime())) return ''
   const yyyy = d.getFullYear()

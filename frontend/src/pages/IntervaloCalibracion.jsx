@@ -4,7 +4,7 @@ import Modal from '../components/Modal.jsx'
 import { api } from '../lib/api.js'
 import { useConfirm } from '../context/ConfirmContext.jsx'
 
-// Intervalo de Calibración (MET-PRO-04-r08, método OIML D10).
+// Intervalo de Calibración (método OIML D10).
 // Edición en matriz: años en filas, puntos en columnas (Resultado · Incert. · EMP).
 const fnum = (v, n = 3) => (v === null || v === undefined || v === '' || isNaN(v)) ? '—' : Number(v).toFixed(n)
 const IB = 'rounded p-1 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800'
@@ -210,7 +210,7 @@ export default function IntervaloCalibracion({ puedeEditar }) {
                     </th>
                   ))}
                 </tr>
-                <tr className="bg-slate-50 text-[10px] uppercase text-slate-500 dark:bg-slate-800/60 dark:text-slate-400">
+                <tr className="bg-slate-50 text-xs text-slate-500 dark:bg-slate-800/60 dark:text-slate-400">
                   {puntos.map((p) => (
                     <Fragment key={p.id}>
                       <th className="border-l border-slate-200 px-1 py-1 font-medium dark:border-slate-700">Resultado</th>

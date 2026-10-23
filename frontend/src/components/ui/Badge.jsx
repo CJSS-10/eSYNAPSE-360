@@ -1,9 +1,16 @@
 // Badge / chip semántico reutilizable.
 // Tonos de estado (regla del proyecto): gris · ambar · azul · violeta · verde · rojo
 // Normas: iso9001 · iso14001 · iso45001 · iso17025
+// Nombres completos de las clases: Tailwind solo genera las que encuentra escritas
+// (con `badge-${tono}` los colores nunca llegaban a la hoja de estilos).
+const CLASE = {
+  gris: 'badge-gris', ambar: 'badge-ambar', azul: 'badge-azul', violeta: 'badge-violeta', verde: 'badge-verde', rojo: 'badge-rojo',
+  iso9001: 'badge-iso9001', iso14001: 'badge-iso14001', iso45001: 'badge-iso45001', iso17025: 'badge-iso17025',
+}
+
 export default function Badge({ tono = 'gris', children, className = '', ...props }) {
   return (
-    <span className={`badge badge-${tono} ${className}`} {...props}>
+    <span className={`badge ${CLASE[tono] || CLASE.gris} ${className}`} {...props}>
       {children}
     </span>
   )
@@ -29,6 +36,16 @@ export const TONO_ESTADO = {
   'Vencido': 'rojo',
   'Rechazado': 'violeta',
   'Reabierto': 'violeta',
+  'Registrada': 'gris',
+  'Recibida': 'gris',
+  'En análisis de causa': 'ambar',
+  'En evaluación': 'ambar',
+  'En implementación': 'azul',
+  'Acción correctiva': 'azul',
+  'Corrección': 'azul',
+  'En verificación de eficacia': 'violeta',
+  'Por vencer': 'ambar',
+  'Devuelto': 'ambar',
 }
 
 export function NormaBadge({ nombre }) {

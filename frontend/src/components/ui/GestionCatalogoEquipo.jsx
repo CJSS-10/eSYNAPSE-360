@@ -73,7 +73,7 @@ export default function GestionCatalogoEquipo({ fuente, titulo, singular, conPre
                 <span className="flex flex-1 items-center gap-2 truncate rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700">
                   {it.nombre}
                   {conPrefijo && <span className="text-xs text-slate-400">({it.prefijo})</span>}
-                  {it.es_patron && <span className="rounded bg-violet-500/15 px-1.5 py-0.5 text-[10px] text-violet-500">patrón</span>}
+                  {it.es_patron && <span className="rounded bg-violet-500/15 px-1.5 py-0.5 text-[11px] text-violet-500">patrón</span>}
                 </span>
                 <button type="button" onClick={() => { setEditId(it.id); setEditNombre(it.nombre); setEditPrefijo(it.prefijo || '') }}
                   title="Renombrar" className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-esynapse-500 dark:hover:bg-slate-800"><Pencil className="h-4 w-4" /></button>

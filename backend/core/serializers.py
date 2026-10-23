@@ -83,19 +83,63 @@ class RolUsuarioSerializer(serializers.ModelSerializer):
         fields = ['id', 'usuario', 'usuario_username', 'rol', 'rol_nombre', 'is_active']
 
 
+def _trabajador_info(obj):
+    t = getattr(obj, 'trabajador', None) if obj and obj.pk else None
+    if not t:
+        return None
+    a = t.area_efectiva
+    return {'id': t.id, 'nombre': t.nombre_completo, 'puesto': t.puesto.nombre, 'sigla': t.puesto.sigla,
+            'area': a.nombre if a else None, 'estado': t.estado}
+
+
+def _trabajadores_qs():
+    from organizacion.models import Trabajador
+    return Trabajador.objects.filter(is_active=True)
+
+
+def _vincular(usuario, trabajador):
+    """Vincula (o desvincula, con None) el usuario a su trabajador; el cargo y el área salen del puesto."""
+    from organizacion.models import Trabajador, sincronizar_usuario
+    Trabajador.objects.filter(usuario=usuario).exclude(pk=getattr(trabajador, 'pk', None)).update(usuario=None)
+    if trabajador:
+        if trabajador.usuario_id and trabajador.usuario_id != usuario.pk:
+            raise serializers.ValidationError({'trabajador': ['Ese trabajador ya tiene otro usuario.']})
+        trabajador.usuario = usuario
+        trabajador.save(update_fields=['usuario'])
+        sincronizar_usuario(trabajador)
+
+
 class UsuarioSerializer(serializers.ModelSerializer):
     """Lectura y edición de usuarios. La contraseña nunca se expone."""
     roles = serializers.SerializerMethodField()
     nombre_completo = serializers.SerializerMethodField()
     foto = serializers.FileField(write_only=True, required=False, allow_null=True)
     foto_url = serializers.SerializerMethodField()
+    trabajador = serializers.PrimaryKeyRelatedField(queryset=_trabajadores_qs(), write_only=True, required=False,
+                                                    allow_null=True)
+    trabajador_info = serializers.SerializerMethodField()
 
     class Meta:
         model = Usuario
         fields = ['id', 'username', 'email', 'first_name', 'last_name', 'nombre_completo',
-                  'area', 'laboratorio', 'cargo', 'telefono', 'foto', 'foto_url',
-                  'is_active', 'is_superuser', 'roles', 'last_login', 'created_at', 'updated_at']
+                  'area', 'laboratorio', 'cargo', 'sigla_cargo', 'telefono', 'foto', 'foto_url',
+                  'is_active', 'is_superuser', 'roles', 'last_login', 'created_at', 'updated_at', 'trabajador',
+                  'trabajador_info']
         read_only_fields = ['is_superuser', 'last_login', 'created_at', 'updated_at']
+
+    def get_trabajador_info(self, obj):
+        return _trabajador_info(obj)
+
+    def update(self, instance, validated_data):
+        enviado = 'trabajador' in validated_data
+        trabajador = validated_data.pop('trabajador', None)
+        instance = super().update(instance, validated_data)
+        if enviado:
+            _vincular(instance, trabajador)
+        elif getattr(instance, 'trabajador', None):
+            from organizacion.models import sincronizar_usuario
+            sincronizar_usuario(instance.trabajador)
+        return instance
 
     def get_roles(self, obj):
         return [
@@ -122,12 +166,27 @@ class UsuarioCreateSerializer(serializers.ModelSerializer):
         queryset=Rol.objects.filter(is_active=True), many=True, required=False, write_only=True
     )
     password_temporal = serializers.CharField(read_only=True)
+    trabajador = serializers.PrimaryKeyRelatedField(queryset=_trabajadores_qs(), write_only=True, required=False,
+                                                    allow_null=True)
 
     class Meta:
         model = Usuario
         fields = ['id', 'username', 'email', 'first_name', 'last_name',
-                  'area', 'laboratorio', 'cargo', 'telefono',
-                  'password', 'password_temporal', 'roles']
+                  'area', 'laboratorio', 'cargo', 'sigla_cargo', 'telefono',
+                  'password', 'password_temporal', 'roles', 'trabajador']
+        extra_kwargs = {'area': {'required': False, 'allow_blank': True},
+                        'cargo': {'required': False, 'allow_blank': True}}
+
+    def validate(self, data):
+        t = data.get('trabajador')
+        if t and t.usuario_id:
+            raise serializers.ValidationError({'trabajador': ['Ese trabajador ya tiene un usuario.']})
+        if not t:
+            faltan = {c: ['Este campo es requerido si el usuario no se vincula a un trabajador.']
+                      for c in ('area', 'cargo') if not (data.get(c) or '').strip()}
+            if faltan:
+                raise serializers.ValidationError(faltan)
+        return data
 
     def validate_email(self, value):
         if Usuario.objects.filter(email__iexact=value).exists():
@@ -136,6 +195,12 @@ class UsuarioCreateSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         roles = validated_data.pop('roles', [])
+        trabajador = validated_data.pop('trabajador', None)
+        if trabajador:
+            a = trabajador.area_efectiva
+            validated_data.setdefault('area', a.nombre if a else '')
+            validated_data['area'] = validated_data['area'] or (a.nombre if a else '')
+            validated_data['cargo'] = trabajador.puesto.nombre
         password = validated_data.pop('password', '') or None
         password_temporal = None
         if password is None:
@@ -145,6 +210,8 @@ class UsuarioCreateSerializer(serializers.ModelSerializer):
         usuario = Usuario.objects.create_user(password=password, **validated_data)
         for rol in roles:
             RolUsuario.objects.create(usuario=usuario, rol=rol)
+        if trabajador:
+            _vincular(usuario, trabajador)
 
         # Se expone la contraseña temporal solo en esta respuesta.
         # TODO Fase 0+: enviar correo de bienvenida en lugar de retornarla.
@@ -186,7 +253,7 @@ class MeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Usuario
         fields = ['id', 'username', 'email', 'first_name', 'last_name', 'nombre_completo',
-                  'area', 'laboratorio', 'cargo', 'telefono', 'foto_url', 'is_superuser', 'roles', 'permisos']
+                  'area', 'laboratorio', 'cargo', 'sigla_cargo', 'telefono', 'foto_url', 'is_superuser', 'roles', 'permisos']
 
     def get_nombre_completo(self, obj):
         return obj.get_full_name() or obj.username

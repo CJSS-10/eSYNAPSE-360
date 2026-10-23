@@ -37,6 +37,14 @@ export default function Login() {
           <p className="text-center text-xs text-slate-500 dark:text-slate-400">
             {config.subtitulo || 'Sistema Integrado de Gestión'}
           </p>
+          {config.version && (
+            <p className="text-center font-mono text-[11px] text-slate-400 dark:text-slate-500">v{config.version}</p>
+          )}
+          {config.modo_pruebas && (
+            <p className="rounded-md border border-amber-500/40 bg-amber-500/15 px-2.5 py-1 text-xs font-bold text-amber-700 dark:text-amber-300">
+              MODO PRUEBAS · copia de la base
+            </p>
+          )}
         </div>
 
         <form onSubmit={enviar} className="space-y-4">

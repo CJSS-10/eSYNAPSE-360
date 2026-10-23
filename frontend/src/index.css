@@ -1,3 +1,42 @@
+/* Tipografía del sistema (ADR-0007): IBM Plex Sans, instalada en el proyecto (licencia OFL en
+   assets/fonts); no depende de internet porque el sistema corre en la red local. */
+@font-face { font-family: 'IBM Plex Sans'; font-style: normal; font-weight: 400; font-display: swap;
+  src: url('./assets/fonts/ibm-plex-sans-latin-400-normal.woff2') format('woff2'); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+@font-face { font-family: 'IBM Plex Sans'; font-style: normal; font-weight: 400; font-display: swap;
+  src: url('./assets/fonts/ibm-plex-sans-latin-ext-400-normal.woff2') format('woff2'); unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }
+@font-face { font-family: 'IBM Plex Sans'; font-style: normal; font-weight: 500; font-display: swap;
+  src: url('./assets/fonts/ibm-plex-sans-latin-500-normal.woff2') format('woff2'); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+@font-face { font-family: 'IBM Plex Sans'; font-style: normal; font-weight: 500; font-display: swap;
+  src: url('./assets/fonts/ibm-plex-sans-latin-ext-500-normal.woff2') format('woff2'); unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }
+@font-face { font-family: 'IBM Plex Sans'; font-style: normal; font-weight: 600; font-display: swap;
+  src: url('./assets/fonts/ibm-plex-sans-latin-600-normal.woff2') format('woff2'); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+@font-face { font-family: 'IBM Plex Sans'; font-style: normal; font-weight: 600; font-display: swap;
+  src: url('./assets/fonts/ibm-plex-sans-latin-ext-600-normal.woff2') format('woff2'); unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }
+@font-face { font-family: 'IBM Plex Sans'; font-style: normal; font-weight: 700; font-display: swap;
+  src: url('./assets/fonts/ibm-plex-sans-latin-700-normal.woff2') format('woff2'); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+@font-face { font-family: 'IBM Plex Sans'; font-style: normal; font-weight: 700; font-display: swap;
+  src: url('./assets/fonts/ibm-plex-sans-latin-ext-700-normal.woff2') format('woff2'); unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }
+@font-face { font-family: 'IBM Plex Sans'; font-style: italic; font-weight: 400; font-display: swap;
+  src: url('./assets/fonts/ibm-plex-sans-latin-400-italic.woff2') format('woff2'); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+@font-face { font-family: 'IBM Plex Sans'; font-style: italic; font-weight: 400; font-display: swap;
+  src: url('./assets/fonts/ibm-plex-sans-latin-ext-400-italic.woff2') format('woff2'); unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }
+@font-face { font-family: 'IBM Plex Sans Condensed'; font-style: normal; font-weight: 600; font-display: swap;
+  src: url('./assets/fonts/ibm-plex-sans-condensed-latin-600-normal.woff2') format('woff2'); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+@font-face { font-family: 'IBM Plex Sans Condensed'; font-style: normal; font-weight: 600; font-display: swap;
+  src: url('./assets/fonts/ibm-plex-sans-condensed-latin-ext-600-normal.woff2') format('woff2'); unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }
+@font-face { font-family: 'IBM Plex Mono'; font-style: normal; font-weight: 400; font-display: swap;
+  src: url('./assets/fonts/ibm-plex-mono-latin-400-normal.woff2') format('woff2'); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+@font-face { font-family: 'IBM Plex Mono'; font-style: normal; font-weight: 400; font-display: swap;
+  src: url('./assets/fonts/ibm-plex-mono-latin-ext-400-normal.woff2') format('woff2'); unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }
+@font-face { font-family: 'IBM Plex Mono'; font-style: normal; font-weight: 500; font-display: swap;
+  src: url('./assets/fonts/ibm-plex-mono-latin-500-normal.woff2') format('woff2'); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+@font-face { font-family: 'IBM Plex Mono'; font-style: normal; font-weight: 500; font-display: swap;
+  src: url('./assets/fonts/ibm-plex-mono-latin-ext-500-normal.woff2') format('woff2'); unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }
+@font-face { font-family: 'IBM Plex Mono'; font-style: normal; font-weight: 600; font-display: swap;
+  src: url('./assets/fonts/ibm-plex-mono-latin-600-normal.woff2') format('woff2'); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+@font-face { font-family: 'IBM Plex Mono'; font-style: normal; font-weight: 600; font-display: swap;
+  src: url('./assets/fonts/ibm-plex-mono-latin-ext-600-normal.woff2') format('woff2'); unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -6,7 +45,8 @@
   html { @apply antialiased; }
   body {
     @apply bg-slate-100 text-slate-900 dark:bg-slate-950 dark:text-slate-100;
-    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+    /* Números de ancho fijo: códigos, fechas y cantidades se alinean en columnas */
+    font-variant-numeric: tabular-nums;
   }
   /* Foco visible y consistente para teclado en todo el sistema */
   :focus-visible { @apply outline-none ring-2 ring-esynapse-500/50 ring-offset-1 ring-offset-white dark:ring-offset-slate-950; }
@@ -33,7 +73,7 @@
 
   /* ---------- Tipografía utilitaria ---------- */
   .page-title { @apply text-2xl font-bold tracking-tight text-slate-900 dark:text-white; }
-  .section-title { @apply text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400; }
+  .section-title { @apply text-xs font-semibold text-slate-500 dark:text-slate-400; }
   .label-esynapse { @apply mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300; }
   .muted { @apply text-slate-500 dark:text-slate-400; }
 
@@ -43,6 +83,33 @@
       placeholder:text-slate-400 hover:border-slate-400
       focus:border-esynapse-500 focus:outline-none focus:ring-2 focus:ring-esynapse-500/30
       dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500 dark:hover:border-slate-600;
+  }
+
+  /* Selectores nativos de fecha y hora: el navegador dibuja el calendario/reloj
+     según el esquema de color; sin esto, en tema oscuro el icono queda negro
+     sobre fondo oscuro (invisible) y el campo parece de texto. */
+  input[type='date'],
+  input[type='time'],
+  input[type='datetime-local'],
+  input[type='month'] {
+    color-scheme: light;
+  }
+  .dark input[type='date'],
+  .dark input[type='time'],
+  .dark input[type='datetime-local'],
+  .dark input[type='month'] {
+    color-scheme: dark;
+  }
+  input[type='date']::-webkit-calendar-picker-indicator,
+  input[type='time']::-webkit-calendar-picker-indicator,
+  input[type='datetime-local']::-webkit-calendar-picker-indicator,
+  input[type='month']::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    opacity: 0.75;
+  }
+  input[type='date']::-webkit-calendar-picker-indicator:hover,
+  input[type='time']::-webkit-calendar-picker-indicator:hover {
+    opacity: 1;
   }
 
   /* ---------- Botones ---------- */
@@ -71,20 +138,36 @@
 
   /* ---------- Badges / chips (base) ---------- */
   .badge {
-    @apply inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium ring-1 ring-inset;
+    @apply inline-flex items-center gap-1 whitespace-nowrap rounded-full px-2 py-0.5 text-[11px] font-medium ring-1 ring-inset;
   }
   /* Normas (regla del proyecto): 9001 azul · 14001 verde · 45001 rojo · 17025 ámbar */
-  .badge-iso9001  { @apply bg-esynapse-500/12 text-esynapse-700 ring-esynapse-500/25 dark:text-esynapse-300; }
-  .badge-iso14001 { @apply bg-emerald-500/12 text-emerald-700 ring-emerald-500/25 dark:text-emerald-300; }
-  .badge-iso45001 { @apply bg-red-500/12 text-red-700 ring-red-500/25 dark:text-red-300; }
+  .badge-iso9001  { @apply bg-esynapse-500/15 text-esynapse-700 ring-esynapse-500/25 dark:text-esynapse-300; }
+  .badge-iso14001 { @apply bg-emerald-500/15 text-emerald-700 ring-emerald-500/25 dark:text-emerald-300; }
+  .badge-iso45001 { @apply bg-red-500/15 text-red-700 ring-red-500/25 dark:text-red-300; }
   .badge-iso17025 { @apply bg-amber-500/15 text-amber-700 ring-amber-500/30 dark:text-amber-300; }
   /* Estados semánticos (regla del proyecto) */
-  .badge-gris    { @apply bg-slate-500/12 text-slate-600 ring-slate-500/25 dark:text-slate-300; }
+  .badge-gris    { @apply bg-slate-500/15 text-slate-600 ring-slate-500/25 dark:text-slate-300; }
   .badge-ambar   { @apply bg-amber-500/15 text-amber-700 ring-amber-500/30 dark:text-amber-300; }
-  .badge-azul    { @apply bg-esynapse-500/12 text-esynapse-700 ring-esynapse-500/25 dark:text-esynapse-300; }
-  .badge-violeta { @apply bg-violet-500/12 text-violet-700 ring-violet-500/25 dark:text-violet-300; }
-  .badge-verde   { @apply bg-emerald-500/12 text-emerald-700 ring-emerald-500/25 dark:text-emerald-300; }
-  .badge-rojo    { @apply bg-red-500/12 text-red-700 ring-red-500/25 dark:text-red-300; }
+  .badge-azul    { @apply bg-esynapse-500/15 text-esynapse-700 ring-esynapse-500/25 dark:text-esynapse-300; }
+  .badge-violeta { @apply bg-violet-500/15 text-violet-700 ring-violet-500/25 dark:text-violet-300; }
+  .badge-verde   { @apply bg-emerald-500/15 text-emerald-700 ring-emerald-500/25 dark:text-emerald-300; }
+  .badge-rojo    { @apply bg-red-500/15 text-red-700 ring-red-500/25 dark:text-red-300; }
+
+  /* ---------- Tabla del estándar de módulo ----------
+     Con :where() la especificidad queda en una clase: las utilidades de cada celda
+     (px-2, text-center, etc.) siguen prevaleciendo. */
+  .tabla-sig { @apply w-full text-sm; }
+  .tabla-sig :where(thead th) {
+    @apply border-b border-slate-200 bg-slate-50 px-4 py-2.5 align-bottom text-[13px] font-semibold leading-tight text-slate-500
+      dark:border-slate-800 dark:bg-slate-900/60 dark:text-slate-400;
+  }
+  .tabla-sig :where(tbody td) { @apply border-b border-slate-100 px-4 py-3 align-middle dark:border-slate-800/60; }
+  .tabla-sig :where(tbody tr:last-child td) { @apply border-b-0; }
+  .tabla-sig :where(tbody tr.fila) { @apply cursor-pointer transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/40; }
+  /* Tablas dentro de las fichas (ADR-0007): compactas, mismas reglas de alineación que «tabla-sig». */
+  .tabla-ficha { @apply w-full text-xs; }
+  .tabla-ficha :where(thead th) { @apply border-b border-slate-200 px-2 py-1.5 align-bottom font-semibold leading-tight text-slate-500 dark:border-slate-700 dark:text-slate-400; }
+  .tabla-ficha :where(tbody td) { @apply px-2 py-1.5 align-top; }
 
   /* ---------- Skeleton de carga ---------- */
   .skeleton { @apply relative overflow-hidden rounded-md bg-slate-200/80 dark:bg-slate-800; }
@@ -98,8 +181,29 @@
   }
 }
 
+/* Mientras se cambia de tema no se anima nada (ver el cambio de tema en Layout) */
+.sin-transicion *, .sin-transicion *::before, .sin-transicion *::after { transition: none !important; }
+
 @keyframes esy-shimmer { 100% { transform: translateX(100%); } }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
 }
+
+/* Alineación en tablas (decisión de César del 23-10-2026, ADR-0007): según el tipo de dato.
+   Las tablas del estándar de módulo llevan la clase «tabla-sig»: texto y códigos a la izquierda
+   (por defecto), estados, clasificaciones y sí/no al centro (text-center), fechas, plazos y
+   cantidades a la derecha (text-right). Las tablas que aún no pasan al estándar conservan el
+   centrado anterior hasta que su módulo se adapte. */
+table:not(.tabla-sig):not(.tabla-ficha) th, table:not(.tabla-sig):not(.tabla-ficha) td { text-align: center !important; }
+table:not(.tabla-sig):not(.tabla-ficha) th > div.flex, table:not(.tabla-sig):not(.tabla-ficha) td > div.flex,
+table:not(.tabla-sig):not(.tabla-ficha) th > span.flex, table:not(.tabla-sig):not(.tabla-ficha) td > span.flex { justify-content: center !important; }
+/* Especificidad mínima (:where) para que text-center y text-right de cada columna prevalezcan */
+:where(table.tabla-sig, table.tabla-ficha) :where(th, td) { text-align: left; }
+/* Fechas, plazos y cantidades (columnas a la derecha) nunca se parten */
+table.tabla-sig td.text-right, table.tabla-ficha td.text-right { white-space: nowrap; }
+table td.font-mono, table th.font-mono { white-space: nowrap; }   /* códigos en una sola línea */
+
+/* Entrada del panel de detalle desde la derecha */
+@keyframes panel-entra { from { transform: translateX(24px); opacity: .6; } to { transform: none; opacity: 1; } }
+.panel-entrada { animation: panel-entra .18s ease-out; }

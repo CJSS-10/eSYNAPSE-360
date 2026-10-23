@@ -10,7 +10,7 @@ from datetime import timedelta
 
 from django.http import HttpResponse
 from django.utils import timezone
-from rest_framework import status, viewsets
+from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.response import Response
@@ -105,6 +105,9 @@ class DocumentoViewSet(viewsets.ModelViewSet):
         (updated_by / updated_at y el log de auditoría, campo a campo).
         """
         doc = self.get_object()
+        if doc.archivado:
+            return Response({'detail': f'El documento {doc.codigo} está archivado: desarchívelo para volver a trabajar con él.'},
+                            status=status.HTTP_400_BAD_REQUEST)
         password = request.data.get('password') or ''
         if not password:
             return Response({'detail': 'Debe confirmar con su contraseña para editar.'},
@@ -113,7 +116,7 @@ class DocumentoViewSet(viewsets.ModelViewSet):
             return Response({'detail': 'Contraseña incorrecta. No se guardaron los cambios.'},
                             status=status.HTTP_400_BAD_REQUEST)
 
-        EDITABLES = ('titulo', 'tipo', 'proceso', 'objetivo', 'alcance',
+        EDITABLES = ('titulo', 'tipo', 'proceso', 'proceso_catalogo', 'objetivo', 'alcance',
                      'entidad_emisora', 'normas_aplicables', 'soporte',
                      'anos_retencion', 'meses_revision', 'dias_verificacion', 'padre')
         datos = {}
@@ -279,6 +282,14 @@ class DocumentoViewSet(viewsets.ModelViewSet):
         correcciones dentro del flujo no incrementan la versión.
         """
         doc = self.get_object()
+        resumen = str(request.data.get('resumen_cambios') or '').strip()
+        if resumen and request.user.check_password(resumen):
+            return Response({'detail': 'El resumen de cambios coincide con su contraseña: no la escriba aquí '
+                                       '(quedaría visible en el historial). Redacte el resumen de los cambios.'},
+                            status=status.HTTP_400_BAD_REQUEST)
+        if doc.archivado:
+            return Response({'detail': f'El documento {doc.codigo} está archivado: desarchívelo para volver a trabajar con él.'},
+                            status=status.HTTP_400_BAD_REQUEST)
         bloqueo = self._solo_interno(doc)
         if bloqueo:
             return bloqueo
@@ -309,6 +320,9 @@ class DocumentoViewSet(viewsets.ModelViewSet):
     def enviar_revision(self, request, pk=None):
         """En elaboración → En revisión. La hace quien elabora."""
         doc = self.get_object()
+        if doc.archivado:
+            return Response({'detail': f'El documento {doc.codigo} está archivado: desarchívelo para volver a trabajar con él.'},
+                            status=status.HTTP_400_BAD_REQUEST)
         bloqueo = self._solo_interno(doc)
         if bloqueo:
             return bloqueo
@@ -338,6 +352,9 @@ class DocumentoViewSet(viewsets.ModelViewSet):
         Regla: el revisor no puede ser quien elaboró la versión.
         """
         doc = self.get_object()
+        if doc.archivado:
+            return Response({'detail': f'El documento {doc.codigo} está archivado: desarchívelo para volver a trabajar con él.'},
+                            status=status.HTTP_400_BAD_REQUEST)
         bloqueo = self._solo_interno(doc)
         if bloqueo:
             return bloqueo
@@ -372,6 +389,9 @@ class DocumentoViewSet(viewsets.ModelViewSet):
         Asigna fecha de vigencia y próxima revisión.
         """
         doc = self.get_object()
+        if doc.archivado:
+            return Response({'detail': f'El documento {doc.codigo} está archivado: desarchívelo para volver a trabajar con él.'},
+                            status=status.HTTP_400_BAD_REQUEST)
         bloqueo = self._solo_interno(doc)
         if bloqueo:
             return bloqueo
@@ -446,6 +466,13 @@ class DocumentoViewSet(viewsets.ModelViewSet):
         v.archivo_publicado.save(f'{doc.codigo}_Ver{v.version}_firmado.pdf', ContentFile(pdf_final), save=False)
         v.hash_publicado = hash_sha256(pdf_final)
         v.save()
+        # El contenido de la ficha del proceso no cambia solo: su responsable
+        # recibe el aviso de revisarla.
+        if doc.proceso_catalogo_id:
+            from procesos.models import avisar_ficha_por_revisar
+            avisar_ficha_por_revisar(doc.proceso_catalogo,
+                                     f'Se aprobó la versión {v.version} de {doc.codigo} — {doc.titulo}.',
+                                     origen='documento', usuario=request.user)
         return Response(VersionDocumentoSerializer(v, context={'request': request}).data)
     aprobar.operacion = 'aprobar'
 
@@ -453,6 +480,9 @@ class DocumentoViewSet(viewsets.ModelViewSet):
     def devolver(self, request, pk=None):
         """En aprobación → vuelve a En elaboración para correcciones."""
         doc = self.get_object()
+        if doc.archivado:
+            return Response({'detail': f'El documento {doc.codigo} está archivado: desarchívelo para volver a trabajar con él.'},
+                            status=status.HTTP_400_BAD_REQUEST)
         bloqueo = self._solo_interno(doc)
         if bloqueo:
             return bloqueo
@@ -475,6 +505,9 @@ class DocumentoViewSet(viewsets.ModelViewSet):
         Requiere justificación obligatoria.
         """
         doc = self.get_object()
+        if doc.archivado:
+            return Response({'detail': f'El documento {doc.codigo} está archivado: desarchívelo para volver a trabajar con él.'},
+                            status=status.HTTP_400_BAD_REQUEST)
         bloqueo = self._solo_interno(doc)
         if bloqueo:
             return bloqueo
@@ -502,6 +535,14 @@ class DocumentoViewSet(viewsets.ModelViewSet):
         no se edita — se versiona. La vigente sigue activa hasta aprobar la nueva.
         """
         doc = self.get_object()
+        resumen = str(request.data.get('resumen_cambios') or '').strip()
+        if resumen and request.user.check_password(resumen):
+            return Response({'detail': 'El resumen de cambios coincide con su contraseña: no la escriba aquí '
+                                       '(quedaría visible en el historial). Redacte el resumen de los cambios.'},
+                            status=status.HTTP_400_BAD_REQUEST)
+        if doc.archivado:
+            return Response({'detail': f'El documento {doc.codigo} está archivado: desarchívelo para volver a trabajar con él.'},
+                            status=status.HTTP_400_BAD_REQUEST)
         if doc.version_en_proceso:
             return Response(
                 {'detail': 'Ya existe una versión en proceso. Complete su flujo antes de crear otra.'},
@@ -557,6 +598,9 @@ class DocumentoViewSet(viewsets.ModelViewSet):
         Body: {"vigente": true/false, "observaciones": ""}.
         """
         doc = self.get_object()
+        if doc.archivado:
+            return Response({'detail': f'El documento {doc.codigo} está archivado: desarchívelo para volver a trabajar con él.'},
+                            status=status.HTTP_400_BAD_REQUEST)
         if doc.origen != 'externo':
             return Response({'detail': 'La verificación de vigencia aplica solo a documentos externos.'},
                             status=status.HTTP_400_BAD_REQUEST)
@@ -612,17 +656,19 @@ class DocumentoViewSet(viewsets.ModelViewSet):
 # ============================================================
 # M8 — HALLAZGOS
 # ============================================================
-from .models import Hallazgo  # noqa: E402
+from .models import Hallazgo, TIPOS_HALLAZGO as TIPOS_HALLAZGO_CHOICES  # noqa: E402
 from .serializers import HallazgoListaSerializer, HallazgoSerializer  # noqa: E402
 
 
 class HallazgoViewSet(viewsets.ModelViewSet):
     """
-    M8 — Hallazgos. Ciclo: Registrado → En análisis → En tratamiento → Cerrado
-    (→ Reabierto si la verificación falla). El cierre lo hace una persona
-    distinta a la responsable del tratamiento.
+    M8 — Hallazgos: registro único de no conformidades, observaciones y
+    oportunidades de mejora. Las NC se tratan en una solicitud de acción
+    correctiva (nueva o una abierta del mismo problema) y se cierran cuando esa
+    solicitud se cierra. Las observaciones y oportunidades de mejora se derivan
+    a Riesgos y Oportunidades.
     """
-    queryset = Hallazgo.objects.all().select_related('responsable', 'cerrado_por', 'created_by')
+    queryset = Hallazgo.objects.all().select_related('responsable', 'cerrado_por', 'created_by', 'sac__responsable')
     permission_classes = [PermisoModular]
     modulo = 'hallazgos'
     parser_classes = [MultiPartParser, FormParser, JSONParser]
@@ -643,6 +689,8 @@ class HallazgoViewSet(viewsets.ModelViewSet):
             qs = qs.filter(tipo=p['tipo'])
         if p.get('estado'):
             qs = qs.filter(estado=p['estado'])
+        if p.get('abiertos') == '1':
+            qs = qs.exclude(estado='cerrado')
         if p.get('buscar'):
             from django.db.models import Q
             b = p['buscar']
@@ -657,148 +705,141 @@ class HallazgoViewSet(viewsets.ModelViewSet):
         h.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    def _transicion(self, h, desde, hacia, mensaje):
-        if h.estado not in desde:
-            return Response({'detail': mensaje}, status=status.HTTP_400_BAD_REQUEST)
-        h.estado = hacia
-        return None
+    def _error(self, mensaje):
+        return Response({'detail': mensaje}, status=status.HTTP_400_BAD_REQUEST)
 
-    def _bloquea_si_nc(self, h):
-        """Las NC se tratan en su Acción Correctiva (M9), no dentro de Hallazgos."""
-        if h.tipo in ('nc_mayor', 'nc_menor'):
-            return Response(
-                {'detail': 'El análisis, tratamiento y cierre de una No Conformidad se realizan '
-                           'en su Acción Correctiva (M9). Genere la SAC desde el hallazgo.'},
-                status=status.HTTP_400_BAD_REQUEST)
-        return None
+    def _data(self, h, request, codigo=status.HTTP_200_OK):
+        return Response(HallazgoSerializer(h, context={'request': request}).data, status=codigo)
+
+    def update(self, request, *args, **kwargs):
+        """Corregir el registro solo mientras su etapa esté abierta. El tipo no
+        se cambia aquí: se reclasifica con motivo."""
+        h = self.get_object()
+        if 'tipo' in request.data and request.data.get('tipo') != h.tipo:
+            return self._error('El tipo no se edita: use «Reclasificar» e indique el motivo.')
+        if not h.registro_abierto():
+            cambiados = [c for c in Hallazgo.CAMPOS_REGISTRO if c in request.data]
+            return self._error(h.mensaje_registro_cerrado(cambiados[0] if cambiados else ''))
+        return super().update(request, *args, **kwargs)
+
+    @staticmethod
+    def _auditoria_pendiente(h):
+        """Un hallazgo de auditoría se trata después de comunicarse en la
+        reunión de cierre; antes aún puede reclasificarse o descartarse."""
+        a = h.auditoria
+        if a and a.estado not in ('en_informe', 'cerrada'):
+            return (f'El hallazgo aún está en consolidación en la auditoría {a.codigo}: se deriva '
+                    f'después de la reunión de cierre.')
+        return ''
 
     @action(detail=True, methods=['post'])
-    def iniciar_analisis(self, request, pk=None):
-        """Registrado/Reabierto → En análisis. Puede registrar el análisis inicial."""
+    def reclasificar(self, request, pk=None):
+        """Cambia el tipo de un hallazgo registrado a mano, con motivo. Si cambia
+        de prefijo toma un código nuevo; el anterior queda en el historial."""
         h = self.get_object()
-        bloqueo = self._bloquea_si_nc(h)
-        if bloqueo:
-            return bloqueo
-        err = self._transicion(h, ['registrado', 'reabierto'], 'en_analisis',
-                               'Solo un hallazgo Registrado o Reabierto puede pasar a análisis.')
-        if err:
-            return err
-        if request.data.get('analisis'):
-            h.analisis = request.data['analisis']
+        if h.auditoria_id:
+            return self._error(h.mensaje_registro_cerrado())
+        if not h.registro_abierto():
+            return self._error(h.mensaje_registro_cerrado())
+        tipo = request.data.get('tipo')
+        if tipo not in dict(TIPOS_HALLAZGO_CHOICES):
+            return self._error('Tipo de hallazgo no válido.')
+        if tipo == h.tipo:
+            return self._error('El hallazgo ya tiene ese tipo.')
+        motivo = (request.data.get('motivo') or '').strip()
+        if not motivo:
+            return self._error('Indique el motivo de la reclasificación.')
+        from .models import PREFIJOS_HALLAZGO
+        anterior = h.codigo
+        if PREFIJOS_HALLAZGO.get(tipo) != PREFIJOS_HALLAZGO.get(h.tipo):
+            h.codigo = Hallazgo.generar_codigo(tipo, h.anio_codigo())
+        h.reclasificaciones = list(h.reclasificaciones or []) + [{
+            'fecha': timezone.now().isoformat(timespec='minutes'),
+            'usuario': request.user.get_full_name() or request.user.username,
+            'de': h.get_tipo_display(), 'a': dict(TIPOS_HALLAZGO_CHOICES)[tipo],
+            'codigo_anterior': anterior, 'motivo': motivo,
+        }]
+        h.tipo = tipo
         h.save()
-        return Response(HallazgoSerializer(h, context={'request': request}).data)
-    iniciar_analisis.operacion = 'editar'
+        return self._data(h, request)
+    reclasificar.operacion = 'editar'
 
-    @action(detail=True, methods=['post'])
-    def registrar_tratamiento(self, request, pk=None):
-        """
-        En análisis → En tratamiento. Registra la corrección inmediata
-        y/o el análisis. Body: {"correccion": "...", "analisis": "..."}
-        """
-        h = self.get_object()
-        bloqueo = self._bloquea_si_nc(h)
-        if bloqueo:
-            return bloqueo
-        err = self._transicion(h, ['en_analisis'], 'en_tratamiento',
-                               'El hallazgo debe estar En análisis para registrar tratamiento.')
-        if err:
-            return err
-        if request.data.get('analisis'):
-            h.analisis = request.data['analisis']
-        if request.data.get('correccion'):
-            h.correccion = request.data['correccion']
-        h.save()
-        return Response(HallazgoSerializer(h, context={'request': request}).data)
-    registrar_tratamiento.operacion = 'editar'
-
-    @action(detail=True, methods=['post'])
-    def cerrar(self, request, pk=None):
-        """
-        En tratamiento → Cerrado. Verificación por persona DISTINTA al
-        responsable. Requiere comentarios. Las NC Mayores no pueden cerrarse
-        hasta que su AC esté verificada (se valida desde M9; por ahora alerta).
-        """
-        h = self.get_object()
-        bloqueo = self._bloquea_si_nc(h)
-        if bloqueo:
-            return bloqueo
-        if h.estado != 'en_tratamiento':
-            return Response({'detail': 'Solo un hallazgo En tratamiento puede cerrarse.'},
-                            status=status.HTTP_400_BAD_REQUEST)
-        if h.responsable_id == request.user.id and not request.user.is_superuser:
-            return Response({'detail': 'El responsable del tratamiento no puede verificar su propio cierre.'},
-                            status=status.HTTP_400_BAD_REQUEST)
-        comentarios = (request.data.get('comentarios') or '').strip()
-        if not comentarios:
-            return Response({'detail': 'El cierre requiere comentarios de verificación.'},
-                            status=status.HTTP_400_BAD_REQUEST)
-        h.estado = 'cerrado'
-        h.comentarios_cierre = comentarios
-        h.cerrado_por = request.user
-        h.fecha_cierre = timezone.now()
-        h.save()
-        return Response(HallazgoSerializer(h, context={'request': request}).data)
-    cerrar.operacion = 'aprobar'
-
-    @action(detail=True, methods=['post'])
-    def reabrir(self, request, pk=None):
-        """Cerrado → Reabierto (la verificación posterior detectó recurrencia)."""
-        h = self.get_object()
-        bloqueo = self._bloquea_si_nc(h)
-        if bloqueo:
-            return bloqueo
-        if h.estado != 'cerrado':
-            return Response({'detail': 'Solo un hallazgo Cerrado puede reabrirse.'},
-                            status=status.HTTP_400_BAD_REQUEST)
-        justificacion = (request.data.get('justificacion') or '').strip()
-        if not justificacion:
-            return Response({'detail': 'La reapertura requiere justificación.'},
-                            status=status.HTTP_400_BAD_REQUEST)
-        h.estado = 'reabierto'
-        h.comentarios_cierre = f'{h.comentarios_cierre}\n[REABIERTO] {justificacion}'.strip()
-        h.cerrado_por = None
-        h.fecha_cierre = None
-        h.save()
-        return Response(HallazgoSerializer(h, context={'request': request}).data)
-    reabrir.operacion = 'aprobar'
+    def _validar_derivacion(self, h):
+        if not h.es_nc:
+            return ('Solo las No Conformidades se tratan con una solicitud de acción correctiva; '
+                    'las observaciones y oportunidades de mejora se derivan a Riesgos y Oportunidades.')
+        if h.sac_id:
+            return f'Este hallazgo ya se trata en la {h.sac.codigo}.'
+        if h.estado == 'cerrado':
+            return 'El hallazgo está cerrado.'
+        return self._auditoria_pendiente(h)
 
     @action(detail=True, methods=['post'])
     def generar_sac(self, request, pk=None):
-        """
-        Deriva una No Conformidad a Acciones Correctivas: crea la
-        SAC en M9 enlazada al hallazgo y precargada con su descripción y
-        requisito. Solo aplica a NC (Mayor/Menor) y a una SAC activa por vez.
-        Las observaciones y oportunidades de mejora se derivan a Riesgos (M3).
-        """
+        """Registra la NC en una solicitud de acción correctiva nueva, precargada
+        con su procedencia, descripción y requisito."""
         h = self.get_object()
-        if h.tipo not in ('nc_mayor', 'nc_menor'):
-            return Response(
-                {'detail': 'Solo las No Conformidades generan SAC. Las observaciones y '
-                           'oportunidades de mejora se derivan a Riesgos y Oportunidades.'},
-                status=status.HTTP_400_BAD_REQUEST)
+        err = self._validar_derivacion(h)
+        if err:
+            return self._error(err)
         from .models import SolicitudAC
-        existente = h.solicitudes_ac.filter(is_active=True).order_by('-id').first()
-        if existente:
-            return Response(
-                {'detail': f'Este hallazgo ya tiene una SAC activa ({existente.codigo}).'},
-                status=status.HTTP_400_BAD_REQUEST)
         fuentes_sac = {'auditoria_interna', 'auditoria_externa', 'revision_direccion', 'queja'}
         sac = SolicitudAC.objects.create(
             hallazgo=h,
             fuente=h.fuente if h.fuente in fuentes_sac else 'otros',
+            fuente_detalle='' if h.fuente in fuentes_sac else h.get_fuente_display(),
+            normas_aplicables=normas_de_sac(getattr(h.auditoria, 'normas_aplicables', None)),
             descripcion_nc=h.descripcion,
             requisito_auditado=h.requisito,
-            requiere_ac=True if h.tipo == 'nc_mayor' else None,
         )
-        # El hallazgo entra en tratamiento; su SAC lo cerrará al ser eficaz (M9).
-        if h.estado in ('registrado', 'en_analisis'):
-            h.estado = 'en_tratamiento'
-            h.save()
-        from .serializers import HallazgoSerializer
-        data = HallazgoSerializer(h, context={'request': request}).data
-        data['sac_creada'] = sac.codigo
-        return Response(data, status=status.HTTP_201_CREATED)
+        h.sac = sac
+        h.estado = 'en_tratamiento'
+        h.save()
+        resp = self._data(h, request, status.HTTP_201_CREATED)
+        resp.data['sac_creada'] = sac.codigo
+        return resp
     generar_sac.operacion = 'crear'
+
+    @action(detail=True, methods=['post'])
+    def vincular_sac(self, request, pk=None):
+        """Suma la NC, como nueva ocurrencia, a una solicitud de acción
+        correctiva abierta sobre el mismo problema (no se duplican solicitudes)."""
+        h = self.get_object()
+        err = self._validar_derivacion(h)
+        if err:
+            return self._error(err)
+        from .models import SolicitudAC
+        sac = SolicitudAC.objects.filter(pk=request.data.get('sac_id'), is_active=True).first()
+        if not sac:
+            return self._error('Solicitud de acción correctiva no encontrada.')
+        if sac.estado in ('cerrada_conforme', 'cerrada_sin_ac'):
+            return self._error(f'La {sac.codigo} está cerrada; genere una solicitud nueva.')
+        h.sac = sac
+        h.estado = 'en_tratamiento'
+        h.save()
+        return self._data(h, request)
+    vincular_sac.operacion = 'editar'
+
+    @action(detail=True, methods=['get'])
+    def sac_abiertas(self, request, pk=None):
+        """Solicitudes abiertas a las que puede sumarse esta NC; primero las del
+        mismo requisito o proceso, para detectar duplicados."""
+        from .models import SolicitudAC
+        h = self.get_object()
+        qs = (SolicitudAC.objects.filter(is_active=True)
+              .exclude(estado__in=('cerrada_conforme', 'cerrada_sin_ac')).order_by('-id'))
+        req = (h.requisito or '').strip().lower()
+        proc = (h.proceso or '').strip().lower()
+
+        def afin(s):
+            texto = f'{s.requisito_auditado} {s.descripcion_nc}'.lower()
+            return bool((req and req in texto) or (proc and proc in texto))
+        datos = [{'id': s.id, 'codigo': s.codigo, 'estado_display': s.get_estado_display(),
+                  'descripcion': (s.descripcion_nc or '')[:160], 'requisito': s.requisito_auditado,
+                  'similar': afin(s)} for s in qs]
+        datos.sort(key=lambda d: not d['similar'])
+        return Response(datos)
+    sac_abiertas.operacion = 'leer'
 
     @action(detail=False, methods=['get'])
     def resumen(self, request):
@@ -827,8 +868,8 @@ from .serializers import (  # noqa: E402
 class SolicitudACViewSet(viewsets.ModelViewSet):
     """
     M9 — SAC. Ciclo:
-    Registrada → evaluar (6.4) → En análisis (6.5) → aprobar_plan (6.6)
-    → En implementación (6.7) → En verificación → verificar_eficacia (6.8)
+    Registrada → evaluar → En análisis → aprobar_plan
+    → En implementación → En verificación → verificar_eficacia
     → Cerrada conforme | reanálisis si no eficaz.
     """
     queryset = SolicitudAC.objects.all().select_related(
@@ -865,6 +906,69 @@ class SolicitudACViewSet(viewsets.ModelViewSet):
         sac.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+    _FUENTE_HALLAZGO = {'auditoria_interna': 'auditoria_interna', 'auditoria_externa': 'auditoria_externa',
+                        'revision_direccion': 'revision_direccion', 'queja': 'queja', 'otros': 'otro'}
+
+    def create(self, request, *args, **kwargs):
+        """Registra la solicitud. Toda SAC trata una No Conformidad del registro
+        de hallazgos: la elegida (si aún no se trata en otra solicitud) o una
+        que se crea aquí mismo con su clasificación (NC mayor o menor)."""
+        datos = request.data
+        hallazgo_id = datos.get('hallazgo') or None
+        if hallazgo_id:
+            h = Hallazgo.objects.filter(pk=hallazgo_id, is_active=True).first()
+            if not h:
+                return self._error('Hallazgo no encontrado.')
+            if not h.es_nc:
+                return self._error('Solo las No Conformidades se tratan con una solicitud de acción correctiva.')
+            if h.sac_id:
+                return self._error(f'El hallazgo {h.codigo} ya se trata en la {h.sac.codigo}.')
+            if h.auditoria_id and h.auditoria.estado not in ('en_informe', 'cerrada'):
+                return self._error(f'{h.codigo} aún está en consolidación en la auditoría {h.auditoria.codigo}.')
+        else:
+            tipo_nc = datos.get('tipo_nc')
+            if tipo_nc not in ('nc_mayor', 'nc_menor'):
+                return self._error('Indique la clasificación de la No Conformidad (NC mayor o NC menor).')
+            if not (datos.get('proceso') or '').strip():
+                return self._error('Indique el proceso afectado por la No Conformidad.')
+        if hallazgo_id:
+            # La solicitud hereda la descripción y el requisito de la NC si no se indican.
+            datos = {k: datos.get(k) for k in datos.keys()}
+            if hasattr(request.data, 'getlist') and 'normas_aplicables' in request.data:
+                datos['normas_aplicables'] = request.data.getlist('normas_aplicables')
+            datos['descripcion_nc'] = (datos.get('descripcion_nc') or '').strip() or h.descripcion
+            datos['requisito_auditado'] = (datos.get('requisito_auditado') or '').strip() or h.requisito
+        ser = self.get_serializer(data=datos)
+        ser.is_valid(raise_exception=True)
+        if not hallazgo_id:
+            h = Hallazgo.objects.create(
+                tipo=datos['tipo_nc'], fuente=self._FUENTE_HALLAZGO.get(ser.validated_data.get('fuente'), 'otro'),
+                proceso=datos['proceso'].strip(), descripcion=ser.validated_data.get('descripcion_nc', ''),
+                requisito=ser.validated_data.get('requisito_auditado', ''),
+                lugar=(datos.get('lugar') or '').strip(),
+                fecha_deteccion=(datos.get('fecha_deteccion') or ser.validated_data.get('fecha_registro')
+                                 or timezone.now().date()),
+                responsable=ser.validated_data.get('responsable'), created_by=request.user)
+        sac = ser.save(hallazgo=h)
+        h.sac = sac
+        h.estado = 'en_tratamiento'
+        h.save()
+        return Response(SolicitudACSerializer(sac, context={'request': request}).data, status=status.HTTP_201_CREATED)
+
+    def update(self, request, *args, **kwargs):
+        """El registro (procedencia y descripción de la NC) se corrige solo
+        mientras la solicitud está Registrada."""
+        sac = self.get_object()
+        if 'hallazgo' in request.data and str(request.data.get('hallazgo') or '') != str(sac.hallazgo_id or ''):
+            return self._error('La NC de origen no se cambia; para otra ocurrencia use «Sumar a SAC abierta» en Hallazgos.')
+        if 'registro' not in sac.etapas_abiertas():
+            campos = [c for c in SolicitudAC.CAMPOS_REGISTRO if c in request.data]
+            if campos:
+                nombre = SolicitudAC._meta.get_field(campos[0]).verbose_name
+                return self._error(f'La etapa de registro está cerrada ({sac.get_estado_display().lower()}): '
+                                   f'no se modifica «{nombre}».')
+        return super().update(request, *args, **kwargs)
+
     @staticmethod
     def _es_si(valor, defecto=None):
         if valor is None:
@@ -874,10 +978,34 @@ class SolicitudACViewSet(viewsets.ModelViewSet):
     def _error(self, mensaje):
         return Response({'detail': mensaje}, status=status.HTTP_400_BAD_REQUEST)
 
+    @action(detail=True, methods=['get'])
+    def pdf(self, request, pk=None):
+        """Solicitud de Acción Correctiva impresa con el formato del procedimiento."""
+        from .ficha_pdf import generar_sac_pdf
+        sac = self.get_object()
+        resp = HttpResponse(generar_sac_pdf(sac), content_type='application/pdf')
+        resp['Content-Disposition'] = f'inline; filename="{sac.codigo}.pdf"'
+        return resp
+    pdf.operacion = 'leer'
+
+    @action(detail=False, methods=['get'])
+    def seguimiento_pdf(self, request):
+        """Seguimiento a solicitudes de acciones correctivas y no conformidades:
+        las solicitudes del listado (con los mismos filtros de la pantalla)."""
+        from .ficha_pdf import generar_seguimiento_sac_pdf
+        qs = self.filter_queryset(self.get_queryset()).filter(is_active=True).select_related(
+            'responsable', 'hallazgo').order_by('id')
+        solicitudes = list(qs)
+        resp = HttpResponse(generar_seguimiento_sac_pdf(solicitudes, _ultima_modificacion_sac(solicitudes)),
+                            content_type='application/pdf')
+        resp['Content-Disposition'] = 'inline; filename="seguimiento_acciones_correctivas.pdf"'
+        return resp
+    seguimiento_pdf.operacion = 'leer'
+
     @action(detail=True, methods=['post'])
     def evaluar(self, request, pk=None):
         """
-        6.4 — Evaluación de la necesidad de AC.
+        Evaluación de la necesidad de AC.
         Body: {significancia, analisis_extension, requiere_ac, justificacion}
         requiere_ac=True → En análisis | False → En implementación (solo correcciones).
         """
@@ -887,6 +1015,15 @@ class SolicitudACViewSet(viewsets.ModelViewSet):
         requiere = request.data.get('requiere_ac')
         if requiere is None:
             return self._error('Debe indicar si requiere acción correctiva.')
+        # El Área SIG designa al responsable del tratamiento.
+        if request.data.get('responsable'):
+            from core.models import Usuario
+            resp = Usuario.objects.filter(pk=request.data.get('responsable'), is_active=True).first()
+            if not resp:
+                return self._error('Responsable no válido.')
+            sac.responsable = resp
+        if not sac.responsable_id:
+            return self._error('Designe al responsable del tratamiento de la No Conformidad.')
         sac.significancia = request.data.get('significancia', sac.significancia)
         sac.analisis_extension = request.data.get('analisis_extension', '')
         sac.justificacion_evaluacion = request.data.get('justificacion', '')
@@ -899,8 +1036,8 @@ class SolicitudACViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'])
     def registrar_analisis(self, request, pk=None):
         """
-        6.5 — Análisis de causa (5 Porqués).
-        Body: {porques: [...], causa_raiz, aplica_cambios_sig, aplica_actualizar_riesgos}
+        Análisis de causa (5 Porqués).
+        Body: {porques: [{pregunta, respuesta}, ...], causa_raiz, aplica_cambios_sig, aplica_actualizar_riesgos}
         """
         sac = self.get_object()
         if sac.estado != 'en_analisis':
@@ -913,7 +1050,18 @@ class SolicitudACViewSet(viewsets.ModelViewSet):
                     porques = _json.loads(porques)
                 except ValueError:
                     porques = [porques]
-            sac.porques = [p for p in porques if str(p).strip()]
+            # Cada «¿por qué?» es un par pregunta / respuesta que redacta el
+            # analista; se aceptan también textos sueltos (registros anteriores).
+            limpios = []
+            for p in porques:
+                if isinstance(p, dict):
+                    par = {'pregunta': str(p.get('pregunta') or '').strip(),
+                           'respuesta': str(p.get('respuesta') or '').strip()}
+                    if par['pregunta'] or par['respuesta']:
+                        limpios.append(par)
+                elif str(p).strip():
+                    limpios.append(str(p).strip())
+            sac.porques = limpios
         sac.causa_raiz = request.data.get('causa_raiz', sac.causa_raiz)
         if 'aplica_cambios_sig' in request.data:
             sac.aplica_cambios_sig = self._es_si(request.data['aplica_cambios_sig'], False)
@@ -927,20 +1075,66 @@ class SolicitudACViewSet(viewsets.ModelViewSet):
     def agregar_accion(self, request, pk=None):
         """Agrega corrección o acción correctiva. Body: {tipo, descripcion, fecha_propuesta, responsable}"""
         sac = self.get_object()
-        if sac.estado in ('cerrada_conforme', 'cerrada_sin_ac'):
+        if sac.estado in SolicitudAC.CERRADAS:
             return self._error('La solicitud está cerrada.')
+        tipo = request.data.get('tipo')
+        if not sac.puede_agregar(tipo):
+            if tipo == 'correctiva':
+                return self._error('Las acciones correctivas se definen en el análisis de causa, antes de aprobar el plan.')
+            return self._error(f'En la etapa «{sac.get_estado_display()}» ya no se agregan correcciones.')
         ser = AccionSACSerializer(data=request.data)
         ser.is_valid(raise_exception=True)
-        ser.save(solicitud=sac)
+        ser.save(solicitud=sac, ciclo=sac.ciclo)
         sac = SolicitudAC.objects.prefetch_related('acciones').get(pk=sac.pk)
         return Response(SolicitudACSerializer(sac, context={'request': request}).data,
                         status=status.HTTP_201_CREATED)
     agregar_accion.operacion = 'editar'
 
+    def _accion_editable(self, sac, request):
+        accion = sac.acciones.filter(pk=request.data.get('accion_id'), is_active=True).first()
+        if not accion:
+            return None, self._error('Acción no encontrada.')
+        if not accion.editable():
+            motivo = ('ya fue completada' if accion.estado != 'pendiente'
+                      else 'es de un ciclo anterior' if accion.ciclo != sac.ciclo
+                      else f'su etapa está cerrada ({sac.get_estado_display().lower()})')
+            return None, self._error(f'La {accion.get_tipo_display().lower()} no se modifica: {motivo}.')
+        return accion, None
+
+    @action(detail=True, methods=['post'])
+    def editar_accion(self, request, pk=None):
+        """Corrige una corrección o acción correctiva mientras su etapa sigue abierta.
+        Body: {accion_id, descripcion, fecha_propuesta, responsable}"""
+        sac = self.get_object()
+        accion, error = self._accion_editable(sac, request)
+        if error:
+            return error
+        datos = {k: request.data[k] for k in ('descripcion', 'fecha_propuesta', 'responsable') if k in request.data}
+        ser = AccionSACSerializer(accion, data=datos, partial=True)
+        ser.is_valid(raise_exception=True)
+        ser.save(updated_by=request.user)
+        sac = SolicitudAC.objects.prefetch_related('acciones').get(pk=sac.pk)
+        return Response(SolicitudACSerializer(sac, context={'request': request}).data)
+    editar_accion.operacion = 'editar'
+
+    @action(detail=True, methods=['post'])
+    def quitar_accion(self, request, pk=None):
+        """Quita (baja lógica) una acción pendiente mientras su etapa sigue abierta. Body: {accion_id}"""
+        sac = self.get_object()
+        accion, error = self._accion_editable(sac, request)
+        if error:
+            return error
+        accion.is_active = False
+        accion.updated_by = request.user
+        accion.save(update_fields=['is_active', 'updated_by', 'updated_at'])
+        sac = SolicitudAC.objects.prefetch_related('acciones').get(pk=sac.pk)
+        return Response(SolicitudACSerializer(sac, context={'request': request}).data)
+    quitar_accion.operacion = 'editar'
+
     @action(detail=True, methods=['post'])
     def aprobar_plan(self, request, pk=None):
         """
-        6.6 — Aprueba el análisis y las acciones; designa verificador.
+        Aprueba el análisis y las acciones; designa verificador.
         Requiere causa raíz y al menos una acción correctiva.
         Body: {verificador: id}
         """
@@ -949,11 +1143,11 @@ class SolicitudACViewSet(viewsets.ModelViewSet):
             return self._error('Solo puede aprobarse el plan de una solicitud En análisis.')
         if not sac.causa_raiz.strip():
             return self._error('Registre la causa raíz antes de aprobar el plan.')
-        if not sac.acciones.filter(tipo='correctiva').exists():
+        if not sac.acciones.filter(tipo='correctiva', ciclo=sac.ciclo, is_active=True).exists():
             return self._error('El plan debe incluir al menos una acción correctiva.')
         verificador_id = request.data.get('verificador')
         if not verificador_id:
-            return self._error('Designe al responsable de verificar la eficacia (6.6.3).')
+            return self._error('Designe al responsable de verificar la eficacia.')
         from core.models import Usuario
         try:
             sac.verificador = Usuario.objects.get(pk=verificador_id, is_active=True)
@@ -967,7 +1161,7 @@ class SolicitudACViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'])
     def completar_accion(self, request, pk=None):
         """
-        6.7 — Marca una acción como completada, con evidencia adjunta.
+        Marca una acción como completada, con evidencia adjunta.
         Body multipart: {accion_id, verificacion, evidencia (archivo)}
         Cuando todas las acciones quedan completadas → En verificación
         (o cierre directo si la SAC no requería AC).
@@ -976,53 +1170,160 @@ class SolicitudACViewSet(viewsets.ModelViewSet):
         if sac.estado != 'en_implementacion':
             return self._error('Las acciones se completan en estado En implementación.')
         try:
-            accion = sac.acciones.get(pk=request.data.get('accion_id'))
+            accion = sac.acciones.get(pk=request.data.get('accion_id'), is_active=True)
         except (AccionSAC.DoesNotExist, ValueError, TypeError):
             return self._error('Acción no encontrada.')
         if accion.estado == 'completada':
             return self._error('Esa acción ya está completada.')
+        if not (request.data.get('verificacion') or '').strip():
+            return self._error('Describa la verificación de lo ejecutado antes de completar la acción.')
         accion.estado = 'completada'
         accion.fecha_completada = timezone.now().date()
         accion.verificacion = request.data.get('verificacion', '')
         if request.FILES.get('evidencia'):
             accion.evidencia = request.FILES['evidencia']
         accion.save()
-        if not sac.acciones.filter(estado='pendiente').exists():
+        if not sac.acciones.filter(estado='pendiente', is_active=True).exists():
             if sac.requiere_ac:
                 sac.estado = 'en_verificacion'
             else:
                 sac.estado = 'cerrada_sin_ac'
                 sac.fecha_cierre = timezone.now()
             sac.save()
+            if sac.estado == 'cerrada_sin_ac':
+                _cerrar_hallazgos_de_sac(sac, request.user, 'Corrección implementada; no requirió acción correctiva.')
         sac = SolicitudAC.objects.prefetch_related('acciones').get(pk=sac.pk)
         return Response(SolicitudACSerializer(sac, context={'request': request}).data)
     completar_accion.operacion = 'editar'
 
     @action(detail=True, methods=['post'])
+    def reabrir_accion(self, request, pk=None):
+        """
+        Reabre una acción completada por error, con motivo, mientras la solicitud
+        está en implementación o esperando la verificación de la eficacia (vuelve
+        a implementación). Lo completado antes queda en el historial de la acción.
+        Body: {accion_id, motivo}
+        """
+        sac = self.get_object()
+        accion = sac.acciones.filter(pk=request.data.get('accion_id'), is_active=True).first()
+        if not accion:
+            return self._error('Acción no encontrada.')
+        if not accion.reabrible():
+            if accion.estado != 'completada':
+                return self._error('La acción no está completada.')
+            return self._error(f'Ya no se reabre: la solicitud está {sac.get_estado_display().lower()}.')
+        motivo = (request.data.get('motivo') or '').strip()
+        if not motivo:
+            return self._error('Indique el motivo de la reapertura.')
+        accion.reaperturas = list(accion.reaperturas or []) + [{
+            'fecha': timezone.now().isoformat(timespec='minutes'),
+            'usuario': request.user.get_full_name() or request.user.username,
+            'motivo': motivo, 'verificacion': accion.verificacion,
+            'fecha_completada': str(accion.fecha_completada or ''),
+            'evidencia': accion.evidencia.name if accion.evidencia else '',
+        }]
+        accion.estado = 'pendiente'
+        accion.fecha_completada = None
+        accion.updated_by = request.user
+        accion.save()
+        if sac.estado == 'en_verificacion':
+            sac.estado = 'en_implementacion'
+            sac.save(update_fields=['estado', 'updated_at'])
+        sac = SolicitudAC.objects.prefetch_related('acciones').get(pk=sac.pk)
+        return Response(SolicitudACSerializer(sac, context={'request': request}).data)
+    reabrir_accion.operacion = 'editar'
+
+    @action(detail=True, methods=['post'])
     def verificar_eficacia(self, request, pk=None):
         """
-        6.8 — Verificación de eficacia. Body: {eficaz: bool, evaluacion}.
+        Verificación de eficacia. Body: {eficaz: bool, evaluacion}.
         Eficaz → Cerrada conforme (+ cierra el hallazgo M8 vinculado).
         No eficaz → vuelve a En análisis (+ reabre el hallazgo si estaba cerrado).
         """
         sac = self.get_object()
         if sac.estado != 'en_verificacion':
             return self._error('La solicitud no está en verificación de eficacia.')
+        if (sac.verificador_id and sac.verificador_id != request.user.pk
+                and not _puede_aprobar(request, 'acciones_correctivas')):
+            return self._error(f'La eficacia la verifica {sac.verificador.get_full_name() or sac.verificador.username}, '
+                               'designado al aprobar el plan.')
         evaluacion = (request.data.get('evaluacion') or '').strip()
         if not evaluacion:
-            return self._error('Registre la evaluación de la eficacia (6.8.1).')
+            return self._error('Registre la evaluación de la eficacia.')
         eficaz = self._es_si(request.data.get('eficaz'), None)
         if eficaz is None:
             return self._error('Indique si las acciones fueron eficaces.')
         sac.evaluacion_eficacia = evaluacion
         sac.resultado_eficaz = eficaz
         sac.fecha_verificacion = timezone.now()
+        sac.verificado_por = request.user
         if eficaz:
             sac.estado = 'cerrada_conforme'
             sac.fecha_cierre = timezone.now()
-            if sac.hallazgo and sac.hallazgo.estado != 'cerrado':
-                h = sac.hallazgo
-               
+            sac.save()
+            _cerrar_hallazgos_de_sac(sac, request.user, 'Acciones verificadas como eficaces.')
+        else:
+            # Si no fue eficaz, se revisa el análisis de causa y se definen nuevas acciones;
+            # la solicitud y sus hallazgos siguen abiertos. El ciclo no eficaz
+            # queda en el historial (no se sobrescribe).
+            sac.ciclos_anteriores = list(sac.ciclos_anteriores or []) + [{
+                'ciclo': sac.ciclo, 'fecha': timezone.now().isoformat(timespec='minutes'),
+                'porques': list(sac.porques or []), 'causa_raiz': sac.causa_raiz,
+                'evaluacion': evaluacion,
+                'verificado_por': request.user.get_full_name() or request.user.username,
+                'extension': sac.analisis_extension,
+                'aplica_cambios_sig': sac.aplica_cambios_sig,
+                'aplica_actualizar_riesgos': sac.aplica_actualizar_riesgos,
+            }]
+            sac.ciclo += 1
+            sac.estado = 'en_analisis'
+            # El nuevo ciclo empieza con el análisis en blanco: el anterior ya quedó
+            # en el historial y la pantalla permite partir de él para revisarlo.
+            sac.porques = []
+            sac.causa_raiz = ''
+            sac.save()
+        sac = SolicitudAC.objects.prefetch_related('acciones').get(pk=sac.pk)
+        return Response(SolicitudACSerializer(sac, context={'request': request}).data)
+    verificar_eficacia.operacion = 'editar'
+
+
+def _ultima_modificacion_sac(solicitudes):
+    """Fecha de actualización del seguimiento: la última modificación real de las
+    solicitudes listadas (la solicitud, sus acciones o su NC de origen). Sin
+    solicitudes, None (el PDF usa la fecha del día)."""
+    from django.db.models import Max
+    if not solicitudes:
+        return None
+    ids = [s.pk for s in solicitudes]
+    fechas = [s.updated_at for s in solicitudes if s.updated_at]
+    fechas.append(AccionSAC.objects.filter(solicitud_id__in=ids).aggregate(m=Max('updated_at'))['m'])
+    fechas.append(Hallazgo.objects.filter(solicitudes_ac__id__in=ids).aggregate(m=Max('updated_at'))['m'])
+    fechas = [f for f in fechas if f]
+    return timezone.localtime(max(fechas)).date() if fechas else None
+
+
+def normas_de_sac(normas):
+    """Normas de la solicitud: el SIG integrado son las tres normas de sistemas
+    de gestión (casillas ISO 9001, 14001 y 45001 del formato)."""
+    salida = []
+    for n in normas or []:
+        for x in (['iso_9001', 'iso_14001', 'iso_45001'] if n == 'sig_integrado' else [n]):
+            if x not in salida:
+                salida.append(x)
+    return salida
+
+
+def _cerrar_hallazgos_de_sac(sac, usuario, motivo):
+    """Al cerrarse una solicitud de acción correctiva se cierran las NC que
+    trata (la de origen y las ocurrencias sumadas)."""
+    from django.db.models import Q
+    for h in Hallazgo.objects.filter(Q(sac=sac) | Q(pk=sac.hallazgo_id), is_active=True).exclude(estado='cerrado'):
+        h.estado = 'cerrado'
+        h.cerrado_por = usuario
+        h.fecha_cierre = timezone.now()
+        h.comentarios_cierre = f'Cerrado con la {sac.codigo}: {motivo}'
+        h.save()
+
 
 # ============================================================
 # M10 — AUDITORÍAS INTERNAS
@@ -1037,15 +1338,37 @@ from .serializers import (  # noqa: E402
 )
 
 
+class FormatoImpresoViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,
+                            mixins.UpdateModelMixin, viewsets.GenericViewSet):
+    """
+    Formatos PDF que genera el sistema y su vínculo con la lista maestra.
+    Cualquier usuario autenticado puede consultarlos; solo administradores
+    cambian el vínculo (la caja de control de los PDF depende de él).
+    """
+    from .models import FormatoImpreso as _FI
+    from .serializers import FormatoImpresoSerializer as _FIS
+    queryset = _FI.objects.filter(is_active=True).select_related('documento')
+    serializer_class = _FIS
+    http_method_names = ['get', 'patch', 'head', 'options']
+
+    def get_permissions(self):
+        from core.permissions import SoloAdministradores
+        from rest_framework.permissions import IsAuthenticated
+        return [SoloAdministradores()] if self.request.method == 'PATCH' else [IsAuthenticated()]
+
+
 class RequisitoNormaViewSet(viewsets.ReadOnlyModelViewSet):
     """Catálogo de cláusulas de las normas (solo lectura)."""
     queryset = RequisitoNorma.objects.all()
     serializer_class = RequisitoNormaSerializer
     permission_classes = [PermisoModular]
     modulo = 'auditorias'
+    # El catálogo completo de una norma se usa en los selectores de cláusulas
+    # (la de 17025 tiene 183 filas): se entrega entero, sin paginar.
+    pagination_class = None
 
     def get_queryset(self):
-        qs = super().get_queryset()
+        qs = super().get_queryset().order_by('norma', 'orden')
         norma = self.request.query_params.get('norma')
         return qs.filter(norma=norma) if norma else qs
 
@@ -1064,18 +1387,72 @@ class ProgramaAuditoriaViewSet(viewsets.ModelViewSet):
         return qs
 
     def destroy(self, request, *args, **kwargs):
-        p = self.get_object(); p.is_active = False; p.save()
+        p = self.get_object()
+        if p.bloqueado:
+            return Response({'detail': 'El programa está aprobado. Ábralo para modificación antes de desactivarlo.'},
+                            status=status.HTTP_400_BAD_REQUEST)
+        p.is_active = False; p.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def update(self, request, *args, **kwargs):
+        p = self.get_object()
+        if p.bloqueado:
+            return Response({'detail': 'El programa está aprobado y es de solo lectura. Use "Modificar programa".'},
+                            status=status.HTTP_400_BAD_REQUEST)
+        return super().update(request, *args, **kwargs)
 
     @action(detail=True, methods=['post'])
     def aprobar(self, request, pk=None):
+        """Aprueba el programa anual (desde borrador o en modificación) y lo deja
+        de solo lectura. Sin permiso de aprobar, queda como solicitud pendiente
+        para que un aprobador la apruebe, devuelva o rechace."""
         p = self.get_object()
-        p.estado = 'aprobado'
-        p.aprobado_por = request.user
-        p.fecha_aprobacion = timezone.now()
+        if p.estado == 'aprobado':
+            return Response({'detail': 'El programa ya está aprobado.'}, status=status.HTTP_400_BAD_REQUEST)
+        if not p.auditorias.filter(is_active=True).exists():
+            return Response({'detail': 'El programa no tiene auditorías; agregue al menos una antes de aprobar.'},
+                            status=status.HTTP_400_BAD_REQUEST)
+        if not _puede_aprobar(request, 'auditorias'):
+            if SolicitudCambioEquipo.objects.filter(modulo='auditorias', entidad='programa_auditoria',
+                                                    entidad_id=p.pk, estado='pendiente').exists():
+                return Response({'detail': 'Ya existe una solicitud de aprobación pendiente para este programa.'},
+                                status=status.HTTP_400_BAD_REQUEST)
+            rev = f' (revisión {p.revision + 1})' if p.estado == 'en_modificacion' else ''
+            return _crear_solicitud_equipo(
+                request, entidad='programa_auditoria', operacion='aprobar', entidad_id=p.pk,
+                resumen=f'Aprobación del programa anual de auditorías {p.anio}{rev}', modulo='auditorias')
+        aprobar_programa(p, request.user)
+        return Response(ProgramaAuditoriaSerializer(p, context={'request': request}).data)
+    aprobar.operacion = 'editar'
+
+    @action(detail=True, methods=['post'])
+    def abrir_modificacion(self, request, pk=None):
+        """Aprobado → En modificación. Reabre el programa para cambios, con motivo
+        obligatorio; al terminar debe aprobarse de nuevo (sube la revisión)."""
+        p = self.get_object()
+        if p.estado != 'aprobado':
+            return Response({'detail': 'Solo se abre para modificación un programa aprobado.'},
+                            status=status.HTTP_400_BAD_REQUEST)
+        motivo = (request.data.get('motivo') or '').strip()
+        if not motivo:
+            return Response({'detail': 'Indique el motivo de la modificación.'}, status=status.HTTP_400_BAD_REQUEST)
+        p.estado = 'en_modificacion'
+        p.modificado_por = request.user
+        p.fecha_modificacion = timezone.now()
+        p.motivo_modificacion = motivo
         p.save()
         return Response(ProgramaAuditoriaSerializer(p, context={'request': request}).data)
-    aprobar.operacion = 'aprobar'
+    abrir_modificacion.operacion = 'editar'
+
+    @action(detail=True, methods=['get'])
+    def programa_pdf(self, request, pk=None):
+        """Programa anual de auditorías."""
+        from .ficha_pdf import generar_programa_anual_pdf
+        p = self.get_object()
+        resp = HttpResponse(generar_programa_anual_pdf(p), content_type='application/pdf')
+        resp['Content-Disposition'] = f'inline; filename="programa_auditorias_{p.anio}.pdf"'
+        return resp
+    programa_pdf.operacion = 'leer'
 
 
 class AuditoriaViewSet(viewsets.ModelViewSet):
@@ -1104,6 +1481,10 @@ class AuditoriaViewSet(viewsets.ModelViewSet):
                 qs = qs.filter(estado=p['estado'])
             if p.get('anio'):
                 qs = qs.filter(programa__anio=p['anio'])
+            if p.get('programa'):
+                qs = qs.filter(programa_id=p['programa'])
+            if p.get('sin_programa') == '1':
+                qs = qs.filter(programa__isnull=True)
             if p.get('buscar'):
                 from django.db.models import Q
                 b = p['buscar']
@@ -1111,8 +1492,72 @@ class AuditoriaViewSet(viewsets.ModelViewSet):
                                Q(objetivo__icontains=b))
         return qs
 
+    # --- Programa aprobado = solo lectura para lo que define el programa ---
+
+    def create(self, request, *args, **kwargs):
+        prog_id = request.data.get('programa')
+        if prog_id:
+            prog = ProgramaAuditoria.objects.filter(pk=prog_id).first()
+            msg = _programa_bloqueado(prog)
+            if msg:
+                return self._error(msg)
+        return super().create(request, *args, **kwargs)
+
+    @staticmethod
+    def _campos_cambiados(a, data, campos):
+        """Campos de `campos` presentes en `data` cuyo valor difiere del guardado.
+        Enviar el mismo valor no cuenta como cambio (la pantalla reenvía todo)."""
+        cambiados = []
+        for c in campos:
+            if c not in data:
+                continue
+            nuevo = data.get(c)
+            if c in ('programa', 'auditor_lider'):
+                actual = getattr(a, f'{c}_id')
+                nuevo = int(nuevo) if nuevo not in (None, '') else None
+            elif c == 'mes_programado':
+                actual = getattr(a, c)
+                nuevo = int(nuevo) if nuevo not in (None, '') else None
+            elif c in ('fecha_elaboracion_plan', 'fecha_programada'):
+                actual = getattr(a, c)
+                actual = actual.isoformat() if actual else None
+                nuevo = nuevo or None
+            else:
+                actual = getattr(a, c)
+                if isinstance(actual, str):
+                    nuevo = '' if nuevo is None else str(nuevo)
+            if nuevo != actual:
+                cambiados.append(c)
+        return cambiados
+
+    def update(self, request, *args, **kwargs):
+        a = self.get_object()
+        # Etapas cerradas = solo lectura: se rechaza cualquier cambio en un
+        # campo de una etapa ya superada, indicando cuál.
+        todos = [c for cfg in Auditoria.ETAPAS.values() for c in cfg['campos']]
+        for c in self._campos_cambiados(a, request.data, todos):
+            etapa = a.campo_bloqueado(c)
+            if etapa:
+                return self._error(a.mensaje_etapa_cerrada(etapa) + f' Campo: {c}.')
+        if a.programa_id and a.programa.bloqueado:
+            # Programa aprobado: además se bloquean los campos que lo definen,
+            # aunque la auditoría siga en etapa Programa.
+            cambiados = self._campos_cambiados(a, request.data, ProgramaAuditoria.CAMPOS_PROGRAMA)
+            if cambiados:
+                return self._error(_programa_bloqueado(a.programa) + f' Campos bloqueados: {", ".join(cambiados)}.')
+        return super().update(request, *args, **kwargs)
+
+    def _exigir_etapa(self, a, etapa):
+        """Respuesta de error si la etapa ya está cerrada; None si sigue abierta."""
+        if not a.etapa_abierta(etapa):
+            return self._error(a.mensaje_etapa_cerrada(etapa))
+        return None
+
     def destroy(self, request, *args, **kwargs):
-        a = self.get_object(); a.is_active = False; a.save()
+        a = self.get_object()
+        if a.programa_id and a.programa.bloqueado:
+            return self._error(_programa_bloqueado(a.programa))
+        a.is_active = False; a.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     def _error(self, msg):
@@ -1128,24 +1573,39 @@ class AuditoriaViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'])
     def planificar(self, request, pk=None):
-        """Programada → Planificada. Requiere objetivo, alcance y auditor líder."""
+        """Aprobar y comunicar el plan (Programada → Planificada). El plan lo
+        aprueba el auditor líder (o quien tenga permiso de aprobar); requiere
+        objetivo, alcance, auditor líder y al menos una entrevista programada."""
         a = self.get_object()
-        if a.estado not in ('programada', 'planificada'):
-            return self._error('Solo se planifica una auditoría Programada.')
-        if not a.objetivo.strip() or not a.alcance.strip() or not a.auditor_lider_id:
-            return self._error('Para planificar: defina objetivo, alcance y auditor líder.')
+        if a.estado != 'programada':
+            return self._error('El plan ya fue aprobado.')
+        a.sincronizar_lider(incorporar_anterior=True)
+        if not a.objetivo.strip() or not a.alcance.strip():
+            return self._error('Para aprobar el plan: defina objetivo y alcance.')
+        if not a.equipo.filter(rol='lider').exists():
+            return self._error('Para aprobar el plan: agregue al auditor líder en el Equipo auditor (rol Líder).')
+        if not [e for e in (a.cronograma_entrevistas or []) if isinstance(e, dict) and (e.get('fecha') or e.get('area'))]:
+            return self._error('Para aprobar el plan: registre al menos una entrevista en el cronograma.')
+        es_lider = a.auditor_lider_id == request.user.pk or a.equipo.filter(rol='lider', usuario=request.user).exists()
+        if not (es_lider or _puede_aprobar(request, 'auditorias')):
+            return self._error('El plan lo aprueba el auditor líder.')
         a.estado = 'planificada'
+        a.plan_aprobado_por = request.user
+        a.fecha_aprobacion_plan = timezone.now()
+        if not a.fecha_elaboracion_plan:
+            from datetime import date
+            a.fecha_elaboracion_plan = date.today()
         a.save()
         return self._data(a, request)
     planificar.operacion = 'editar'
 
     @action(detail=True, methods=['post'])
     def iniciar(self, request, pk=None):
-        """Planificada → En ejecución."""
+        """Planificada → Reunión de apertura (cierra los documentos de trabajo)."""
         a = self.get_object()
         if a.estado != 'planificada':
-            return self._error('Solo se inicia una auditoría Planificada.')
-        a.estado = 'en_ejecucion'
+            return self._error('Solo se inicia una auditoría con el plan aprobado.')
+        a.estado = 'apertura'
         if not a.fecha_inicio:
             a.fecha_inicio = timezone.now().date()
         a.save()
@@ -1156,10 +1616,22 @@ class AuditoriaViewSet(viewsets.ModelViewSet):
     def reprogramar(self, request, pk=None):
         """Mueve la fecha/mes con motivo registrado."""
         a = self.get_object()
+        if a.estado not in ('programada', 'planificada'):
+            return self._error('Solo se reprograma una auditoría que aún no se ha ejecutado.')
+        motivo = (request.data.get('motivo') or '').strip()
+        if not motivo:
+            return self._error('Indique el motivo de la reprogramación.')
+        nuevo_mes = request.data.get('mes_programado') or request.data.get('mes_reprogramado')
+        if not nuevo_mes:
+            return self._error('Indique el nuevo mes.')
+        nuevo_mes = int(nuevo_mes)
+        if not 1 <= nuevo_mes <= 12:
+            return self._error('El mes debe estar entre 1 y 12.')
+        # El mes programado original se conserva (fila "Programado" del
+        # programa anual); el nuevo va a la fila "Reprogramado".
         a.reprogramada = True
-        a.motivo_reprogramacion = request.data.get('motivo', '')
-        if request.data.get('mes_programado'):
-            a.mes_programado = int(request.data['mes_programado'])
+        a.motivo_reprogramacion = motivo
+        a.mes_reprogramado = nuevo_mes
         if request.data.get('fecha_programada'):
             a.fecha_programada = request.data['fecha_programada']
         a.save()
@@ -1169,6 +1641,8 @@ class AuditoriaViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'])
     def agregar_integrante(self, request, pk=None):
         a = self.get_object()
+        if (err := self._exigir_etapa(a, 'plan')):
+            return err
         rol = request.data.get('rol')
         if rol not in dict([('lider', 1), ('auditor', 1), ('experto', 1), ('observador', 1)]):
             return self._error('Rol no válido.')
@@ -1177,27 +1651,54 @@ class AuditoriaViewSet(viewsets.ModelViewSet):
         if usuario_id:
             from core.models import Usuario
             usuario = Usuario.objects.filter(pk=usuario_id, is_active=True).first()
+        # El cargo se toma del indicado; si no viene y es usuario interno, se
+        # hereda del cargo registrado del usuario.
+        if not usuario and not (request.data.get('nombre_externo') or '').strip():
+            return self._error('Indique el usuario o el nombre del integrante externo.')
+        if rol == 'lider':
+            actual = a.integrante_lider()
+            if actual:
+                nombre = (actual.usuario.get_full_name() or actual.usuario.username) if actual.usuario else actual.nombre_externo
+                return self._error(f'La auditoría ya tiene auditor líder ({nombre}). Quítelo del equipo para designar a otro.')
+        cargo = request.data.get('cargo', '') or (getattr(usuario, 'cargo', '') if usuario else '')
         EquipoAuditoria.objects.create(
             auditoria=a, usuario=usuario,
             nombre_externo=request.data.get('nombre_externo', ''),
-            rol=rol, cargo=request.data.get('cargo', ''))
-        return self._data(a, request)
+            rol=rol, cargo=cargo)
+        # El auditor líder del equipo se refleja como auditor líder de la
+        # auditoría (sincroniza el campo que valida la planificación).
+        if rol == 'lider':
+            a.sincronizar_lider()
+        resp = self._data(a, request)
+        # Independencia del auditor: se avisa (no se bloquea) si la persona
+        # pertenece al área o laboratorio que se va a auditar.
+        aviso = _aviso_independencia(usuario, a, rol)
+        if aviso:
+            resp.data['aviso'] = aviso
+        return resp
     agregar_integrante.operacion = 'editar'
 
     @action(detail=True, methods=['post'])
     def quitar_integrante(self, request, pk=None):
         a = self.get_object()
+        if (err := self._exigir_etapa(a, 'plan')):
+            return err
         EquipoAuditoria.objects.filter(auditoria=a, pk=request.data.get('integrante_id')).delete()
+        a.sincronizar_lider()
         return self._data(a, request)
     quitar_integrante.operacion = 'editar'
 
     @action(detail=True, methods=['post'])
     def registrar_acta(self, request, pk=None):
-        """Registra/actualiza el acta de apertura o cierre."""
+        """Registra el acta de la reunión de apertura o de cierre y avanza la
+        auditoría: la apertura da inicio a la ejecución; el cierre congela los
+        hallazgos comunicados y pasa al informe. Un acta registrada no se edita."""
         a = self.get_object()
         tipo = request.data.get('tipo')
         if tipo not in ('apertura', 'cierre'):
             return self._error('Tipo de acta no válido (apertura/cierre).')
+        if (err := self._exigir_etapa(a, 'apertura' if tipo == 'apertura' else 'cierre')):
+            return err
         participantes = request.data.get('participantes', [])
         if isinstance(participantes, str):
             import json as _json
@@ -1205,49 +1706,87 @@ class AuditoriaViewSet(viewsets.ModelViewSet):
                 participantes = _json.loads(participantes)
             except ValueError:
                 participantes = []
+        participantes = [p for p in participantes if isinstance(p, dict) and (p.get('nombre') or '').strip()]
+        if not participantes:
+            return self._error('Registre los participantes de la reunión.')
+        if not (request.data.get('contenido') or '').strip():
+            return self._error('Complete el contenido del acta (sección 2).')
         acta, _ = ActaAuditoria.objects.update_or_create(
             auditoria=a, tipo=tipo,
             defaults={
                 'participantes': participantes,
                 'contenido': request.data.get('contenido', ''),
+                'seccion3': request.data.get('seccion3', ''),
                 'observaciones_auditado': request.data.get('observaciones_auditado', ''),
             })
         if request.FILES.get('archivo'):
             acta.archivo = request.FILES['archivo']
             acta.save()
+        if tipo == 'apertura':
+            a.estado = 'en_ejecucion'
+            if not a.fecha_inicio:
+                a.fecha_inicio = timezone.now().date()
+        else:
+            a.estado = 'en_informe'
+            if not a.fecha_fin:
+                a.fecha_fin = timezone.now().date()
+        a.save()
         return self._data(a, request)
     registrar_acta.operacion = 'editar'
 
     @action(detail=True, methods=['post'])
     def generar_lista(self, request, pk=None):
-        """Crea la lista de verificación de una norma con sus cláusulas del catálogo."""
+        """Crea la lista de verificación de una norma con sus cláusulas del
+        catálogo. Es un documento de trabajo: se prepara con el plan aprobado."""
         a = self.get_object()
+        if (err := self._exigir_etapa(a, 'documentos')):
+            return err
         norma = request.data.get('norma')
-        if norma not in ('iso_9001', 'iso_14001', 'iso_45001', 'iso_17025'):
+        if norma not in ('iso_9001', 'iso_14001', 'iso_45001', 'iso_17025', 'sig_integrado'):
             return self._error('Norma no válida.')
         if ListaVerificacion.objects.filter(auditoria=a, norma=norma).exists():
             return self._error('Ya existe la lista de verificación de esa norma.')
         lista = ListaVerificacion.objects.create(auditoria=a, norma=norma)
         reqs = RequisitoNorma.objects.filter(norma=norma).order_by('orden')
+        # ISO 9001 / 14001 / 45001 auditadas solas: sus preguntas (bloque
+        # 'lista'); las demás filas de esas normas son títulos para selectores.
+        if reqs.filter(bloque='lista').exists():
+            reqs = reqs.filter(bloque='lista')
         ItemVerificacion.objects.bulk_create([
-            ItemVerificacion(lista=lista, codigo=r.codigo, titulo=r.titulo,
-                             es_seccion=r.es_seccion, orden=r.orden)
+            ItemVerificacion(lista=lista, codigo=r.codigo, titulo=r.titulo, es_seccion=r.es_seccion,
+                             bloque='requisitos' if r.bloque == 'lista' else r.bloque,
+                             formato=r.formato, orden=r.orden)
             for r in reqs])
         return self._data(a, request)
     generar_lista.operacion = 'editar'
 
     @action(detail=True, methods=['post'])
     def evaluar_item(self, request, pk=None):
-        """Marca el resultado de un ítem de la lista de verificación."""
+        """Ítem de la lista de verificación. En la preparación (documentos de
+        trabajo) solo se anota el documento de referencia; la evaluación
+        (evidencia y conclusión) se registra durante la ejecución."""
         a = self.get_object()
+        if not (a.etapa_abierta('documentos') or a.etapa_abierta('ejecucion')):
+            return self._error(a.mensaje_etapa_cerrada('ejecucion'))
         try:
             item = ItemVerificacion.objects.get(pk=request.data.get('item_id'), lista__auditoria=a)
         except ItemVerificacion.DoesNotExist:
             return self._error('Ítem no encontrado.')
-        res = request.data.get('resultado')
+        res = request.data.get('resultado', item.resultado)
         if res not in ('pendiente', 'cumple', 'no_cumple', 'na', 'observa'):
             return self._error('Resultado no válido.')
+        if not a.etapa_abierta('ejecucion'):
+            evalua = (res != item.resultado
+                      or request.data.get('evidencia', item.evidencia) != item.evidencia
+                      or request.data.get('observacion', item.observacion) != item.observacion)
+            if evalua:
+                return self._error('La evaluación se registra durante la ejecución, después de la reunión de apertura.')
+        if res not in ItemVerificacion.RESULTADOS_CON_HALLAZGO:
+            # Ya no es No cumple ni Observación: deja de originar un hallazgo.
+            item.hallazgo = None
+            item.motivo_descarte = ''
         item.resultado = res
+        item.documento_referencia = request.data.get('documento_referencia', item.documento_referencia)
         item.evidencia = request.data.get('evidencia', item.evidencia)
         item.observacion = request.data.get('observacion', item.observacion)
         item.save()
@@ -1261,8 +1800,8 @@ class AuditoriaViewSet(viewsets.ModelViewSet):
         con fuente 'auditoria_interna'. Las NC Mayores marcan requiere_ac (M9).
         """
         a = self.get_object()
-        if a.estado not in ('en_ejecucion', 'en_informe'):
-            return self._error('Los hallazgos se registran durante la ejecución o el informe.')
+        if not (a.etapa_abierta('ejecucion') or a.etapa_abierta('conclusiones')):
+            return self._error(a.mensaje_etapa_cerrada('ejecucion'))
         tipo = request.data.get('tipo')
         if tipo not in ('nc_mayor', 'nc_menor', 'observacion', 'odm'):
             return self._error('Tipo de hallazgo no válido.')
@@ -1277,42 +1816,248 @@ class AuditoriaViewSet(viewsets.ModelViewSet):
             lugar=request.data.get('lugar', ''),
             fecha_deteccion=timezone.now().date(),
             auditoria=a,
-            requiere_ac=(tipo == 'nc_mayor'),
+            requiere_ac=(tipo in ('nc_mayor', 'nc_menor')),
         )
+        items, err = self._items_de_hallazgo(a, request.data.get('item_ids'))
+        if err:
+            return err
         h.save()
+        for it in items:
+            it.hallazgo = h
+            it.motivo_descarte = ''
+            it.save()
         return self._data(a, request)
     registrar_hallazgo.operacion = 'crear'
 
+    def _items_de_hallazgo(self, a, ids):
+        """Ítems de la lista (de esta auditoría) evaluados como No cumple u
+        Observación, que pueden originar un hallazgo."""
+        ids = [i for i in (ids or []) if str(i).isdigit()]
+        if not ids:
+            return [], None
+        items = list(ItemVerificacion.objects.filter(pk__in=ids, lista__auditoria=a, es_seccion=False))
+        if len(items) != len(set(map(int, ids))):
+            return None, self._error('Algún ítem no pertenece a esta auditoría.')
+        if any(it.resultado not in ItemVerificacion.RESULTADOS_CON_HALLAZGO for it in items):
+            return None, self._error('Solo originan hallazgos los ítems evaluados como No cumple u Observación.')
+        return items, None
+
+    def _etapa_hallazgos(self, a):
+        if not (a.etapa_abierta('ejecucion') or a.etapa_abierta('conclusiones')):
+            return self._error('Los hallazgos ya se comunicaron en la reunión de cierre: son de solo lectura.')
+        return None
+
     @action(detail=True, methods=['post'])
-    def generar_informe(self, request, pk=None):
-        """En ejecución → En informe. Consolida conclusiones del informe."""
+    def vincular_items(self, request, pk=None):
+        """Suma ítems de la lista a un hallazgo ya registrado (un mismo problema
+        que incumple varios requisitos)."""
+        a = self.get_object()
+        if (err := self._etapa_hallazgos(a)):
+            return err
+        h = _Hallazgo.objects.filter(pk=request.data.get('hallazgo_id'), auditoria=a, is_active=True).first()
+        if not h:
+            return self._error('Hallazgo no encontrado.')
+        items, err = self._items_de_hallazgo(a, request.data.get('item_ids'))
+        if err:
+            return err
+        if not items:
+            return self._error('Elige al menos un ítem.')
+        for it in items:
+            it.hallazgo = h
+            it.motivo_descarte = ''
+            it.save()
+        return self._data(a, request)
+    vincular_items.operacion = 'editar'
+
+    @action(detail=True, methods=['post'])
+    def descartar_items(self, request, pk=None):
+        """El ítem evaluado como No cumple u Observación no genera hallazgo
+        (no se sostiene con evidencia, ya está cubierto, etc.). Motivo obligatorio."""
+        a = self.get_object()
+        if (err := self._etapa_hallazgos(a)):
+            return err
+        motivo = (request.data.get('motivo') or '').strip()
+        if not motivo:
+            return self._error('Indique por qué no genera hallazgo.')
+        items, err = self._items_de_hallazgo(a, request.data.get('item_ids'))
+        if err:
+            return err
+        if not items:
+            return self._error('Elige al menos un ítem.')
+        for it in items:
+            it.hallazgo = None
+            it.motivo_descarte = motivo
+            it.save()
+        return self._data(a, request)
+    descartar_items.operacion = 'editar'
+
+    @action(detail=True, methods=['post'])
+    def reabrir_item(self, request, pk=None):
+        """Devuelve un ítem a "pendiente de clasificar" (se desvincula de su
+        hallazgo o se anula su descarte)."""
+        a = self.get_object()
+        if (err := self._etapa_hallazgos(a)):
+            return err
+        it = ItemVerificacion.objects.filter(pk=request.data.get('item_id'), lista__auditoria=a).first()
+        if not it:
+            return self._error('Ítem no encontrado.')
+        it.hallazgo = None
+        it.motivo_descarte = ''
+        it.save()
+        return self._data(a, request)
+    reabrir_item.operacion = 'editar'
+
+    @action(detail=True, methods=['post'])
+    def editar_hallazgo(self, request, pk=None):
+        """Consolidación: corrige o reclasifica un hallazgo antes de la reunión
+        de cierre. Si cambia de tipo y de prefijo, toma el código del nuevo tipo
+        (aún no se ha comunicado formalmente)."""
+        a = self.get_object()
+        if not (a.etapa_abierta('ejecucion') or a.etapa_abierta('conclusiones')):
+            return self._error('Los hallazgos ya se comunicaron en la reunión de cierre: son de solo lectura.')
+        h = _Hallazgo.objects.filter(pk=request.data.get('hallazgo_id'), auditoria=a, is_active=True).first()
+        if not h:
+            return self._error('Hallazgo no encontrado.')
+        tipo = request.data.get('tipo', h.tipo)
+        if tipo not in ('nc_mayor', 'nc_menor', 'observacion', 'odm'):
+            return self._error('Tipo de hallazgo no válido.')
+        descripcion = (request.data.get('descripcion', h.descripcion) or '').strip()
+        if not descripcion:
+            return self._error('La descripción del hallazgo es obligatoria.')
+        from .models import PREFIJOS_HALLAZGO
+        if PREFIJOS_HALLAZGO.get(tipo) != PREFIJOS_HALLAZGO.get(h.tipo):
+            h.codigo = _Hallazgo.generar_codigo(tipo, h.anio_codigo())
+        h.tipo = tipo
+        h.descripcion = descripcion
+        h.requisito = request.data.get('requisito', h.requisito)
+        h.save()
+        return self._data(a, request)
+    editar_hallazgo.operacion = 'editar'
+
+    @action(detail=True, methods=['post'])
+    def anular_hallazgo(self, request, pk=None):
+        """Consolidación: descarta un hallazgo que no se sostiene con evidencia
+        (baja lógica; no se borra)."""
+        a = self.get_object()
+        if not (a.etapa_abierta('ejecucion') or a.etapa_abierta('conclusiones')):
+            return self._error('Los hallazgos ya se comunicaron en la reunión de cierre: son de solo lectura.')
+        h = _Hallazgo.objects.filter(pk=request.data.get('hallazgo_id'), auditoria=a, is_active=True).first()
+        if not h:
+            return self._error('Hallazgo no encontrado.')
+        h.is_active = False
+        h.save()
+        # Sus ítems de origen vuelven a "pendiente de clasificar": hay que
+        # decidir de nuevo (otro hallazgo o descarte con motivo).
+        ItemVerificacion.objects.filter(hallazgo=h).update(hallazgo=None)
+        return self._data(a, request)
+    anular_hallazgo.operacion = 'editar'
+
+    @action(detail=True, methods=['post'])
+    def terminar_ejecucion(self, request, pk=None):
+        """En ejecución → Conclusiones: el equipo auditor se reúne a consolidar
+        y clasificar los hallazgos."""
         a = self.get_object()
         if a.estado != 'en_ejecucion':
-            return self._error('Solo se genera el informe de una auditoría En ejecución.')
-        a.fortalezas = request.data.get('fortalezas', a.fortalezas)
-        a.debilidades = request.data.get('debilidades', a.debilidades)
-        a.conclusiones = request.data.get('conclusiones', a.conclusiones)
-        if not a.fecha_fin:
-            a.fecha_fin = timezone.now().date()
-        a.estado = 'en_informe'
-        a.fecha_informe = timezone.now()
+            return self._error('La auditoría no está en ejecución.')
+        a.estado = 'conclusiones'
         a.save()
         return self._data(a, request)
-    generar_informe.operacion = 'editar'
+    terminar_ejecucion.operacion = 'editar'
+
+    @action(detail=True, methods=['post'])
+    def validar_hallazgos(self, request, pk=None):
+        """Conclusiones → Reunión de cierre. Requiere las conclusiones de la
+        auditoría (grado de conformidad), que se presentan en la reunión."""
+        a = self.get_object()
+        if a.estado != 'conclusiones':
+            return self._error('La auditoría no está en conclusiones.')
+        pendientes = list(a.items_pendientes())
+        if pendientes:
+            codigos = '; '.join(it.referencia_texto() for it in pendientes[:8]) + ('…' if len(pendientes) > 8 else '')
+            return self._error(f'Quedan {len(pendientes)} ítem(s) de la lista evaluados como No cumple u Observación '
+                               f'sin clasificar ({codigos}): regístrelos como hallazgo, súmelos a uno o descártelos con motivo.')
+        conclusiones = (request.data.get('conclusiones') or a.conclusiones or '').strip()
+        if not conclusiones:
+            return self._error('Registre las conclusiones de la auditoría antes de pasar a la reunión de cierre.')
+        a.conclusiones = conclusiones
+        a.estado = 'reunion_cierre'
+        a.save()
+        return self._data(a, request)
+    validar_hallazgos.operacion = 'editar'
+
 
     @action(detail=True, methods=['post'])
     def cerrar(self, request, pk=None):
-        """En informe → Cerrada. Requiere conclusiones."""
+        """En informe → Cerrada. Requiere conclusiones. Sin permiso de aprobar,
+        el cierre queda como solicitud pendiente (aprobar / devolver / rechazar)."""
         a = self.get_object()
         if a.estado != 'en_informe':
             return self._error('Solo se cierra una auditoría que ya tiene informe.')
-        a.conclusiones = request.data.get('conclusiones', a.conclusiones)
-        if not a.conclusiones.strip():
-            return self._error('Registre las conclusiones antes de cerrar la auditoría.')
+        conclusiones = (a.conclusiones or '').strip()
+        if not conclusiones:
+            return self._error('La auditoría no tiene conclusiones registradas.')
+        if not _puede_aprobar(request, 'auditorias'):
+            if SolicitudCambioEquipo.objects.filter(modulo='auditorias', entidad='informe_auditoria',
+                                                    entidad_id=a.pk, estado='pendiente').exists():
+                return self._error('Ya existe una solicitud de cierre pendiente para esta auditoría.')
+            # Las conclusiones ya se validaron y comunicaron en la reunión de
+            # cierre: el aprobador recibe el informe tal cual; si lo devuelve,
+            # se corrigen los campos del informe y se reenvía.
+            return _crear_solicitud_equipo(
+                request, entidad='informe_auditoria', operacion='aprobar', entidad_id=a.pk,
+                payload={},
+                resumen=f'Cierre del informe de auditoría {a.codigo}', modulo='auditorias')
         a.estado = 'cerrada'
+        a.fecha_informe = a.fecha_informe or timezone.now()
         a.save()
         return self._data(a, request)
-    cerrar.operacion = 'aprobar'
+    cerrar.operacion = 'editar'
+
+    def _pdf(self, pdf, nombre):
+        resp = HttpResponse(pdf, content_type='application/pdf')
+        resp['Content-Disposition'] = f'inline; filename="{nombre}.pdf"'
+        return resp
+
+    @action(detail=True, methods=['get'])
+    def plan_pdf(self, request, pk=None):
+        """Plan de auditoría."""
+        from .ficha_pdf import generar_plan_auditoria_pdf
+        a = self.get_object()
+        return self._pdf(generar_plan_auditoria_pdf(a), f'plan_{a.codigo}')
+    plan_pdf.operacion = 'leer'
+
+    @action(detail=True, methods=['get'])
+    def informe_pdf(self, request, pk=None):
+        """Informe de auditoría."""
+        from .ficha_pdf import generar_informe_auditoria_pdf
+        a = self.get_object()
+        return self._pdf(generar_informe_auditoria_pdf(a), f'informe_{a.codigo}')
+    informe_pdf.operacion = 'leer'
+
+    @action(detail=True, methods=['get'])
+    def acta_pdf(self, request, pk=None):
+        """Acta de apertura o cierre. ?tipo=apertura|cierre."""
+        from .ficha_pdf import generar_acta_pdf
+        a = self.get_object()
+        tipo = request.query_params.get('tipo', 'apertura')
+        acta = a.actas.filter(tipo=tipo).first()
+        if not acta:
+            # Acta provisional en memoria para imprimir aunque aún no se registre
+            acta = ActaAuditoria(auditoria=a, tipo=tipo)
+        return self._pdf(generar_acta_pdf(acta), f'acta_{tipo}_{a.codigo}')
+    acta_pdf.operacion = 'leer'
+
+    @action(detail=True, methods=['get'])
+    def lista_pdf(self, request, pk=None):
+        """Lista de verificación de una norma. ?norma=..."""
+        from .ficha_pdf import generar_lista_verificacion_pdf
+        a = self.get_object()
+        norma = request.query_params.get('norma')
+        lista = a.listas.filter(norma=norma).first() if norma else a.listas.first()
+        if not lista:
+            return self._error('No existe la lista de verificación solicitada. Genérela primero.')
+        return self._pdf(generar_lista_verificacion_pdf(lista), f'lista_{lista.norma}_{a.codigo}')
+    lista_pdf.operacion = 'leer'
 
     @action(detail=False, methods=['get'])
     def resumen(self, request):
@@ -1342,20 +2087,72 @@ from .serializers import (  # noqa: E402
 )
 
 
+def _puede_aprobar(request, modulo='equipos'):
+    """True si el usuario puede aprobar cambios del módulo indicado."""
+    return request.user.tiene_permiso(modulo, 'aprobar')
+
+
+def aprobar_programa(programa, usuario):
+    """Aprueba el programa anual y lo deja de solo lectura. Si venía de una
+    modificación, sube el número de revisión."""
+    if programa.estado == 'en_modificacion':
+        programa.revision = (programa.revision or 0) + 1
+    programa.estado = 'aprobado'
+    programa.aprobado_por = usuario
+    programa.fecha_aprobacion = timezone.now()
+    programa.save()
+
+
+def _programa_bloqueado(programa):
+    """Mensaje de bloqueo si el programa está aprobado (solo lectura); '' si no."""
+    if programa and programa.bloqueado:
+        return (f'El programa anual {programa.anio} está aprobado y es de solo lectura. '
+                f'Para cambiarlo use "Modificar programa" (quedará pendiente de nueva aprobación).')
+    return ''
+
+
+def _aviso_independencia(usuario, auditoria, rol):
+    """
+    Independencia del auditor: devuelve un texto de aviso si la persona
+    pertenece al área o laboratorio que se va a auditar (no bloquea; la
+    decisión queda registrada en quien la asigna). Los observadores no aplican.
+    """
+    import unicodedata
+    if not usuario or rol == 'observador':
+        return ''
+
+    def norm(s):
+        s = unicodedata.normalize('NFKD', str(s or '')).encode('ascii', 'ignore').decode().lower()
+        return ' '.join(s.split())
+
+    objetivo = norm(getattr(auditoria, 'areas_procesos', ''))
+    if not objetivo:
+        return ''
+    coincidencias = []
+    for etiqueta, valor in (('área', getattr(usuario, 'area', '')), ('laboratorio', getattr(usuario, 'laboratorio', ''))):
+        v = norm(valor)
+        if v and len(v) >= 3 and v in objetivo:
+            coincidencias.append(f'{etiqueta} "{valor}"')
+    if not coincidencias:
+        return ''
+    nombre = usuario.get_full_name() or usuario.username
+    return (f'Posible falta de independencia: {nombre} pertenece a {" y ".join(coincidencias)}, '
+            f'que está dentro del alcance a auditar. Un auditor no debe auditar su propio trabajo (ISO 19011). '
+            f'Revise la asignación o deje constancia de la justificación.')
+
+
 def _puede_aprobar_equipos(request):
-    """True si el usuario puede aprobar cambios del módulo Equipos."""
-    return request.user.tiene_permiso('equipos', 'aprobar')
+    return _puede_aprobar(request, 'equipos')
 
 
 def _crear_solicitud_equipo(request, *, entidad, operacion, equipo=None,
-                            entidad_id=None, payload=None, archivo=None, resumen=''):
+                            entidad_id=None, payload=None, archivo=None, resumen='', modulo='equipos'):
     """
     Registra un cambio pendiente de aprobación y responde 202. Lo usan los puntos
-    de guardado (alta/baja, bitácoras, intervalo, nodos) cuando el usuario no tiene
-    permiso de aprobar.
+    de guardado (equipos y competencia) cuando el usuario no tiene permiso de aprobar.
     """
     sol = SolicitudCambioEquipo(
-        equipo=equipo, entidad=entidad, operacion=operacion, entidad_id=entidad_id,
+        modulo=modulo, equipo=equipo, entidad=entidad, operacion=operacion, entidad_id=entidad_id,
         payload=payload or {}, resumen=resumen, created_by=request.user)
     if archivo:
         sol.archivo = archivo
@@ -1535,10 +2332,29 @@ class EquipoViewSet(viewsets.ModelViewSet):
         headers = self.get_success_headers(serializer.data)
         return Response(self._data(eq, request).data, status=status.HTTP_201_CREATED, headers=headers)
 
+    def _baja(self, eq):
+        """Un equipo dado de baja queda fuera del inventario activo: su hoja de
+        vida es de solo lectura."""
+        if eq.estado == 'baja':
+            return self._error(f'El equipo {eq.codigo} está dado de baja: su hoja de vida es de solo lectura.')
+        return None
+
     @action(detail=True, methods=['post'])
     def registrar_calibracion(self, request, pk=None):
         """Registra la calibración: certificado, fecha y próxima (regla patrón vigente)."""
         eq = self.get_object()
+        if (err := self._baja(eq)):
+            return err
+        from datetime import date as _d
+        try:
+            f_ult = _d.fromisoformat(str(request.data.get('fecha_ultima_calibracion'))[:10]) \
+                if request.data.get('fecha_ultima_calibracion') else None
+            f_prox = _d.fromisoformat(str(request.data.get('fecha_proxima_calibracion'))[:10]) \
+                if request.data.get('fecha_proxima_calibracion') else None
+        except ValueError:
+            return self._error('Fecha no válida.')
+        if f_ult and f_prox and f_prox <= f_ult:
+            return self._error('La próxima calibración debe ser posterior a la fecha de calibración.')
         eq.n_certificado = request.data.get('n_certificado', eq.n_certificado)
         if request.data.get('fecha_ultima_calibracion'):
             eq.fecha_ultima_calibracion = request.data['fecha_ultima_calibracion']
@@ -1572,6 +2388,8 @@ class EquipoViewSet(viewsets.ModelViewSet):
         calibración del equipo (regla "patrón vigente").
         """
         eq = self.get_object()
+        if (err := self._baja(eq)):
+            return err
         tipo = request.data.get('tipo')
         if tipo not in dict(RegistroEquipo._meta.get_field('tipo').choices):
             return self._error('Tipo de registro no válido.')
@@ -1633,8 +2451,13 @@ class EquipoViewSet(viewsets.ModelViewSet):
     def marcar_inoperativo(self, request, pk=None):
         """Fuera de servicio: aísla el equipo. Levantar trabajo no conforme aparte."""
         eq = self.get_object()
+        if (err := self._baja(eq)):
+            return err
+        motivo = (request.data.get('motivo') or '').strip()
+        if not motivo:
+            return self._error('Indique el motivo por el que el equipo queda fuera de servicio.')
         eq.estado = 'inoperativo'
-        eq.motivo_inoperativo = request.data.get('motivo', '')
+        eq.motivo_inoperativo = motivo
         eq.fecha_fuera_servicio = timezone.now().date()
         eq.save()
         return self._data(eq, request)
@@ -1643,6 +2466,10 @@ class EquipoViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'])
     def reactivar(self, request, pk=None):
         eq = self.get_object()
+        if (err := self._baja(eq)):
+            return err
+        if eq.estado != 'inoperativo':
+            return self._error('Solo se reactiva un equipo fuera de servicio.')
         eq.estado = 'operativo'
         eq.motivo_inoperativo = ''
         eq.fecha_fuera_servicio = None
@@ -1701,6 +2528,8 @@ class EquipoViewSet(viewsets.ModelViewSet):
     def agregar_actividad(self, request, pk=None):
         """Programa anual: actividad (tipo, año, frecuencia, meses)."""
         eq = self.get_object()
+        if (err := self._baja(eq)):
+            return err
         tipo = request.data.get('tipo')
         if tipo not in dict(ActividadPrograma._meta.get_field('tipo').choices):
             return self._error('Tipo de actividad no válido.')
@@ -1721,6 +2550,8 @@ class EquipoViewSet(viewsets.ModelViewSet):
     def programar(self, request, pk=None):
         """Programa Anual: upsert de una actividad (equipo+tipo+año) con frecuencia y meses."""
         eq = self.get_object()
+        if (err := self._baja(eq)):
+            return err
         tipo = request.data.get('tipo')
         if tipo not in dict(ActividadPrograma._meta.get_field('tipo').choices):
             return self._error('Tipo de actividad no válido.')
@@ -1793,9 +2624,14 @@ class EquipoViewSet(viewsets.ModelViewSet):
     def registrar_movimiento(self, request, pk=None):
         """Salida del equipo."""
         eq = self.get_object()
+        if (err := self._baja(eq)):
+            return err
         motivo = request.data.get('motivo')
         if motivo not in dict(MovimientoEquipo._meta.get_field('motivo').choices):
             return self._error('Motivo no válido.')
+        abierto = eq.movimientos.filter(fecha_retorno__isnull=True).first()
+        if abierto:
+            return self._error('El equipo ya está fuera (salida sin retorno registrado): registre primero su retorno.')
         MovimientoEquipo.objects.create(
             equipo=eq, motivo=motivo,
             destino=request.data.get('destino', ''),
@@ -1815,6 +2651,8 @@ class EquipoViewSet(viewsets.ModelViewSet):
             mov = eq.movimientos.get(pk=request.data.get('movimiento_id'))
         except (MovimientoEquipo.DoesNotExist, ValueError, TypeError):
             return self._error('Movimiento no encontrado.')
+        if mov.fecha_retorno:
+            return self._error('El retorno de esa salida ya está registrado.')
         mov.fecha_retorno = timezone.now()
         mov.estado_retorno = request.data.get('estado_retorno', mov.estado_retorno)
         mov.responsable_retorno = request.data.get('responsable_retorno', '')
@@ -1828,6 +2666,8 @@ class EquipoViewSet(viewsets.ModelViewSet):
     def registrar_informe(self, request, pk=None):
         """Informe de mantenimiento / comprobación / caracterización con archivo adjunto."""
         eq = self.get_object()
+        if (err := self._baja(eq)):
+            return err
         tipo = request.data.get('tipo')
         if tipo not in dict(InformeEquipo._meta.get_field('tipo').choices):
             return self._error('Tipo de informe no válido.')
@@ -1927,7 +2767,7 @@ class CartaTrazabilidadViewSet(viewsets.ModelViewSet):
                 'padres': list(n.padres.values_list('id', flat=True)),
                 'entidad': n.entidad, 'descripcion': n.descripcion, 'codigo': n.codigo,
                 'procedimiento': n.procedimiento, 'certificado': n.certificado,
-                'incertidumbre': n.incertidumbre, 'nota': n.nota,
+                'incertidumbre': n.incertidumbre, 'nota': n.nota, 'equipo': n.equipo_id,
             })
         pdf = generar_carta_trazabilidad_pdf(carta, nodos)
         resp = HttpResponse(pdf, content_type='application/pdf')
@@ -2071,7 +2911,12 @@ class SolicitudCambioEquipoViewSet(viewsets.ReadOnlyModelViewSet):
     modulo = 'equipos'
 
     def get_queryset(self):
-        qs = super().get_queryset()
+        qs = super().get_queryset().filter(modulo=self.modulo)
+        # Los filtros de bandeja (estado, equipo, mías) aplican solo al listado.
+        # Las acciones sobre una solicitud concreta (aprobar, devolver, reenviar…)
+        # deben encontrarla en cualquier estado.
+        if self.action != 'list':
+            return qs
         estado = self.request.query_params.get('estado', 'pendiente')
         if estado and estado != 'todas':
             qs = qs.filter(estado=estado)
@@ -2085,14 +2930,14 @@ class SolicitudCambioEquipoViewSet(viewsets.ReadOnlyModelViewSet):
     def mis_devueltas_count(self, request):
         """N.° de solicitudes propias devueltas para corrección (distintivo del solicitante)."""
         n = SolicitudCambioEquipo.objects.filter(
-            created_by=request.user, estado='devuelta').count()
+            modulo=self.modulo, created_by=request.user, estado='devuelta').count()
         return Response({'devueltas': n})
     mis_devueltas_count.operacion = 'leer'
 
     @action(detail=False, methods=['get'])
     def pendientes_count(self, request):
         """N.° de solicitudes pendientes (para el distintivo del buzón)."""
-        return Response({'pendientes': SolicitudCambioEquipo.objects.filter(estado='pendiente').count()})
+        return Response({'pendientes': SolicitudCambioEquipo.objects.filter(modulo=self.modulo, estado='pendiente').count()})
     pendientes_count.operacion = 'leer'
 
     @action(detail=True, methods=['post'])
@@ -2260,6 +3105,97 @@ class SolicitudCambioEquipoViewSet(viewsets.ReadOnlyModelViewSet):
                     _baja(nodo)
             return
 
+        # --- Competencia: autorización ---
+        if ent == 'autorizacion':
+            from .models import Autorizacion
+            if op == 'crear':
+                ser = AutorizacionSerializer(data=pl, context={'request': request})
+                ser.is_valid(raise_exception=True)
+                ser.save(created_by=user, updated_by=user)
+            elif op == 'editar':
+                a = Autorizacion.objects.filter(pk=sol.entidad_id).first()
+                if a:
+                    ser = AutorizacionSerializer(a, data=pl, partial=True, context={'request': request})
+                    ser.is_valid(raise_exception=True)
+                    ser.save(updated_by=user)
+            elif op == 'eliminar':
+                a = Autorizacion.objects.filter(pk=sol.entidad_id).first()
+                if a:
+                    a.is_active = False; a.updated_by = user; a.save(update_fields=['is_active', 'updated_at'])
+            return
+
+        # --- Auditorías: aprobación del programa anual ---
+        if ent == 'programa_auditoria':
+            p = ProgramaAuditoria.objects.filter(pk=sol.entidad_id).first()
+            if p and p.estado != 'aprobado':
+                aprobar_programa(p, user)
+            return
+
+        # --- Auditorías: cierre del informe ---
+        if ent == 'informe_auditoria':
+            a = Auditoria.objects.filter(pk=sol.entidad_id).first()
+            if a and a.estado == 'en_informe':
+                if not (a.conclusiones or '').strip():
+                    from rest_framework.exceptions import ValidationError
+                    raise ValidationError({'conclusiones': ['El informe no tiene conclusiones.']})
+                a.fecha_informe = a.fecha_informe or timezone.now()
+                a.estado = 'cerrada'
+                a.updated_by = user
+                a.save()
+            return
+
+        # --- Competencia: proceso de entrenamiento ---
+        if ent == 'entrenamiento':
+            from .models import ProcesoEntrenamiento
+            if op == 'crear':
+                ser = ProcesoEntrenamientoSerializer(data=pl, context={'request': request})
+                ser.is_valid(raise_exception=True)
+                ser.save(created_by=user, updated_by=user)
+            elif op == 'editar':
+                pe = ProcesoEntrenamiento.objects.filter(pk=sol.entidad_id).first()
+                if pe:
+                    ser = ProcesoEntrenamientoSerializer(pe, data=pl, partial=True, context={'request': request})
+                    ser.is_valid(raise_exception=True)
+                    ser.save(updated_by=user)
+            elif op == 'eliminar':
+                pe = ProcesoEntrenamiento.objects.filter(pk=sol.entidad_id).first()
+                if pe and pe.concluido:
+                    from rest_framework.exceptions import ValidationError
+                    raise ValidationError({'detail': 'Un entrenamiento concluido no se elimina.'})
+                if pe:
+                    pe.is_active = False; pe.updated_by = user; pe.save(update_fields=['is_active', 'updated_at'])
+            return
+
+        # --- Competencia: evaluación de seguimiento ---
+        if ent == 'seguimiento':
+            from .models import EvaluacionSeguimiento
+            ev = None
+            if op == 'crear':
+                ser = EvaluacionSeguimientoSerializer(data=pl, context={'request': request})
+                ser.is_valid(raise_exception=True)
+                ev = ser.save(created_by=user, updated_by=user)
+            elif op == 'editar':
+                ev = EvaluacionSeguimiento.objects.filter(pk=sol.entidad_id).first()
+                if ev:
+                    ser = EvaluacionSeguimientoSerializer(ev, data=pl, partial=True, context={'request': request})
+                    ser.is_valid(raise_exception=True)
+                    ev = ser.save(updated_by=user)
+            elif op == 'eliminar':
+                ev = EvaluacionSeguimiento.objects.filter(pk=sol.entidad_id).first()
+                if ev:
+                    ev.is_active = False; ev.updated_by = user; ev.save(update_fields=['is_active', 'updated_at'])
+                return
+            if ev and ev.autorizacion:
+                a = ev.autorizacion
+                if ev.fecha:
+                    a.fecha_ultimo_seguimiento = ev.fecha
+                if ev.decision == 'suspender':
+                    a.estado = 'suspendida'
+                elif ev.decision == 'reautorizar':
+                    a.estado = 'vigente'
+                a.updated_by = user; a.save()
+            return
+
 
 class PuntoIntervaloViewSet(viewsets.ModelViewSet):
     """Puntos nominales para el intervalo de calibración (método OIML D10)."""
@@ -2317,7 +3253,7 @@ class PuntoIntervaloViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'])
     def intervalo_pdf(self, request):
-        """PDF del Intervalo de Calibración (MET-PRO-04-r08) del patrón."""
+        """PDF del Intervalo de Calibración del patrón."""
         from .ficha_pdf import generar_intervalo_pdf
         eq = Equipo.objects.filter(pk=request.query_params.get('equipo')).first()
         if not eq:
@@ -2343,3 +3279,246 @@ class ResultadoIntervaloViewSet(viewsets.ModelViewSet):
         if self.request.query_params.get('punto'):
             qs = qs.filter(punto_id=self.request.query_params['punto'])
         return qs.order_by('anio', 'id')
+
+
+# ============================================================
+# M12 — Competencia técnica y autorización del personal
+# ============================================================
+from .models import (  # noqa: E402
+    MetodoCalibracion, ControlValidez, Autorizacion,
+    ProcesoEntrenamiento, EvaluacionSeguimiento,
+)
+from .serializers import (  # noqa: E402
+    MetodoCalibracionSerializer, ControlValidezSerializer, AutorizacionSerializer,
+    ProcesoEntrenamientoSerializer, EvaluacionSeguimientoSerializer,
+)
+
+
+class MetodoCalibracionViewSet(viewsets.ModelViewSet):
+    """Catálogo gestionable de métodos / procedimientos de calibración."""
+    queryset = MetodoCalibracion.objects.all()
+    serializer_class = MetodoCalibracionSerializer
+    permission_classes = [PermisoModular]
+    modulo = 'competencia_tecnica'
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        if self.request.query_params.get('incluir_inactivos') != '1':
+            qs = qs.filter(is_active=True)
+        if self.request.query_params.get('magnitud'):
+            qs = qs.filter(magnitud=self.request.query_params['magnitud'])
+        return qs
+
+    def destroy(self, request, *args, **kwargs):
+        obj = self.get_object(); obj.is_active = False; obj.save()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class ControlValidezViewSet(viewsets.ModelViewSet):
+    """Catálogo gestionable de controles de aseguramiento de la validez de resultados."""
+    queryset = ControlValidez.objects.all()
+    serializer_class = ControlValidezSerializer
+    permission_classes = [PermisoModular]
+    modulo = 'competencia_tecnica'
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        if self.request.query_params.get('incluir_inactivos') != '1':
+            qs = qs.filter(is_active=True)
+        return qs
+
+    def destroy(self, request, *args, **kwargs):
+        obj = self.get_object(); obj.is_active = False; obj.save()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class _CompetenciaViewSet(viewsets.ModelViewSet):
+    """Base de Competencia: fija created_by/updated_by y hace baja lógica."""
+    permission_classes = [PermisoModular]
+    modulo = 'competencia_tecnica'
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=self.request.user, updated_by=self.request.user)
+
+    def perform_update(self, serializer):
+        serializer.save(updated_by=self.request.user)
+
+    def destroy(self, request, *args, **kwargs):
+        obj = self.get_object(); obj.is_active = False
+        obj.save(update_fields=['is_active', 'updated_at'])
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class _GateCompetencia:
+    """Candado de aprobación (crear/editar/eliminar) para las entidades de competencia."""
+    entidad_solicitud = None
+
+    def _res_sol(self, op):
+        et = {'autorizacion': 'autorización', 'entrenamiento': 'proceso de entrenamiento',
+              'seguimiento': 'evaluación de seguimiento'}.get(self.entidad_solicitud, self.entidad_solicitud)
+        return f'Competencia: {op} de {et}'
+
+    def create(self, request, *args, **kwargs):
+        if not _puede_aprobar(request, 'competencia_tecnica'):
+            ser = self.get_serializer(data=request.data)
+            ser.is_valid(raise_exception=True)
+            return _crear_solicitud_equipo(request, modulo='competencia_tecnica', entidad=self.entidad_solicitud,
+                                           operacion='crear', payload={k: v for k, v in request.data.items()},
+                                           resumen=self._res_sol('nueva'))
+        return super().create(request, *args, **kwargs)
+
+    def update(self, request, *args, **kwargs):
+        if not _puede_aprobar(request, 'competencia_tecnica'):
+            obj = self.get_object()
+            ser = self.get_serializer(obj, data=request.data, partial=kwargs.get('partial', False))
+            ser.is_valid(raise_exception=True)
+            return _crear_solicitud_equipo(request, modulo='competencia_tecnica', entidad=self.entidad_solicitud,
+                                           operacion='editar', entidad_id=obj.pk,
+                                           payload={k: v for k, v in request.data.items()}, resumen=self._res_sol('edición'))
+        return super().update(request, *args, **kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        if not _puede_aprobar(request, 'competencia_tecnica'):
+            obj = self.get_object()
+            return _crear_solicitud_equipo(request, modulo='competencia_tecnica', entidad=self.entidad_solicitud,
+                                           operacion='eliminar', entidad_id=obj.pk, resumen=self._res_sol('eliminación'))
+        return super().destroy(request, *args, **kwargs)
+
+
+class AutorizacionViewSet(_GateCompetencia, _CompetenciaViewSet):
+    """Autorizaciones de competencia técnica (por método y funciones)."""
+    entidad_solicitud = 'autorizacion'
+    queryset = Autorizacion.objects.select_related('usuario', 'metodo', 'autorizado_por')
+    serializer_class = AutorizacionSerializer
+
+    def get_queryset(self):
+        qs = super().get_queryset().filter(is_active=True)
+        p = self.request.query_params
+        if p.get('usuario'):
+            qs = qs.filter(usuario_id=p['usuario'])
+        if p.get('estado'):
+            qs = qs.filter(estado=p['estado'])
+        if p.get('metodo'):
+            qs = qs.filter(metodo_id=p['metodo'])
+        return qs
+
+    @action(detail=False, methods=['get'])
+    def seguimientos(self, request):
+        """Autorizaciones vigentes cuyo seguimiento está por vencer o vencido."""
+        out = []
+        for a in Autorizacion.objects.filter(estado='vigente', is_active=True).select_related('usuario', 'metodo'):
+            if a.estado_seguimiento in ('por_vencer', 'vencido'):
+                out.append(AutorizacionSerializer(a, context={'request': request}).data)
+        return Response(out)
+    seguimientos.operacion = 'leer'
+
+    @action(detail=True, methods=['get'])
+    def autorizacion_pdf(self, request, pk=None):
+        """Carta de Autorización del Personal."""
+        from .ficha_pdf import generar_autorizacion_pdf
+        aut = self.get_object()
+        pdf = generar_autorizacion_pdf(aut)
+        resp = HttpResponse(pdf, content_type='application/pdf')
+        resp['Content-Disposition'] = f'inline; filename="autorizacion_{aut.pk}.pdf"'
+        return resp
+    autorizacion_pdf.operacion = 'leer'
+
+
+class ProcesoEntrenamientoViewSet(_GateCompetencia, _CompetenciaViewSet):
+    """Entrenamiento y trabajo bajo supervisión previos a la autorización."""
+    entidad_solicitud = 'entrenamiento'
+    queryset = ProcesoEntrenamiento.objects.select_related('usuario', 'metodo', 'tutor', 'control_validez')
+    serializer_class = ProcesoEntrenamientoSerializer
+
+    def get_queryset(self):
+        qs = super().get_queryset().filter(is_active=True)
+        if self.request.query_params.get('usuario'):
+            qs = qs.filter(usuario_id=self.request.query_params['usuario'])
+        return qs
+
+    def destroy(self, request, *args, **kwargs):
+        if self.get_object().concluido:
+            return Response({'detail': 'Un entrenamiento concluido es parte del sustento de la autorización: '
+                                       'no se elimina.'}, status=status.HTTP_400_BAD_REQUEST)
+        return super().destroy(request, *args, **kwargs)
+
+    @action(detail=True, methods=['get'])
+    def entrenamiento_pdf(self, request, pk=None):
+        """Entrenamiento y Supervisión de Actividades."""
+        from .ficha_pdf import generar_entrenamiento_pdf
+        proc = self.get_object()
+        pdf = generar_entrenamiento_pdf(proc)
+        resp = HttpResponse(pdf, content_type='application/pdf')
+        resp['Content-Disposition'] = f'inline; filename="entrenamiento_{proc.pk}.pdf"'
+        return resp
+    entrenamiento_pdf.operacion = 'leer'
+
+    @action(detail=False, methods=['post'])
+    def subir_adjunto(self, request):
+        """Sube el documento adjunto de una actividad y devuelve su URL y nombre."""
+        from django.core.files.storage import default_storage
+        f = request.FILES.get('archivo')
+        if not f:
+            return Response({'detail': 'Falta el archivo.'}, status=status.HTTP_400_BAD_REQUEST)
+        ruta = default_storage.save(f'competencia/adjuntos/{timezone.now():%Y}/{f.name}', f)
+        return Response({'url': default_storage.url(ruta), 'nombre': f.name})
+    subir_adjunto.operacion = 'editar'
+
+
+class EvaluacionSeguimientoViewSet(_GateCompetencia, _CompetenciaViewSet):
+    """Seguimiento de la competencia (entrevistas / controles de validez) con decisión."""
+    entidad_solicitud = 'seguimiento'
+    queryset = EvaluacionSeguimiento.objects.select_related('usuario', 'evaluador', 'autorizacion', 'control_validez')
+    serializer_class = EvaluacionSeguimientoSerializer
+
+    def get_queryset(self):
+        qs = super().get_queryset().filter(is_active=True)
+        p = self.request.query_params
+        if p.get('usuario'):
+            qs = qs.filter(usuario_id=p['usuario'])
+        if p.get('autorizacion'):
+            qs = qs.filter(autorizacion_id=p['autorizacion'])
+        return qs
+
+    def perform_create(self, serializer):
+        ev = serializer.save(created_by=self.request.user, updated_by=self.request.user)
+        self._aplicar_decision(ev)
+
+    def perform_update(self, serializer):
+        ev = serializer.save(updated_by=self.request.user)
+        self._aplicar_decision(ev)
+
+    def _aplicar_decision(self, ev):
+        """El seguimiento mueve la fecha de último seguimiento y puede suspender/reautorizar."""
+        a = ev.autorizacion
+        if not a:
+            return
+        if ev.fecha:
+            a.fecha_ultimo_seguimiento = ev.fecha
+        if ev.decision == 'suspender':
+            a.estado = 'suspendida'
+        elif ev.decision == 'reautorizar':
+            a.estado = 'vigente'
+        a.updated_by = self.request.user
+        a.save()
+
+    @action(detail=True, methods=['get'])
+    def seguimiento_pdf(self, request, pk=None):
+        """Entrevista de Seguimiento al Personal."""
+        from .ficha_pdf import generar_seguimiento_pdf
+        seg = self.get_object()
+        pdf = generar_seguimiento_pdf(seg)
+        resp = HttpResponse(pdf, content_type='application/pdf')
+        resp['Content-Disposition'] = f'inline; filename="seguimiento_{seg.pk}.pdf"'
+        return resp
+    seguimiento_pdf.operacion = 'leer'
+
+
+class SolicitudCambioCompetenciaViewSet(SolicitudCambioEquipoViewSet):
+    """Bandeja de aprobación de cambios del módulo Competencia técnica (aprobar/devolver/rechazar/reenviar)."""
+    modulo = 'competencia_tecnica'
+
+
+class SolicitudCambioAuditoriaViewSet(SolicitudCambioEquipoViewSet):
+    """Bandeja de aprobación de Auditorías: programa anual e informes de cierre."""
+    modulo = 'auditorias'

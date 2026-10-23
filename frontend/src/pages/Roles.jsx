@@ -3,6 +3,7 @@ import { LayoutGrid, List, Pencil, Plus, ShieldCheck, Trash2 } from 'lucide-reac
 import Modal from '../components/Modal.jsx'
 import { api } from '../lib/api.js'
 import { useAuth } from '../context/AuthContext.jsx'
+import TituloModulo from '../components/ui/TituloModulo.jsx'
 
 export default function Roles() {
   const { tienePermiso, usuario } = useAuth()
@@ -100,7 +101,7 @@ export default function Roles() {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-bold">Roles y permisos</h1>
+        <TituloModulo seccion="Administración" titulo="Roles y permisos" descripcion="Qué puede hacer cada rol en cada módulo: leer, crear, editar, aprobar y eliminar." />
         <div className="flex items-center gap-2">
           <div className="flex rounded-lg border border-slate-300 p-0.5 dark:border-slate-700">
             <button onClick={() => cambiarVista('tarjetas')} title="Vista de tarjetas"
@@ -132,7 +133,7 @@ export default function Roles() {
                 <h2 className="font-semibold">{rol.nombre}</h2>
               </div>
               {rol.es_admin_sistema && (
-                <span className="rounded bg-amber-500/15 px-1.5 py-0.5 text-[10px] font-medium text-amber-600 dark:text-amber-400">
+                <span className="rounded bg-amber-500/15 px-1.5 py-0.5 text-[11px] font-medium text-amber-600 dark:text-amber-400">
                   Sistema
                 </span>
               )}
@@ -171,13 +172,13 @@ export default function Roles() {
 
       {vista === 'lista' && (
         <div className="card-esynapse overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="tabla-sig w-full text-sm">
             <thead>
-              <tr className="border-b border-slate-200 text-left text-xs uppercase tracking-wide text-slate-500 dark:border-slate-800 dark:text-slate-400">
+              <tr className="border-b border-slate-200 text-slate-500 dark:border-slate-800 dark:text-slate-400">
                 <th className="px-4 py-3">Rol</th>
                 <th className="px-4 py-3">Descripción</th>
-                <th className="px-4 py-3 text-center">Permisos</th>
-                <th className="px-4 py-3 text-center">Usuarios</th>
+                <th className="px-4 py-3">Permisos</th>
+                <th className="px-4 py-3 text-right">Usuarios</th>
                 <th className="px-4 py-3 text-right">Acciones</th>
               </tr>
             </thead>
@@ -189,14 +190,14 @@ export default function Roles() {
                       <ShieldCheck className="h-4 w-4 shrink-0 text-esynapse-500" />
                       <span className="font-medium">{rol.nombre}</span>
                       {rol.es_admin_sistema && (
-                        <span className="rounded bg-amber-500/15 px-1.5 py-0.5 text-[10px] font-medium text-amber-600 dark:text-amber-400">Sistema</span>
+                        <span className="rounded bg-amber-500/15 px-1.5 py-0.5 text-[11px] font-medium text-amber-600 dark:text-amber-400">Sistema</span>
                       )}
                     </div>
                   </td>
                   <td className="max-w-md truncate px-4 py-3 text-slate-500 dark:text-slate-400">{rol.descripcion || 'Sin descripción'}</td>
-                  <td className="px-4 py-3 text-center">{(rol.permisos || []).length}</td>
-                  <td className="px-4 py-3 text-center">{rol.total_usuarios}</td>
-                  <td className="px-4 py-3">
+                  <td className="px-4 py-3">{(rol.permisos || []).length}</td>
+                  <td className="px-4 py-3 text-right">{rol.total_usuarios}</td>
+                  <td className="px-4 py-3 text-right">
                     {(!rol.es_admin_sistema || usuario?.is_superuser) && (
                       <div className="flex justify-end gap-1">
                         {tienePermiso('usuarios', 'editar') && (

@@ -1,0 +1,2682 @@
+{
+ "catalogo": [
+  {
+   "nombre": "Gestión Estratégica",
+   "tipo": "estrategico",
+   "padre": null,
+   "detalle_mapa": "Alta Dirección",
+   "orden": 1,
+   "responsable_cargo": "Gerente General"
+  },
+  {
+   "nombre": "Sistema Integrado de Gestión",
+   "tipo": "estrategico",
+   "padre": null,
+   "detalle_mapa": "",
+   "orden": 2,
+   "responsable_cargo": "Gerente SIG"
+  },
+  {
+   "nombre": "Riesgos y Oportunidades",
+   "tipo": "estrategico",
+   "padre": "Sistema Integrado de Gestión",
+   "detalle_mapa": "",
+   "orden": 3,
+   "responsable_cargo": "Gerente SIG / Asistente SIG"
+  },
+  {
+   "nombre": "Requisitos Legales",
+   "tipo": "estrategico",
+   "padre": "Sistema Integrado de Gestión",
+   "detalle_mapa": "",
+   "orden": 4,
+   "responsable_cargo": "Gerente SIG"
+  },
+  {
+   "nombre": "IPERC",
+   "tipo": "estrategico",
+   "padre": "Sistema Integrado de Gestión",
+   "detalle_mapa": "",
+   "orden": 5,
+   "responsable_cargo": "Gerente SIG"
+  },
+  {
+   "nombre": "Investigación de Incidentes y Accidentes",
+   "tipo": "estrategico",
+   "padre": "Sistema Integrado de Gestión",
+   "detalle_mapa": "",
+   "orden": 6,
+   "responsable_cargo": "Gerente SIG / Asistente SIG"
+  },
+  {
+   "nombre": "Auditoría Interna",
+   "tipo": "estrategico",
+   "padre": "Sistema Integrado de Gestión",
+   "detalle_mapa": "",
+   "orden": 7,
+   "responsable_cargo": "Gerente SIG"
+  },
+  {
+   "nombre": "No Conformidad y Acción Correctiva",
+   "tipo": "estrategico",
+   "padre": "Sistema Integrado de Gestión",
+   "detalle_mapa": "",
+   "orden": 8,
+   "responsable_cargo": "Gerente SIG"
+  },
+  {
+   "nombre": "Trabajos y Salidas No Conformes",
+   "tipo": "estrategico",
+   "padre": "Sistema Integrado de Gestión",
+   "detalle_mapa": "",
+   "orden": 9,
+   "responsable_cargo": "Gerente SIG"
+  },
+  {
+   "nombre": "Gestión de Quejas",
+   "tipo": "estrategico",
+   "padre": "Sistema Integrado de Gestión",
+   "detalle_mapa": "",
+   "orden": 10,
+   "responsable_cargo": "Gerente SIG"
+  },
+  {
+   "nombre": "Gestión Documentaria",
+   "tipo": "estrategico",
+   "padre": "Sistema Integrado de Gestión",
+   "detalle_mapa": "",
+   "orden": 11,
+   "responsable_cargo": "Gerente SIG / Asistente SIG"
+  },
+  {
+   "nombre": "Comercial",
+   "tipo": "operativo",
+   "padre": null,
+   "detalle_mapa": "",
+   "orden": 12,
+   "responsable_cargo": "Coordinador Comercial"
+  },
+  {
+   "nombre": "Metrología",
+   "tipo": "operativo",
+   "padre": null,
+   "detalle_mapa": "Recepción de equipos → Calibración y emisión de certificados → Entrega de certificados y equipos",
+   "orden": 13,
+   "responsable_cargo": "Gerente Técnico"
+  },
+  {
+   "nombre": "Recursos Humanos",
+   "tipo": "soporte",
+   "padre": null,
+   "detalle_mapa": "",
+   "orden": 14,
+   "responsable_cargo": "Coordinador Administrativo"
+  },
+  {
+   "nombre": "Compras",
+   "tipo": "soporte",
+   "padre": null,
+   "detalle_mapa": "",
+   "orden": 15,
+   "responsable_cargo": "Coordinador Logístico"
+  },
+  {
+   "nombre": "Mantenimiento",
+   "tipo": "soporte",
+   "padre": null,
+   "detalle_mapa": "",
+   "orden": 16,
+   "responsable_cargo": "Gerente Técnico"
+  },
+  {
+   "nombre": "Calibración y Verificación",
+   "tipo": "soporte",
+   "padre": null,
+   "detalle_mapa": "",
+   "orden": 17,
+   "responsable_cargo": "Gerente Técnico"
+  },
+  {
+   "nombre": "Facturación y Cobranzas",
+   "tipo": "soporte",
+   "padre": null,
+   "detalle_mapa": "",
+   "orden": 18,
+   "responsable_cargo": "Coordinador Administrativo"
+  },
+  {
+   "nombre": "Sistemas",
+   "tipo": "soporte",
+   "padre": null,
+   "detalle_mapa": "",
+   "orden": 19,
+   "responsable_cargo": "Gerente Técnico"
+  }
+ ],
+ "fichas": [
+  {
+   "proceso": "Gestión Estratégica",
+   "objetivo": "Determinar el contexto de la organización que afecta o puede afectar al Sistema Integrado de Gestión.",
+   "responsable": "Gerente General",
+   "alcance": "Todos los procesos incluidos en el Sistema Integrado de Gestión.",
+   "tipo": "estrategico",
+   "actividades": [
+    {
+     "seccion": "Determinación de las cuestiones internas y externas",
+     "proveedores": [],
+     "proveedor_otro": "Todos los procesos",
+     "entrada": "Cuestiones internas y Externas",
+     "actividad": "Desarrollo de la Matriz FODA",
+     "control": "Reunión",
+     "clientes": [
+      "Gestión Estratégica",
+      "Sistema Integrado de Gestión"
+     ],
+     "cliente_otro": "",
+     "salida": "Matriz FODA"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Sistema Integrado de Gestión"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Cambios en el Contexto",
+     "actividad": "Actualización de Matriz FODA",
+     "control": "Reunión",
+     "clientes": [
+      "Gestión Estratégica",
+      "Sistema Integrado de Gestión"
+     ],
+     "cliente_otro": "",
+     "salida": "Matriz FODA actualizada"
+    },
+    {
+     "seccion": "Determinación de las necesidades y expectativas de las partes interesadas",
+     "proveedores": [],
+     "proveedor_otro": "Todos los procesos",
+     "entrada": "Partes Interesadas",
+     "actividad": "Desarrollo de Matriz de Partes Interesadas Pertinentes",
+     "control": "Reunión",
+     "clientes": [
+      "Gestión Estratégica"
+     ],
+     "cliente_otro": "",
+     "salida": "Partes interesadas pertinentes identificadas"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Sistema Integrado de Gestión"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Partes interesadas pertinentes identificadas",
+     "actividad": "Determinación de los requisitos de las partes interesadas pertinentes",
+     "control": "Reunión",
+     "clientes": [
+      "Gestión Estratégica",
+      "Sistema Integrado de Gestión"
+     ],
+     "cliente_otro": "",
+     "salida": "Requisitos de Partes interesadas pertinentes identificados"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Sistema Integrado de Gestión"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Cambios en los requisitos de las partes interesadas pertinentes",
+     "actividad": "Actualización de Matriz de Partes Interesadas Pertinentes",
+     "control": "Reunión",
+     "clientes": [
+      "Gestión Estratégica",
+      "Sistema Integrado de Gestión"
+     ],
+     "cliente_otro": "",
+     "salida": "Requisitos de Partes interesadas pertinentes identificados"
+    },
+    {
+     "seccion": "Política, objetivos y revisión por la dirección",
+     "proveedores": [
+      "Gestión Estratégica",
+      "Sistema Integrado de Gestión"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Matriz FODA\nRequisitos de partes interesadas pertinentes",
+     "actividad": "Establecimiento y revisión de la política y los objetivos del SIG",
+     "control": "Reunión de la Alta Dirección; aprobación del Gerente General",
+     "clientes": [],
+     "cliente_otro": "Todos los procesos",
+     "salida": "Política y objetivos del SIG aprobados y comunicados"
+    },
+    {
+     "seccion": "",
+     "proveedores": [],
+     "proveedor_otro": "Todos los procesos",
+     "entrada": "Resultados de los indicadores de los procesos",
+     "actividad": "Seguimiento del cumplimiento de los objetivos",
+     "control": "Matriz de objetivos e indicadores",
+     "clientes": [
+      "Gestión Estratégica",
+      "Sistema Integrado de Gestión"
+     ],
+     "cliente_otro": "",
+     "salida": "Avance de objetivos reportado"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Sistema Integrado de Gestión"
+     ],
+     "proveedor_otro": "Todos los procesos",
+     "entrada": "Resultados de auditorías, acciones correctivas, quejas, riesgos, indicadores y desempeño de proveedores",
+     "actividad": "Revisión por la dirección",
+     "control": "Programación anual; acta de revisión",
+     "clientes": [],
+     "cliente_otro": "Todos los procesos",
+     "salida": "Decisiones y acciones de mejora; recursos asignados"
+    }
+   ],
+   "documentos": [
+    "Manual del Sistema Integrado de Gestión",
+    "Política del SIG"
+   ],
+   "registros": [
+    "Matriz FODA",
+    "Matriz de Partes Interesadas Pertinentes",
+    "Matriz de objetivos e indicadores",
+    "Acta de revisión por la dirección"
+   ],
+   "indicadores": [
+    {
+     "nombre": "Cumplimiento de objetivos del SIG",
+     "calculo": "(N° de objetivos cumplidos / N° de objetivos programados) x 100",
+     "meta": "≥ 80 %",
+     "frecuencia": "anual",
+     "responsable": "Gerente General"
+    }
+   ],
+   "recurso_humano": "Alta Dirección, Gerente SIG",
+   "recurso_economico": "Derivado del cumplimiento de los requisitos de las partes interesadas y aprovechamiento de las oportunidades.",
+   "recurso_tecnologico": "Equipos de Cómputo"
+  },
+  {
+   "proceso": "Riesgos y Oportunidades",
+   "objetivo": "Establecer un procedimiento documentado que permita la identificación, evaluación y determinación de acciones de los riesgos y oportunidades asociados a METRINDUST.",
+   "responsable": "Gerente SIG / Asistente SIG",
+   "alcance": "El presente procedimiento se aplica a los riesgos y oportunidades identificados en METRINDUST.",
+   "tipo": "estrategico",
+   "actividades": [
+    {
+     "seccion": "",
+     "proveedores": [
+      "Sistema Integrado de Gestión"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Contexto Interno\nContexto Externo\nPartes Interesadas\nProcesos del Sistema de Gestión",
+     "actividad": "Identificación de Riesgos y Oportunidades",
+     "control": "Revisión del contexto (FODA) y de los requisitos de las partes interesadas",
+     "clientes": [
+      "Sistema Integrado de Gestión"
+     ],
+     "cliente_otro": "",
+     "salida": "Matriz de riesgos y Oportunidades Elaborada"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Sistema Integrado de Gestión"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Matriz de riesgos y Oportunidades Elaborada",
+     "actividad": "Evaluación de los Riesgos y Oportunidades",
+     "control": "Nivel de Probabilidad\nNivel de Impacto",
+     "clientes": [
+      "Sistema Integrado de Gestión"
+     ],
+     "cliente_otro": "",
+     "salida": "Riesgos y Oportunidades evaluados"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Sistema Integrado de Gestión"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Nivel de Probabilidad\nNivel de Impacto",
+     "actividad": "Nivel de Riesgo u Oportunidad",
+     "control": "Matriz de riesgos y oportunidades",
+     "clientes": [
+      "Sistema Integrado de Gestión"
+     ],
+     "cliente_otro": "",
+     "salida": "Nivel de riesgo identificado"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Sistema Integrado de Gestión"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Nivel de riesgo identificado",
+     "actividad": "Determinación de las Acciones",
+     "control": "Estrategias para el tratamiento",
+     "clientes": [
+      "Sistema Integrado de Gestión"
+     ],
+     "cliente_otro": "",
+     "salida": "Acciones determinadas"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Sistema Integrado de Gestión"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Acciones determinadas",
+     "actividad": "Seguimiento",
+     "control": "Matriz de riesgos y oportunidades",
+     "clientes": [
+      "Sistema Integrado de Gestión"
+     ],
+     "cliente_otro": "",
+     "salida": "Seguimiento a las acciones realizada"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Sistema Integrado de Gestión"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Seguimiento a las acciones realizada",
+     "actividad": "Actualización",
+     "control": "Revisión anual o ante cambios del contexto (FODA)",
+     "clientes": [
+      "Sistema Integrado de Gestión"
+     ],
+     "cliente_otro": "",
+     "salida": "Matriz de riesgos y oportunidades actualizada"
+    }
+   ],
+   "documentos": [
+    "Procedimiento de Identificación de Riesgos y Oportunidades"
+   ],
+   "registros": [
+    "Matriz de Riesgos y Oportunidades"
+   ],
+   "indicadores": [
+    {
+     "nombre": "Eficacia de las acciones de riesgos y oportunidades",
+     "calculo": "(N° de acciones eficaces / N° de acciones implementadas) x 100",
+     "meta": "≥ 80 %",
+     "frecuencia": "semestral",
+     "responsable": "Gerente SIG"
+    }
+   ],
+   "recurso_humano": "Gerente SIG / Asistente SIG",
+   "recurso_economico": "Costos de las acciones para abordar riesgos y oportunidades",
+   "recurso_tecnologico": "Equipos de Cómputo"
+  },
+  {
+   "proceso": "Auditoría Interna",
+   "objetivo": "Definir las actividades, responsabilidades y objetivos sobre el proceso de auditoría interna del Sistema Integrado de Gestión.",
+   "responsable": "Gerente SIG",
+   "alcance": "Se aplica a todos los procesos incluidos en el Sistema Integrado de Gestión.",
+   "tipo": "estrategico",
+   "actividades": [
+    {
+     "seccion": "",
+     "proveedores": [
+      "Gestión Estratégica"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Cronograma de auditorías internas.",
+     "actividad": "Programación de Auditorías",
+     "control": "Programa basado en la importancia de los procesos, los cambios y los resultados de auditorías previas",
+     "clientes": [],
+     "cliente_otro": "Todos los procesos",
+     "salida": "Programa anual de Auditorías Internas"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Gestión Estratégica"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Programa anual de Auditorías Internas",
+     "actividad": "Aprobación del Programa",
+     "control": "Aprobación del programa por la Alta Dirección",
+     "clientes": [
+      "Auditoría Interna"
+     ],
+     "cliente_otro": "",
+     "salida": "Programa anual de Auditorías Internas aprobado y publicado"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Auditoría Interna"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Programa anual de Auditorías Internas aprobado y publicado",
+     "actividad": "Planificación de la Auditoría",
+     "control": "Programa de Auditorías Internas",
+     "clientes": [],
+     "cliente_otro": "Todos los procesos",
+     "salida": "Plan de Auditoría Interna"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Auditoría Interna",
+      "Gestión Estratégica"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Plan de Auditoría Interna",
+     "actividad": "Aprobación del Plan",
+     "control": "Revisión y aprobación del plan; independencia del auditor respecto del área auditada",
+     "clientes": [
+      "Auditoría Interna"
+     ],
+     "cliente_otro": "",
+     "salida": "Plan de Auditoría Interna aprobado y publicado"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Auditoría Interna"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Plan de Auditoría Interna aprobado y publicado",
+     "actividad": "Preparación de la Auditoría",
+     "control": "Lista de verificación por norma y proceso",
+     "clientes": [
+      "Auditoría Interna"
+     ],
+     "cliente_otro": "",
+     "salida": "Lista de Verificación"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Auditoría Interna"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Lista de Verificación",
+     "actividad": "Reunión de Apertura",
+     "control": "Acta de reunión de apertura firmada",
+     "clientes": [],
+     "cliente_otro": "Todos los procesos",
+     "salida": "Plan confirmado con los auditados"
+    },
+    {
+     "seccion": "",
+     "proveedores": [],
+     "proveedor_otro": "Todos los procesos",
+     "entrada": "Plan confirmado con los auditados",
+     "actividad": "Ejecución de la Auditoría",
+     "control": "Lista de Verificación",
+     "clientes": [],
+     "cliente_otro": "Todos los procesos",
+     "salida": "Información de Hallazgos encontrados"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Auditoría Interna"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Información de Hallazgos encontrados",
+     "actividad": "Informe de Auditoría",
+     "control": "Informe revisado por el auditor líder; hallazgos clasificados (NC, observación, oportunidad de mejora)",
+     "clientes": [],
+     "cliente_otro": "Todos los procesos",
+     "salida": "Informe de Auditoría elaborado"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Auditoría Interna"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Informe de Auditoría elaborado",
+     "actividad": "Reunión de cierre",
+     "control": "Acta de reunión de cierre firmada",
+     "clientes": [],
+     "cliente_otro": "Todos los procesos",
+     "salida": "Hallazgos comunicados a los auditados"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Auditoría Interna"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Hallazgos comunicados\nInforme de Auditoría",
+     "actividad": "Seguimiento",
+     "control": "Procedimiento de Gestión de No Conformidades y Acciones Correctivas",
+     "clientes": [],
+     "cliente_otro": "Todos los procesos",
+     "salida": "Solicitudes de acción correctiva registradas y en seguimiento"
+    }
+   ],
+   "documentos": [
+    "Procedimiento de Auditoría Interna",
+    "Procedimiento de Gestión de No Conformidades y Acciones Correctivas",
+    "Manual del Sistema Integrado de Gestión",
+    "Normas ISO 9001, ISO 14001, ISO 45001 y NTP-ISO/IEC 17025"
+   ],
+   "registros": [
+    "Programa anual de Auditorías Internas",
+    "Plan de Auditoría Interna",
+    "Lista de Verificación",
+    "Informe de Auditoría",
+    "Actas de reunión de apertura y de cierre"
+   ],
+   "indicadores": [
+    {
+     "nombre": "Cumplimiento del programa de auditorías",
+     "calculo": "(N° de auditorías ejecutadas / N° de auditorías programadas) x 100",
+     "meta": "100 %",
+     "frecuencia": "anual",
+     "responsable": "Gerente SIG"
+    }
+   ],
+   "recurso_humano": "Gerente SIG / Asistente SIG",
+   "recurso_economico": "Costo de Auditoría Interna",
+   "recurso_tecnologico": "Equipos de Cómputo"
+  },
+  {
+   "proceso": "Gestión Documentaria",
+   "objetivo": "Definir las actividades y responsabilidades asociadas a la elaboración, aprobación, control, publicación y difusión para los documentos y registros del Sistema Integrado de Gestión.",
+   "responsable": "Gerente SIG / Asistente SIG",
+   "alcance": "Se aplica a la base documental y registros incluidos en el Sistema Integrado de Gestión.",
+   "tipo": "estrategico",
+   "actividades": [
+    {
+     "seccion": "Control de documentos internos",
+     "proveedores": [],
+     "proveedor_otro": "Todos los procesos",
+     "entrada": "Necesidad de creación de un documento del SIG",
+     "actividad": "Solicitud",
+     "control": "Solicitud de creación o cambio con su motivo",
+     "clientes": [
+      "Gestión Documentaria"
+     ],
+     "cliente_otro": "",
+     "salida": "Solicitud enviada"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Gestión Documentaria"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Solicitud enviada",
+     "actividad": "Revisión de la Solicitud",
+     "control": "Revisión de pertinencia por el Gerente SIG",
+     "clientes": [],
+     "cliente_otro": "Área solicitante",
+     "salida": "Solicitud recibida"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Gestión Documentaria"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Solicitud recibida",
+     "actividad": "Creación / Actualización",
+     "control": "Uso de plantillas y codificación del SIG",
+     "clientes": [],
+     "cliente_otro": "Todos los procesos",
+     "salida": "Documento creado y actualizado"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Gestión Documentaria"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Documento creado y actualizado",
+     "actividad": "Revisión del Documento",
+     "control": "Revisión por el responsable del proceso",
+     "clientes": [],
+     "cliente_otro": "Todos los procesos",
+     "salida": "Documento creado, actualizado y revisado"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Gestión Estratégica"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Documento creado y actualizado y revisado",
+     "actividad": "Aprobación del Documento",
+     "control": "Aprobación por la Alta Dirección",
+     "clientes": [],
+     "cliente_otro": "Todos los procesos",
+     "salida": "Documento creado, actualizado, revisado y aprobado"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Gestión Documentaria"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Documento creado, actualizado, revisado y aprobado",
+     "actividad": "Control y Publicación",
+     "control": "Lista Maestra de Documentos Internos",
+     "clientes": [],
+     "cliente_otro": "Todos los procesos",
+     "salida": "Documento creado, actualizado, revisado, aprobado y publicado"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Gestión Documentaria"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Documento creado, actualizado, revisado, aprobado y publicado",
+     "actividad": "Difusión",
+     "control": "Registro de la difusión al personal",
+     "clientes": [],
+     "cliente_otro": "Todos los procesos",
+     "salida": "Documento creado, actualizado, revisado, aprobado, publicado y difundido."
+    },
+    {
+     "seccion": "Control de documentos externos",
+     "proveedores": [
+      "Gestión Estratégica"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Documentos externos",
+     "actividad": "Identificación",
+     "control": "Verificación de vigencia de documentos",
+     "clientes": [
+      "Gestión Documentaria"
+     ],
+     "cliente_otro": "",
+     "salida": "Lista Maestra de Documentos Externos"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Gestión Estratégica"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Lista Maestra de Documentos Externos",
+     "actividad": "Control",
+     "control": "Revisión periódica de la vigencia",
+     "clientes": [],
+     "cliente_otro": "Todos los procesos",
+     "salida": "Lista Maestra de Documentos Externos actualizada"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Gestión Documentaria"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Lista Maestra de Documentos Externos actualizada",
+     "actividad": "Publicación",
+     "control": "Comunicación de la lista actualizada a los procesos",
+     "clientes": [],
+     "cliente_otro": "Todos los procesos",
+     "salida": "Lista Maestra de Documentos Externos actualizada y publicada"
+    },
+    {
+     "seccion": "Control de registros",
+     "proveedores": [],
+     "proveedor_otro": "Todos los Procesos",
+     "entrada": "Condiciones de almacenamiento",
+     "actividad": "Identificación",
+     "control": "Procedimiento de Control de Documentos y Registros",
+     "clientes": [
+      "Gestión Documentaria"
+     ],
+     "cliente_otro": "",
+     "salida": "Condiciones de almacenamiento identificadas"
+    },
+    {
+     "seccion": "",
+     "proveedores": [],
+     "proveedor_otro": "Todos los Procesos",
+     "entrada": "Condiciones de almacenamiento identificadas",
+     "actividad": "Almacenamiento",
+     "control": "Procedimiento de Control de Documentos y Registros",
+     "clientes": [],
+     "cliente_otro": "Todos los procesos",
+     "salida": "Lista Maestra de Registros"
+    },
+    {
+     "seccion": "",
+     "proveedores": [],
+     "proveedor_otro": "Todos los Procesos",
+     "entrada": "Lista Maestra de Registros",
+     "actividad": "Protección",
+     "control": "Procedimiento de Control de Documentos y Registros",
+     "clientes": [],
+     "cliente_otro": "Todos los procesos",
+     "salida": "Registros protegidos"
+    },
+    {
+     "seccion": "",
+     "proveedores": [],
+     "proveedor_otro": "Todos los Procesos",
+     "entrada": "Registros protegidos",
+     "actividad": "Recuperación",
+     "control": "Procedimiento de Control de Documentos y Registros",
+     "clientes": [],
+     "cliente_otro": "Todos los procesos",
+     "salida": "Lista Maestra de Registros"
+    },
+    {
+     "seccion": "",
+     "proveedores": [],
+     "proveedor_otro": "Todos los Procesos",
+     "entrada": "Lista Maestra de Registros",
+     "actividad": "Tiempo de almacenamiento y disposición final",
+     "control": "Procedimiento de Control de Documentos y Registros",
+     "clientes": [],
+     "cliente_otro": "Todos los procesos",
+     "salida": "Lista Maestra de Registros"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Gestión Documentaria"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Lista Maestra de Registros",
+     "actividad": "Control",
+     "control": "Procedimiento de Control de Documentos y Registros",
+     "clientes": [],
+     "cliente_otro": "Todos los procesos",
+     "salida": "Lista Maestra de Registros elaborada y  actualizada"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Gestión Documentaria"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Lista Maestra de Registros elaborada y  actualizada",
+     "actividad": "Publicación",
+     "control": "Procedimiento de Control de Documentos y Registros",
+     "clientes": [],
+     "cliente_otro": "Todos los procesos",
+     "salida": "Lista Maestra de Registros elaborada, actualizada y  publicada"
+    },
+    {
+     "seccion": "",
+     "proveedores": [],
+     "proveedor_otro": "Todos los Procesos",
+     "entrada": "Lista Maestra de Registros elaborada, actualizada y  publicada",
+     "actividad": "Generación",
+     "control": "Procedimiento de Control de Documentos y Registros",
+     "clientes": [],
+     "cliente_otro": "Todos los procesos",
+     "salida": "Registros generados"
+    },
+    {
+     "seccion": "",
+     "proveedores": [],
+     "proveedor_otro": "Todos los Procesos",
+     "entrada": "Generación de registros",
+     "actividad": "Archivo",
+     "control": "Procedimiento de Control de Documentos y Registros",
+     "clientes": [],
+     "cliente_otro": "Todos los procesos",
+     "salida": "Registros archivados"
+    }
+   ],
+   "documentos": [
+    "Procedimiento de Control de Documentos y Registros"
+   ],
+   "registros": [
+    "Lista Maestra de Documentos Internos",
+    "Lista Maestra de Documentos Externos",
+    "Lista Maestra de Registros"
+   ],
+   "indicadores": [
+    {
+     "nombre": "Documentos revisados dentro del plazo",
+     "calculo": "(N° de documentos revisados en plazo / N° de documentos con revisión vencida en el periodo) x 100",
+     "meta": "≥ 95 %",
+     "frecuencia": "trimestral",
+     "responsable": "Gerente SIG"
+    }
+   ],
+   "recurso_humano": "Gerente SIG / Asistente SIG",
+   "recurso_economico": "Ninguno",
+   "recurso_tecnologico": "Equipos de cómputo; sistema eSYNAPSE 360 (lista maestra y control de versiones)"
+  },
+  {
+   "proceso": "Gestión de Quejas",
+   "objetivo": "Recibir, validar, investigar y resolver las quejas de los clientes y otras partes interesadas, comunicando al reclamante en cada etapa.",
+   "responsable": "Gerente SIG",
+   "alcance": "Aplica a las quejas relacionadas con los servicios y actividades de METRINDUST S.A.C., presentadas por clientes u otras partes interesadas.",
+   "tipo": "estrategico",
+   "actividades": [
+    {
+     "seccion": "",
+     "proveedores": [
+      "Comercial"
+     ],
+     "proveedor_otro": "Cliente",
+     "entrada": "Queja del cliente o de otra parte interesada",
+     "actividad": "Recepción y registro de la queja",
+     "control": "Registro con código correlativo; acuse de recibo al reclamante en 24 horas",
+     "clientes": [
+      "Sistema Integrado de Gestión"
+     ],
+     "cliente_otro": "",
+     "salida": "Queja registrada y acusada"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Sistema Integrado de Gestión"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Queja registrada y acusada",
+     "actividad": "Validación de la queja",
+     "control": "Verificación de que se relaciona con las actividades del laboratorio; resultado comunicado en 2 días hábiles",
+     "clientes": [
+      "Sistema Integrado de Gestión"
+     ],
+     "cliente_otro": "Cliente",
+     "salida": "Queja validada (o cerrada con motivo comunicado)"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Sistema Integrado de Gestión"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Queja validada (o cerrada con motivo comunicado)",
+     "actividad": "Evaluación e investigación",
+     "control": "Investigación por el Gerente Técnico (técnicas) o el Gerente SIG (otras); revisión del alcance acreditado",
+     "clientes": [
+      "Metrología",
+      "Sistema Integrado de Gestión"
+     ],
+     "cliente_otro": "",
+     "salida": "Causas analizadas"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Metrología",
+      "Sistema Integrado de Gestión"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Causas analizadas",
+     "actividad": "Decisión",
+     "control": "Decisión fundamentada de procedencia, tomada por personal no involucrado en el origen",
+     "clientes": [
+      "Sistema Integrado de Gestión"
+     ],
+     "cliente_otro": "",
+     "salida": "Queja procedente o no procedente"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Sistema Integrado de Gestión"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Queja procedente o no procedente",
+     "actividad": "Tratamiento",
+     "control": "Acciones con responsable; registro de la no conformidad y del trabajo no conforme cuando corresponde",
+     "clientes": [],
+     "cliente_otro": "Proceso involucrado",
+     "salida": "Acciones implementadas; NC registrada si procede"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Sistema Integrado de Gestión"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Acciones implementadas; NC registrada si procede",
+     "actividad": "Cierre y comunicación al cliente",
+     "control": "Comunicación formal del resultado por personal no involucrado; conformidad del cliente",
+     "clientes": [
+      "Gestión Estratégica"
+     ],
+     "cliente_otro": "Cliente",
+     "salida": "Queja cerrada"
+    }
+   ],
+   "documentos": [
+    "Procedimiento de Gestión de Quejas",
+    "Procedimiento de Gestión de No Conformidades y Acciones Correctivas"
+   ],
+   "registros": [
+    "Reporte de Quejas",
+    "Registro de Seguimiento de Quejas"
+   ],
+   "indicadores": [
+    {
+     "nombre": "Quejas cerradas dentro del plazo",
+     "calculo": "(N° de quejas cerradas en plazo / N° de quejas cerradas) x 100",
+     "meta": "≥ 90 %",
+     "frecuencia": "trimestral",
+     "responsable": "Gerente SIG"
+    },
+    {
+     "nombre": "Quejas procedentes",
+     "calculo": "(N° de quejas procedentes / N° de servicios entregados) x 100",
+     "meta": "≤ 0,5 %",
+     "frecuencia": "trimestral",
+     "responsable": "Gerente SIG"
+    }
+   ],
+   "recurso_humano": "Gerente SIG / Asistente SIG, Gerente Técnico, Comercial",
+   "recurso_economico": "Costos de las acciones derivadas de la queja",
+   "recurso_tecnologico": "Equipos de cómputo; sistema eSYNAPSE 360"
+  },
+  {
+   "proceso": "IPERC",
+   "objetivo": "Establecer el procedimiento para la Identificación continua de Peligros y Evaluación de Riesgos y determinación de controles en todas las actividades, procesos, instalaciones y servicios relacionados a las actividades de la organización, sobre los cuales se tiene influencia y pueden controlarse, con la finalidad de prevenir daños a los colaboradores y a la propiedad.",
+   "responsable": "Gerente SIG",
+   "alcance": "El presente procedimiento se aplica dentro del ámbito de las actividades realizadas por la organización a cargo de los colaboradores, contratistas, proveedores y visitantes",
+   "tipo": "estrategico",
+   "actividades": [
+    {
+     "seccion": "",
+     "proveedores": [
+      "Sistema Integrado de Gestión"
+     ],
+     "proveedor_otro": "Todos los procesos",
+     "entrada": "Procesos de la organización",
+     "actividad": "Identificación del Alcance del Control",
+     "control": "Alcance revisado por el Gerente SIG",
+     "clientes": [
+      "Sistema Integrado de Gestión"
+     ],
+     "cliente_otro": "Todos los procesos",
+     "salida": "Procesos definidos"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Sistema Integrado de Gestión"
+     ],
+     "proveedor_otro": "Todos los procesos",
+     "entrada": "Procesos definidos",
+     "actividad": "Mapeo de Procesos",
+     "control": "Mapa de Procesos",
+     "clientes": [
+      "Sistema Integrado de Gestión"
+     ],
+     "cliente_otro": "Todos los procesos",
+     "salida": "Actividades identificadas de los procesos definidos"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Sistema Integrado de Gestión"
+     ],
+     "proveedor_otro": "Todos los procesos",
+     "entrada": "Actividades identificadas de los procesos definidos",
+     "actividad": "Identificación de Peligros",
+     "control": "Participación de los trabajadores en la identificación de peligros",
+     "clientes": [
+      "Sistema Integrado de Gestión"
+     ],
+     "cliente_otro": "Todos los procesos",
+     "salida": "Peligros Identificados por cada actividad de los procesos definidos"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Sistema Integrado de Gestión"
+     ],
+     "proveedor_otro": "Todos los procesos",
+     "entrada": "Peligros Identificados por cada actividad de los procesos definidos",
+     "actividad": "Identificación de Peligro Asociado",
+     "control": "Matriz IPERC",
+     "clientes": [
+      "Sistema Integrado de Gestión"
+     ],
+     "cliente_otro": "Todos los procesos",
+     "salida": "Peligros registrados en la Matriz de Identificación de Peligros y Evaluación de Riesgos"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Sistema Integrado de Gestión"
+     ],
+     "proveedor_otro": "Todos los procesos",
+     "entrada": "Peligros registrados en la Matriz de Identificación de Peligros y Evaluación de Riesgos",
+     "actividad": "Requisito Legal u Otro Asociado",
+     "control": "Matriz de requisitos legales",
+     "clientes": [
+      "Sistema Integrado de Gestión"
+     ],
+     "cliente_otro": "Todos los procesos",
+     "salida": "Requisitos legales identificados relacionados a los peligros y riesgos"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Sistema Integrado de Gestión"
+     ],
+     "proveedor_otro": "Todos los procesos",
+     "entrada": "Requisitos legales identificados relacionados a los peligros y riesgos",
+     "actividad": "Incidencia",
+     "control": "Criterios del procedimiento IPERC",
+     "clientes": [
+      "Sistema Integrado de Gestión"
+     ],
+     "cliente_otro": "Todos los procesos",
+     "salida": "Incidencia evaluada"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Sistema Integrado de Gestión"
+     ],
+     "proveedor_otro": "Todos los procesos",
+     "entrada": "Incidencia evaluada",
+     "actividad": "Criterio de Probabilidad",
+     "control": "Criterios del procedimiento IPERC",
+     "clientes": [
+      "Sistema Integrado de Gestión"
+     ],
+     "cliente_otro": "Todos los procesos",
+     "salida": "Criterios de probabilidad establecidos"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Sistema Integrado de Gestión"
+     ],
+     "proveedor_otro": "Todos los procesos",
+     "entrada": "Criterios de probabilidad establecidos",
+     "actividad": "Índice de Probabilidad y Severidad",
+     "control": "Criterios del procedimiento IPERC",
+     "clientes": [
+      "Sistema Integrado de Gestión"
+     ],
+     "cliente_otro": "Todos los procesos",
+     "salida": "Criterio de Probabilidad y Severidad aplicado de acuerdo al procedimiento"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Sistema Integrado de Gestión"
+     ],
+     "proveedor_otro": "Todos los procesos",
+     "entrada": "Criterio de Probabilidad y Severidad aplicado de acuerdo al procedimiento",
+     "actividad": "Nivel de Riesgo SST",
+     "control": "Criterios del procedimiento IPERC",
+     "clientes": [
+      "Sistema Integrado de Gestión"
+     ],
+     "cliente_otro": "Todos los procesos",
+     "salida": "Nivel de Riesgo aplicado de acuerdo al procedimiento"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Sistema Integrado de Gestión"
+     ],
+     "proveedor_otro": "Todos los procesos",
+     "entrada": "Nivel de Riesgo aplicado de acuerdo al procedimiento",
+     "actividad": "Control Operacional",
+     "control": "Jerarquía de controles: eliminación, sustitución, ingeniería, administrativos y EPP",
+     "clientes": [
+      "Sistema Integrado de Gestión"
+     ],
+     "cliente_otro": "Todos los procesos",
+     "salida": "Medidas de Control determinadas"
+    }
+   ],
+   "documentos": [
+    "Procedimiento de Identificación de Peligros y Evaluación de Riesgos y Controles (IPERC)"
+   ],
+   "registros": [
+    "Matriz IPERC"
+   ],
+   "indicadores": [
+    {
+     "nombre": "Implementación de controles del IPERC",
+     "calculo": "(N° de controles implementados / N° de controles programados) x 100",
+     "meta": "≥ 90 %",
+     "frecuencia": "semestral",
+     "responsable": "Gerente SIG"
+    }
+   ],
+   "recurso_humano": "Gerente SIG / Asistente SIG, Personal de la organización",
+   "recurso_economico": "Costos de implementación de controles y EPP",
+   "recurso_tecnologico": "Equipo de cómputo, internet."
+  },
+  {
+   "proceso": "Investigación de Incidentes y Accidentes",
+   "objetivo": "Establecer y mantener un procedimiento para la investigación de Incidente/Accidentes y a la correcta identificación y control de las causas del Incidente/Accidente.",
+   "responsable": "Gerente SIG / Asistente SIG",
+   "alcance": "Se aplica en todas las investigaciones de los Incidentes/Accidentes de trabajo que involucren a la organización.",
+   "tipo": "estrategico",
+   "actividades": [
+    {
+     "seccion": "",
+     "proveedores": [],
+     "proveedor_otro": "Todos los procesos",
+     "entrada": "Incidente y/o accidente suscitado",
+     "actividad": "Reporte del Incidente/Accidente",
+     "control": "Correo electrónico con Reporte del Incidente/Accidente\nReporte escrito",
+     "clientes": [
+      "Investigación de Incidentes y Accidentes"
+     ],
+     "cliente_otro": "",
+     "salida": "Reporte del Incidente/accidente"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Investigación de Incidentes y Accidentes"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Fotografías\nManifestación de testigos\nExámenes Toxicológicos,\nexámenes Psicosomáticos y\nexámenes de Conocimiento de las Normas de Tránsito y Seguridad Vial (Accidentes que involucren vehículos)",
+     "actividad": "Investigación del Incidente/Accidente",
+     "control": "Investigación con participación del Supervisor o Comité de SST",
+     "clientes": [
+      "Investigación de Incidentes y Accidentes"
+     ],
+     "cliente_otro": "",
+     "salida": "Registro de accidentes de trabajo.\nRegistro de enfermedades ocupacionales.\nRegistro de incidentes peligrosos e incidentes"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Investigación de Incidentes y Accidentes"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Registro de accidentes de trabajo.\nRegistro de enfermedades ocupacionales.\nRegistro de incidentes peligrosos e incidentes",
+     "actividad": "Metodología de la Investigación",
+     "control": "Análisis de causas inmediatas y básicas",
+     "clientes": [
+      "Investigación de Incidentes y Accidentes"
+     ],
+     "cliente_otro": "",
+     "salida": "Causa Básica\nCausa Inmediata"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Investigación de Incidentes y Accidentes"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Causa Básica\nCausa Inmediata",
+     "actividad": "Acciones Correctivas",
+     "control": "Acciones aprobadas con responsable y plazo",
+     "clientes": [
+      "Investigación de Incidentes y Accidentes"
+     ],
+     "cliente_otro": "",
+     "salida": "Acciones correctivas."
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Investigación de Incidentes y Accidentes"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Acciones correctivas.",
+     "actividad": "Seguimiento de Las Acciones Correctivas",
+     "control": "Seguimiento de Acciones Correctivas",
+     "clientes": [
+      "Investigación de Incidentes y Accidentes"
+     ],
+     "cliente_otro": "",
+     "salida": "Informe de incidentes peligrosos e incidentes"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Investigación de Incidentes y Accidentes"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Informe de incidentes peligrosos e incidentes",
+     "actividad": "Estadísticas de Incidente/Accidentes/Enfermedades",
+     "control": "Consolidación mensual de estadísticas",
+     "clientes": [
+      "Investigación de Incidentes y Accidentes"
+     ],
+     "cliente_otro": "",
+     "salida": "Datos para registro de estadística de seguridad y salud en el trabajo \nRegistro de estadística de seguridad y salud en el trabajo."
+    }
+   ],
+   "documentos": [
+    "Procedimiento de Investigación de Incidentes, Accidentes y Enfermedades Ocupacionales"
+   ],
+   "registros": [
+    "Registro de accidentes de trabajo",
+    "Registro de enfermedades ocupacionales",
+    "Registro de incidentes peligrosos e incidentes",
+    "Datos para registro de estadística de seguridad y salud en el trabajo",
+    "Informe de incidentes peligrosos e incidentes",
+    "Registro de estadística de seguridad y salud en el trabajo."
+   ],
+   "indicadores": [
+    {
+     "nombre": "Eliminación de condiciones inseguras",
+     "calculo": "(Nº Condiciones Inseguras Eliminadas / Nº Condiciones Inseguras identificadas) x 100",
+     "meta": "≥ 95 %",
+     "frecuencia": "mensual",
+     "responsable": "Gerente SIG / Asistente SIG"
+    },
+    {
+     "nombre": "Incidentes investigados dentro del plazo",
+     "calculo": "(N° de incidentes y accidentes investigados en plazo / N° reportados) x 100",
+     "meta": "100 %",
+     "frecuencia": "mensual",
+     "responsable": "Gerente SIG"
+    }
+   ],
+   "recurso_humano": "Gerente SIG / Asistente SIG, Personal de la organización",
+   "recurso_economico": "Costos de atención y de las acciones correctivas",
+   "recurso_tecnologico": "Equipo de cómputo, internet."
+  },
+  {
+   "proceso": "No Conformidad y Acción Correctiva",
+   "objetivo": "Definir las actividades y responsabilidades para el tratamiento de las No conformidades detectadas por el personal involucrado en el Sistema Integrado de Gestión.",
+   "responsable": "Gerente SIG",
+   "alcance": "Se aplica a todos los procesos incluidos en el Sistema Integrado de Gestión.",
+   "tipo": "estrategico",
+   "actividades": [
+    {
+     "seccion": "",
+     "proveedores": [],
+     "proveedor_otro": "Todos los Procesos",
+     "entrada": "Requisitos de las normas ISO 9001, ISO 14001, ISO 45001 y NTP-ISO/IEC 17025\nRequisitos establecidos para el SIG, procedimientos y sus criterios de aceptación, política y objetivos del SIG\nSolicitud de acción",
+     "actividad": "Identificación de No Conformidades",
+     "control": "Criterios de los requisitos aplicables",
+     "clientes": [
+      "Sistema Integrado de Gestión"
+     ],
+     "cliente_otro": "",
+     "salida": "No Conformidad redactada"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Sistema Integrado de Gestión"
+     ],
+     "proveedor_otro": "",
+     "entrada": "No Conformidad redactada",
+     "actividad": "Reporte de No Conformidades",
+     "control": "Correo electrónico, WhatsApp o verbal; registro en la SAC",
+     "clientes": [],
+     "cliente_otro": "Proceso involucrado en la No Conformidad",
+     "salida": "Registro de la No Conformidad en el formato de Solicitud de Acción Correctiva (SAC)"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Sistema Integrado de Gestión"
+     ],
+     "proveedor_otro": "",
+     "entrada": "SAC",
+     "actividad": "Codificación y Distribución",
+     "control": "Seguimiento a Solicitudes de Acciones Correctivas y No Conformidades",
+     "clientes": [
+      "Sistema Integrado de Gestión"
+     ],
+     "cliente_otro": "",
+     "salida": "SAC con codificación aprobada y distribuida"
+    },
+    {
+     "seccion": "",
+     "proveedores": [],
+     "proveedor_otro": "Responsable del proceso asignado",
+     "entrada": "SAC con codificación aprobada y distribuida",
+     "actividad": "Acción inmediata",
+     "control": "Corrección registrada en la SAC",
+     "clientes": [],
+     "cliente_otro": "Responsable del proceso asignado",
+     "salida": "SAC con determinación de acción inmediata"
+    },
+    {
+     "seccion": "",
+     "proveedores": [],
+     "proveedor_otro": "Responsable del proceso asignado",
+     "entrada": "SAC con determinación de acción inmediata",
+     "actividad": "Análisis de causas",
+     "control": "Seguimiento a Solicitudes de Acciones Correctivas y No Conformidades",
+     "clientes": [],
+     "cliente_otro": "Colaborador Asignado",
+     "salida": "SAC con análisis de causa realizado"
+    },
+    {
+     "seccion": "",
+     "proveedores": [],
+     "proveedor_otro": "Responsable del proceso asignado",
+     "entrada": "SAC con análisis de causa realizado",
+     "actividad": "Aprobación de la corrección, el análisis de causa y las acciones correctivas",
+     "control": "Seguimiento a Solicitudes de Acciones Correctivas y No Conformidades",
+     "clientes": [
+      "Sistema Integrado de Gestión"
+     ],
+     "cliente_otro": "",
+     "salida": "SAC revisada y aprobada"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Sistema Integrado de Gestión"
+     ],
+     "proveedor_otro": "",
+     "entrada": "SAC revisada y aprobada",
+     "actividad": "Toma de Acciones",
+     "control": "Seguimiento a Solicitudes de Acciones Correctivas y No Conformidades",
+     "clientes": [],
+     "cliente_otro": "Responsable del proceso asignado",
+     "salida": "Evidencia de la ejecución de las acciones correctivas"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Sistema Integrado de Gestión"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Evidencia de la ejecución de las acciones correctivas",
+     "actividad": "Verificación",
+     "control": "Seguimiento a Solicitudes de Acciones Correctivas y No Conformidades",
+     "clientes": [
+      "Sistema Integrado de Gestión"
+     ],
+     "cliente_otro": "",
+     "salida": "SAC con acciones correctivas implementadas, verificadas y eficaces"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Sistema Integrado de Gestión"
+     ],
+     "proveedor_otro": "",
+     "entrada": "SAC con acciones correctivas implementadas, verificadas y eficaces",
+     "actividad": "Seguimiento",
+     "control": "Seguimiento a Solicitudes de Acciones Correctivas y No Conformidades",
+     "clientes": [
+      "Sistema Integrado de Gestión"
+     ],
+     "cliente_otro": "",
+     "salida": "Seguimiento a Solicitudes de Acciones Correctivas y No Conformidades actualizado"
+    }
+   ],
+   "documentos": [
+    "Procedimiento de Gestión de No Conformidades y Acciones Correctivas"
+   ],
+   "registros": [
+    "Solicitud de Acción Correctiva",
+    "Seguimiento a Solicitudes de Acciones Correctivas y No Conformidades"
+   ],
+   "indicadores": [
+    {
+     "nombre": "Eficacia de las acciones correctivas",
+     "calculo": "(N° de SAC eficaces / N° de SAC con verificación de eficacia) x 100",
+     "meta": "≥ 90 %",
+     "frecuencia": "trimestral",
+     "responsable": "Gerente SIG"
+    },
+    {
+     "nombre": "Cierre de SAC dentro del plazo",
+     "calculo": "(N° de SAC cerradas en plazo / N° de SAC con plazo vencido en el periodo) x 100",
+     "meta": "≥ 80 %",
+     "frecuencia": "mensual",
+     "responsable": "Gerente SIG"
+    }
+   ],
+   "recurso_humano": "Gerente SIG / Asistente SIG",
+   "recurso_economico": "Costos derivados de la implementación de las acciones inmediatas y correctivas",
+   "recurso_tecnologico": "Equipos de Cómputo"
+  },
+  {
+   "proceso": "Requisitos Legales",
+   "objetivo": "Establecer un procedimiento documentado que describa la identificación, acceso, evaluación de cumplimiento y aplicación de los requisitos legales y demás requisitos a ser cumplidos por la organización.",
+   "responsable": "Gerente SIG",
+   "alcance": "Aplica a los requisitos legales y otros requisitos de calidad, medio ambiente, seguridad y salud en el trabajo y metrología aplicables a las actividades de la organización.",
+   "tipo": "estrategico",
+   "actividades": [
+    {
+     "seccion": "",
+     "proveedores": [],
+     "proveedor_otro": "Todos los procesos",
+     "entrada": "Nueva normativa legal",
+     "actividad": "Identificación de requisitos",
+     "control": "Revisión periódica de El Peruano y fuentes oficiales (INACAL, MINAM, MTPE)",
+     "clientes": [],
+     "cliente_otro": "Todos los procesos",
+     "salida": "Normas legales y otros requisitos (calidad, ambiente, SST y metrología) aplicables a la organización"
+    },
+    {
+     "seccion": "",
+     "proveedores": [],
+     "proveedor_otro": "Todos los procesos",
+     "entrada": "Normas legales y otros requisitos (calidad, ambiente, SST y metrología) aplicables a la organización",
+     "actividad": "Comunicación",
+     "control": "Comunicación a los responsables de los procesos afectados",
+     "clientes": [],
+     "cliente_otro": "Todos los procesos",
+     "salida": "Impacto de cambios en las legislaciones comunicado"
+    },
+    {
+     "seccion": "",
+     "proveedores": [],
+     "proveedor_otro": "Todos los procesos",
+     "entrada": "Impacto de cambios en las legislaciones comunicado",
+     "actividad": "Publicación Interna",
+     "control": "Publicación interna y registro de la difusión",
+     "clientes": [],
+     "cliente_otro": "Todos los procesos",
+     "salida": "Normativa legal vigente publicada"
+    },
+    {
+     "seccion": "",
+     "proveedores": [],
+     "proveedor_otro": "Todos los procesos",
+     "entrada": "Normativa legal vigente publicada",
+     "actividad": "Actualización",
+     "control": "Matriz de requisitos legales actualizada",
+     "clientes": [],
+     "cliente_otro": "Todos los procesos",
+     "salida": "Lista de requisitos legales y otros requisitos actualizada"
+    },
+    {
+     "seccion": "",
+     "proveedores": [],
+     "proveedor_otro": "Todos los procesos",
+     "entrada": "Lista de requisitos legales y otros requisitos actualizada",
+     "actividad": "Evaluación inicial del cumplimiento",
+     "control": "Matriz de Requisitos Legales",
+     "clientes": [],
+     "cliente_otro": "Todos los procesos",
+     "salida": "Evaluación del cumplimiento legal y otros requisitos"
+    },
+    {
+     "seccion": "",
+     "proveedores": [],
+     "proveedor_otro": "Todos los procesos",
+     "entrada": "Evaluación del cumplimiento legal y otros requisitos",
+     "actividad": "Implementación",
+     "control": "Procedimiento Identificación de Peligros, Evaluación y Control de Riesgos",
+     "clientes": [],
+     "cliente_otro": "Todos los procesos",
+     "salida": "Matriz IPERC actualizada\nRequisitos legales y otros Requisitos implementados"
+    },
+    {
+     "seccion": "",
+     "proveedores": [],
+     "proveedor_otro": "Todos los procesos",
+     "entrada": "Lista de requisitos legales y otros requisitos implementados",
+     "actividad": "Evaluación periódica del cumplimiento",
+     "control": "Matriz de Requisitos Legales",
+     "clientes": [],
+     "cliente_otro": "Todos los procesos",
+     "salida": "Evaluación del cumplimiento legal y otros requisitos"
+    }
+   ],
+   "documentos": [
+    "Procedimiento de Identificación de Requisitos Legales y otros Requisitos"
+   ],
+   "registros": [
+    "Lista de requisitos legales y otros requisitos",
+    "Evaluación del cumplimiento legal y otros requisitos"
+   ],
+   "indicadores": [
+    {
+     "nombre": "Cumplimiento de requisitos legales",
+     "calculo": "(N° de requisitos cumplidos / N° de requisitos evaluados) x 100",
+     "meta": "100 %",
+     "frecuencia": "semestral",
+     "responsable": "Gerente SIG"
+    }
+   ],
+   "recurso_humano": "Gerente SIG / Asistente SIG, Asesor Legal externo",
+   "recurso_economico": "Pago de asesor legal externo (en caso se requiera)",
+   "recurso_tecnologico": "Equipo de cómputo, internet, Diario el Peruano digital"
+  },
+  {
+   "proceso": "Trabajos y Salidas No Conformes",
+   "objetivo": "Establecer los lineamientos para la identificación y el tratamiento de los trabajos y salidas no conformes en los procesos del Sistema Integrado de Gestión.",
+   "responsable": "Gerente SIG",
+   "alcance": "Aplica a  los procesos involucrados en el alcance del Sistema Integrado de Gestión, así como los procesos de apoyo y de soporte relacionados a los servicios que proporciona la organización.",
+   "tipo": "estrategico",
+   "actividades": [
+    {
+     "seccion": "",
+     "proveedores": [
+      "Metrología"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Salida No Conforme reportada por Cliente/ Procesos Internos",
+     "actividad": "Identificación de Salida No Conforme",
+     "control": "Llamada telefónica/ Correo electrónico/ Whatsapp",
+     "clientes": [
+      "Sistema Integrado de Gestión"
+     ],
+     "cliente_otro": "",
+     "salida": "Salida No Conforme Identificada"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Sistema Integrado de Gestión"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Salida No Conforme Identificada",
+     "actividad": "Notificar al responsable del proceso",
+     "control": "Notificación verbal / vía correo",
+     "clientes": [
+      "Metrología"
+     ],
+     "cliente_otro": "",
+     "salida": "Salida No Conforme reportada"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Sistema Integrado de Gestión",
+      "Metrología"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Salida No Conforme reportada",
+     "actividad": "Registrar Salida No Conforme",
+     "control": "Registro de Trabajos y Salidas No Conformes",
+     "clientes": [
+      "Metrología"
+     ],
+     "cliente_otro": "",
+     "salida": "Salida No Conforme registrada"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Metrología"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Salida No Conforme registrada",
+     "actividad": "Evaluación del impacto y notificación al cliente",
+     "control": "Evaluación de la significancia (incluye trabajos anteriores); autorización para reanudar el trabajo",
+     "clientes": [
+      "Metrología",
+      "Comercial"
+     ],
+     "cliente_otro": "",
+     "salida": "Impacto evaluado; cliente notificado cuando corresponde"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Metrología",
+      "Sistema Integrado de Gestión"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Impacto evaluado; cliente notificado cuando corresponde",
+     "actividad": "Acciones a Tomar",
+     "control": "Registro de Trabajos y Salidas No Conformes",
+     "clientes": [
+      "Metrología",
+      "Sistema Integrado de Gestión"
+     ],
+     "cliente_otro": "",
+     "salida": "Acciones a tomar aprobadas e implementadas"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Sistema Integrado de Gestión"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Acciones a tomar aprobadas e implementadas",
+     "actividad": "Verificar eficacia de la acción",
+     "control": "Seguimiento en el registro de trabajos y salidas no conformes",
+     "clientes": [
+      "Sistema Integrado de Gestión"
+     ],
+     "cliente_otro": "",
+     "salida": "Eficacia de la acción verificada"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Sistema Integrado de Gestión"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Eficacia de la acción verificada",
+     "actividad": "Análisis de datos de la Salida No Conforme",
+     "control": "Revisión por la dirección",
+     "clientes": [
+      "Gestión Estratégica"
+     ],
+     "cliente_otro": "",
+     "salida": "Toma de decisiones"
+    }
+   ],
+   "documentos": [
+    "Procedimiento de Control de Trabajos y Salidas No Conformes"
+   ],
+   "registros": [
+    "Registro de Trabajos y Salidas No Conformes"
+   ],
+   "indicadores": [
+    {
+     "nombre": "% Trabajos y salidas no conformes",
+     "calculo": "(Nº de salidas no conformes identificadas/ Nº de entregables enviados)*100",
+     "meta": "≤ 5%",
+     "frecuencia": "mensual",
+     "responsable": "Gerente Técnico"
+    }
+   ],
+   "recurso_humano": "Gerente SIG / Asistente SIG",
+   "recurso_economico": "Costos de reproceso, recalibración o reemplazo",
+   "recurso_tecnologico": "Equipos de Cómputo"
+  },
+  {
+   "proceso": "Comercial",
+   "objetivo": "Asegurar la correcta gestión de cotizaciónes y atención al cliente, garantizando el cumplimiento de los requisitos establecidos y la satisfacción del cliente.",
+   "responsable": "Coordinador Comercial",
+   "alcance": "Desde la recepción de la solicitud del cliente hasta la aceptación de la cotización y la comunicación del servicio a Metrología.",
+   "tipo": "operativo",
+   "actividades": [
+    {
+     "seccion": "Gestión de solicitudes y cotizaciones",
+     "proveedores": [],
+     "proveedor_otro": "Cliente",
+     "entrada": "Requerimiento de cliente",
+     "actividad": "Recepción de la Solicitud del Cliente",
+     "control": "Revisión de la solicitud: capacidad técnica, método y alcance acreditado",
+     "clientes": [
+      "Comercial"
+     ],
+     "cliente_otro": "",
+     "salida": "Solicitud registrada y revisada"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Comercial"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Solicitud revisada",
+     "actividad": "Elaboración y Envío de la Cotización",
+     "control": "Cotización emitida en Odoo y revisada antes del envío",
+     "clientes": [],
+     "cliente_otro": "Cliente",
+     "salida": "Cotización enviada al cliente"
+    },
+    {
+     "seccion": "",
+     "proveedores": [],
+     "proveedor_otro": "Cliente",
+     "entrada": "Solicitud de modificación de la cotización",
+     "actividad": "Modificación de la Cotización (a solicitud del cliente).",
+     "control": "Nueva versión de la cotización en Odoo",
+     "clientes": [],
+     "cliente_otro": "Cliente",
+     "salida": "Cotización modificada enviada"
+    },
+    {
+     "seccion": "",
+     "proveedores": [],
+     "proveedor_otro": "Cliente",
+     "entrada": "Orden de servicio o aceptación del cliente",
+     "actividad": "Aceptación de la cotización (orden de servicio u otra forma de aceptación)",
+     "control": "Registro de la aceptación en Odoo; diferencias entre la solicitud y la cotización resueltas",
+     "clientes": [
+      "Comercial"
+     ],
+     "cliente_otro": "",
+     "salida": "Cotización aceptada"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Comercial"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Cotización aceptada",
+     "actividad": "Comunicación del servicio aceptado y coordinación de la recepción del equipo",
+     "control": "Registro en Odoo; comunicación a Metrología por correo o WhatsApp",
+     "clientes": [
+      "Metrología"
+     ],
+     "cliente_otro": "",
+     "salida": "Servicio comunicado para coordinar la recepción"
+    },
+    {
+     "seccion": "",
+     "proveedores": [],
+     "proveedor_otro": "Cliente",
+     "entrada": "Consultas, reclamos o quejas del cliente",
+     "actividad": "Atención al cliente y derivación de quejas",
+     "control": "Registro de la queja según el procedimiento de gestión de quejas",
+     "clientes": [
+      "Sistema Integrado de Gestión"
+     ],
+     "cliente_otro": "",
+     "salida": "Queja registrada y derivada"
+    }
+   ],
+   "documentos": [
+    "Manual del Sistema Integrado de Gestión",
+    "Procedimiento de revisión de solicitudes, ofertas y contratos",
+    "Procedimiento de Gestión de Quejas"
+   ],
+   "registros": [
+    "Cotización",
+    "Orden de servicio o aceptación del cliente",
+    "Seguimiento de cotizaciónes"
+   ],
+   "indicadores": [
+    {
+     "nombre": "Atención oportuna de cotizaciones",
+     "calculo": "(N° de cotizaciones enviadas en el plazo establecido / N° de solicitudes recibidas) x 100",
+     "meta": "≥ 90 %",
+     "frecuencia": "mensual",
+     "responsable": "Coordinador Comercial"
+    },
+    {
+     "nombre": "Satisfacción del cliente",
+     "calculo": "Promedio de las calificaciones de las encuestas de satisfacción",
+     "meta": "≥ 85 %",
+     "frecuencia": "semestral",
+     "responsable": "Coordinador Comercial"
+    }
+   ],
+   "recurso_humano": "Coordinador Comercial, ejecutivos de ventas",
+   "recurso_economico": "Presupuesto comercial",
+   "recurso_tecnologico": "Equipos de cómputo; Odoo"
+  },
+  {
+   "proceso": "Metrología",
+   "objetivo": "Garantizar calibraciones confiables y trazables, entregadas al cliente en el plazo acordado, cumpliendo la NTP-ISO/IEC 17025.",
+   "responsable": "Gerente Técnico",
+   "alcance": "Desde la recepción del equipo hasta la entrega del equipo calibrado y su certificado.",
+   "tipo": "operativo",
+   "actividades": [
+    {
+     "seccion": "",
+     "proveedores": [
+      "Comercial"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Solicitud del cliente; información preliminar del equipo",
+     "actividad": "Coordinación de recepción del equipo.",
+     "control": "Verificación de datos mínimos del equipo (tipo, marca, modelo, serie); registro de coordinación",
+     "clientes": [
+      "Metrología"
+     ],
+     "cliente_otro": "",
+     "salida": "Fecha y modalidad de recepción definida"
+    },
+    {
+     "seccion": "",
+     "proveedores": [],
+     "proveedor_otro": "Cliente",
+     "entrada": "Equipo del cliente; guía de remisión",
+     "actividad": "Recepción física del equipo.",
+     "control": "Comparación física equipo vs. guía; registro de observaciones; evidencia fotográfica",
+     "clientes": [
+      "Metrología"
+     ],
+     "cliente_otro": "",
+     "salida": "Equipo recibido y verificado; registro de observaciones; evidencia fotográfica"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Metrología"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Equipo recibido; datos del cliente y del servicio",
+     "actividad": "Generación de orden de trabajo (OT).",
+     "control": "La OT se genera solo con la recepción validada; registro en Odoo; validación de datos del cliente y del equipo",
+     "clientes": [
+      "Metrología"
+     ],
+     "cliente_otro": "",
+     "salida": "Orden de Trabajo (OT) generada en Odoo"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Metrología"
+     ],
+     "proveedor_otro": "",
+     "entrada": "OT generada; equipo identificado",
+     "actividad": "Rotulado del equipo.",
+     "control": "Impresión de sticker con número de OT; colocación visible y legible del rótulo en el equipo; verificación de correspondencia OT–equipo",
+     "clientes": [
+      "Metrología"
+     ],
+     "cliente_otro": "",
+     "salida": "Equipo rotulado con número de OT"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Metrología"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Equipo rotulado; OT activa",
+     "actividad": "Derivación al laboratorio.",
+     "control": "Traslado controlado; registro de fecha y hora de ingreso al laboratorio; identificación como “No Calibrado”",
+     "clientes": [
+      "Metrología"
+     ],
+     "cliente_otro": "",
+     "salida": "Equipo ingresado al laboratorio; notificación al metrólogo"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Metrología"
+     ],
+     "proveedor_otro": "",
+     "entrada": "OT en laboratorio; disponibilidad de patrones",
+     "actividad": "Planificación de calibraciones.",
+     "control": "Asignación a técnico autorizado para el método y la magnitud; patrones con calibración vigente; condiciones ambientales controladas",
+     "clientes": [
+      "Metrología"
+     ],
+     "cliente_otro": "",
+     "salida": "Plan de calibración definido; equipos y patrones preparados"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Metrología"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Equipo en laboratorio; procedimientos técnicos; patrones calibrados",
+     "actividad": "Ejecución de la calibración y emisión del certificado.",
+     "control": "Procedimiento de calibración aprobado; registro de datos; certificado elaborado por el metrólogo, revisado por el encargado y firmado por un firmante autorizado (Gerente Técnico o encargado del laboratorio)",
+     "clientes": [
+      "Metrología"
+     ],
+     "cliente_otro": "",
+     "salida": "Datos de calibración; certificado de calibración firmado"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Metrología"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Certificado firmado en PDF",
+     "actividad": "Carga al sistema y revisión.",
+     "control": "Carga del certificado al sistema Odoo; control de acceso y visualización",
+     "clientes": [
+      "Metrología"
+     ],
+     "cliente_otro": "",
+     "salida": "Certificado cargado en Odoo; condición de pago verificada"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Metrología"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Equipo calibrado; autorización de salida",
+     "actividad": "Traslado de equipos del laboratorio al almacén.",
+     "control": "Registro de salida del laboratorio; notificación interna",
+     "clientes": [
+      "Metrología"
+     ],
+     "cliente_otro": "",
+     "salida": "Equipo trasladado al almacén; registro de salida"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Metrología"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Certificado cargado; condición de pago cumplida",
+     "actividad": "Envío del certificado.",
+     "control": "Liberación del certificado según la condición de pago pactada en la cotización (adelantado, contra entrega o crédito); registro de envío",
+     "clientes": [],
+     "cliente_otro": "Cliente",
+     "salida": "Certificado enviado al cliente"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Metrología"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Equipo calibrado; coordinación de entrega",
+     "actividad": "Entrega del equipo al cliente.",
+     "control": "Firma de cargo de entrega o guía de remisión; verificación final del equipo",
+     "clientes": [],
+     "cliente_otro": "Cliente",
+     "salida": "Equipo entregado al cliente; cargo de entrega firmado"
+    }
+   ],
+   "documentos": [
+    "Manual del Sistema Integrado de Gestión",
+    "Procedimiento de Control de las Instalaciones y Condiciones Ambientales",
+    "Procedimiento de Control del Equipamiento",
+    "Procedimiento de Autorización del Personal Técnico",
+    "Procedimiento de Control de Trabajos y Salidas No Conformes",
+    "Procedimientos de calibración por magnitud"
+   ],
+   "registros": [
+    "Guía de remisión y registro de recepción (con evidencia fotográfica)",
+    "Orden de trabajo",
+    "Datos de calibración y certificado de calibración",
+    "Cargo de entrega o guía de remisión"
+   ],
+   "indicadores": [
+    {
+     "nombre": "Cumplimiento del plazo de entrega",
+     "calculo": "(N° de OT entregadas en el plazo comprometido / N° de OT entregadas) x 100",
+     "meta": "≥ 90 %",
+     "frecuencia": "mensual",
+     "responsable": "Gerente Técnico"
+    },
+    {
+     "nombre": "Certificados reemitidos por error",
+     "calculo": "(N° de certificados reemitidos por error interno / N° de certificados emitidos) x 100",
+     "meta": "≤ 2 %",
+     "frecuencia": "mensual",
+     "responsable": "Gerente Técnico"
+    }
+   ],
+   "recurso_humano": "Gerente Técnico, encargados de laboratorio, metrólogos, personal de recepción y logística",
+   "recurso_economico": "Presupuesto del laboratorio (calibración de patrones, mantenimiento e insumos)",
+   "recurso_tecnologico": "Patrones y equipos de laboratorio; equipos de cómputo; Odoo"
+  },
+  {
+   "proceso": "Calibración y Verificación",
+   "objetivo": "Describir la gestión necesaria para el correcto control de equipos de medición.",
+   "responsable": "Gerente Técnico",
+   "alcance": "Se aplica a los equipos de medición del Laboratorio de Metrología de METRINDUST S.A.C. que puedan afectar la calidad de nuestros resultados de calibración.",
+   "tipo": "soporte",
+   "actividades": [
+    {
+     "seccion": "Control metrológico de equipos",
+     "proveedores": [
+      "Calibración y Verificación"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Equipos e instrumentos de medición del laboratorio",
+     "actividad": "Programación de calibración y verificaciones",
+     "control": "Elaboración y control del Programa MET-PRO-04-r03; registro de incumplimientos por fuerza mayor en la hoja de vida del equipo; comunicación al Área Comercial sobre suspensión del servicio cuando corresponda",
+     "clientes": [
+      "Calibración y Verificación"
+     ],
+     "cliente_otro": "",
+     "salida": "Programa de calibración y verificaciones aprobado"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Calibración y Verificación"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Equipo sin calibración vigente",
+     "actividad": "Calibración de equipos antes de su uso",
+     "control": "Verificación de que el equipo cuente con calibración vigente antes de ser puesto en servicio; cumplimiento del programa aprobado para asegurar trazabilidad",
+     "clientes": [
+      "Metrología"
+     ],
+     "cliente_otro": "",
+     "salida": "Equipo calibrado"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Compras"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Equipo nuevo sin calibración",
+     "actividad": "Calibración de equipos nuevos",
+     "control": "Calibración del equipo en INACAL-DM o en laboratorio acreditado ISO/IEC 17025; verificación de evidencia de trazabilidad antes de su uso",
+     "clientes": [
+      "Metrología"
+     ],
+     "cliente_otro": "",
+     "salida": "Equipo calibrado con trazabilidad al INACAL o ISO/IEC 17025"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Calibración y Verificación"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Información técnica del equipo",
+     "actividad": "Determinación del intervalo inicial de calibración",
+     "control": "Definición del intervalo considerando recomendaciones del fabricante, normas metrológicas y guías de institutos de metrología",
+     "clientes": [
+      "Calibración y Verificación"
+     ],
+     "cliente_otro": "",
+     "salida": "Intervalo inicial de calibración definido"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Calibración y Verificación"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Historial metrológico del equipo",
+     "actividad": "Determinación de intervalos posteriores de calibración",
+     "control": "Aplicación del instructivo IT-02 y registro del intervalo definido en el formato MET-PRO-04-r08",
+     "clientes": [
+      "Calibración y Verificación"
+     ],
+     "cliente_otro": "",
+     "salida": "Intervalo de calibración registrado"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Calibración y Verificación"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Resultados de calibración o comprobación intermedia",
+     "actividad": "Obtención de factores de corrección",
+     "control": "Uso de resultados de calibración o comprobación intermedia para actualizar factores de corrección y asegurar trazabilidad de los resultados",
+     "clientes": [
+      "Metrología"
+     ],
+     "cliente_otro": "",
+     "salida": "Factores de corrección actualizados"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Metrología"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Desviación detectada en el patrón",
+     "actividad": "Control de desviaciones que afecten la calibración",
+     "control": "Registro de la desviación, comunicación inmediata al jefe inmediato y evaluación del impacto en calibraciones anteriores (trabajo no conforme)",
+     "clientes": [
+      "Calibración y Verificación"
+     ],
+     "cliente_otro": "",
+     "salida": "Desviación registrada"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Calibración y Verificación"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Equipo incluido en el plan",
+     "actividad": "Comprobación funcional del equipo",
+     "control": "Ejecución de comprobación funcional conforme al plan establecido y verificación del estado operativo del equipo",
+     "clientes": [
+      "Metrología"
+     ],
+     "cliente_otro": "",
+     "salida": "Equipo funcionalmente comprobado"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Calibración y Verificación"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Afectación a la exactitud o incertidumbre",
+     "actividad": "Calibración extraordinaria del equipo",
+     "control": "Ejecución de calibración adicional cuando la exactitud o la incertidumbre afecten la validez de los resultados o la trazabilidad",
+     "clientes": [
+      "Metrología"
+     ],
+     "cliente_otro": "",
+     "salida": "Equipo recalibrado"
+    }
+   ],
+   "documentos": [
+    "Procedimiento de Control del Equipamiento"
+   ],
+   "registros": [
+    "Programa de Mantenimiento, Calibración, Comprobación Intermedia y Caracterización",
+    "Hoja de vida del equipo",
+    "Certificados de calibración de los patrones",
+    "Intervalo de calibración",
+    "Informe de comprobación intermedia"
+   ],
+   "indicadores": [
+    {
+     "nombre": "Cumplimiento del programa de calibración",
+     "calculo": "(N° de calibraciones ejecutadas en fecha / N° de calibraciones programadas) x 100",
+     "meta": "100 %",
+     "frecuencia": "mensual",
+     "responsable": "Gerente Técnico"
+    }
+   ],
+   "recurso_humano": "Gerente Técnico, encargados de laboratorio, metrólogos",
+   "recurso_economico": "Presupuesto de calibraciones externas y verificaciones",
+   "recurso_tecnologico": "Patrones y equipos de medición; equipos de cómputo"
+  },
+  {
+   "proceso": "Compras",
+   "objetivo": "Establecer los lineamientos para los procesos de selección, evaluación de proveedores, compra de servicios y suministros requeridos por la organización.",
+   "responsable": "Coordinador Logístico",
+   "alcance": "Aplica para todas las compras de insumos, equipos y/o instrumentos y servicios involucrados en la calidad de las calibraciones brindadas por METRINDUST S.A.C.",
+   "tipo": "soporte",
+   "actividades": [
+    {
+     "seccion": "Compras y evaluación de proveedores",
+     "proveedores": [],
+     "proveedor_otro": "Todos los procesos",
+     "entrada": "Necesidad de compra o servicio identificada por el personal",
+     "actividad": "Solicitud de compra y servicios y suministro",
+     "control": "Uso obligatorio del COM-PRO-02-r05 Pedido Interno; análisis y selección de cotización por el responsable de Área; emisión y aprobación de la COM-PRO-02-r01 Orden de Compra; control de pagos (transferencia o caja chica según monto)",
+     "clientes": [],
+     "cliente_otro": "Proveedor externo",
+     "salida": "Orden de Compra aprobada o Pedido Interno autorizado"
+    },
+    {
+     "seccion": "",
+     "proveedores": [],
+     "proveedor_otro": "Proveedor externo",
+     "entrada": "Producto o servicio adquirido",
+     "actividad": "Recepción verificación y evaluación de servicios y suministros",
+     "control": "Revisión del cumplimiento de requisitos antes del uso; verificación documental y funcional según tipo de producto; emisión del COM-PRO-02-r06 Acta de Conformidad; gestión de devoluciones y quejas a proveedores en caso de no conformidad",
+     "clientes": [],
+     "cliente_otro": "Proceso solicitante",
+     "salida": "Acta de Conformidad emitida o producto observado/devuelto"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Compras"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Proveedor potencial o proveedor en evaluación",
+     "actividad": "Selección aprobación, evaluación y reevaluación de proveedores",
+     "control": "Evaluación mediante COM-PRO-02-r02 y COM-PRO-02-r04; aplicación de criterios de calificación y aprobación ≥70%; actualización del COM-PRO-02-r03 Lista de Proveedores Aprobados; seguimiento y reevaluación periódica",
+     "clientes": [],
+     "cliente_otro": "Todos los procesos",
+     "salida": "Proveedor aprobado o retirado de la lista de proveedores"
+    }
+   ],
+   "documentos": [
+    "Procedimiento de Compras, Evaluación y Reevaluación de Proveedores"
+   ],
+   "registros": [
+    "Pedido interno",
+    "Orden de compra",
+    "Acta de conformidad",
+    "Evaluación y reevaluación de proveedores",
+    "Lista de proveedores aprobados"
+   ],
+   "indicadores": [
+    {
+     "nombre": "Compras conformes",
+     "calculo": "(N° de compras recibidas conformes / N° de compras recibidas) x 100",
+     "meta": "≥ 95 %",
+     "frecuencia": "mensual",
+     "responsable": "Coordinador Logístico"
+    }
+   ],
+   "recurso_humano": "Coordinador Logístico, responsables de área",
+   "recurso_economico": "Presupuesto de compras",
+   "recurso_tecnologico": "Equipos de Cómputo"
+  },
+  {
+   "proceso": "Facturación y Cobranzas",
+   "objetivo": "Facturar los servicios según la condición de pago pactada y asegurar su cobranza oportuna.",
+   "responsable": "Coordinador Administrativo",
+   "alcance": "Desde la cotización aceptada hasta la cobranza del servicio. Los comprobantes se emiten en Odoo.",
+   "tipo": "soporte",
+   "actividades": [
+    {
+     "seccion": "Facturación y cobranza",
+     "proveedores": [
+      "Comercial"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Cotización aceptada con su condición de pago (adelantado, parcial, contra entrega o crédito)",
+     "actividad": "Registro de la condición de pago",
+     "control": "Condición de pago heredada de la cotización en Odoo",
+     "clientes": [
+      "Facturación y Cobranzas"
+     ],
+     "cliente_otro": "",
+     "salida": "Condición de pago registrada"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Metrología"
+     ],
+     "proveedor_otro": "",
+     "entrada": "OT con servicio ejecutado, o pago adelantado pactado",
+     "actividad": "Emisión del comprobante",
+     "control": "Comprobante emitido en Odoo según la condición de pago",
+     "clientes": [],
+     "cliente_otro": "Cliente",
+     "salida": "Factura o boleta emitida"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Facturación y Cobranzas"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Factura emitida",
+     "actividad": "Seguimiento de la cobranza",
+     "control": "Reporte de cuentas por cobrar por antigüedad",
+     "clientes": [
+      "Comercial"
+     ],
+     "cliente_otro": "",
+     "salida": "Cuentas por cobrar actualizadas"
+    },
+    {
+     "seccion": "",
+     "proveedores": [],
+     "proveedor_otro": "Cliente",
+     "entrada": "Pago del cliente",
+     "actividad": "Registro del pago y conciliación",
+     "control": "Conciliación con el estado bancario",
+     "clientes": [
+      "Metrología"
+     ],
+     "cliente_otro": "",
+     "salida": "Pago confirmado (habilita la liberación del certificado cuando corresponde)"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Facturación y Cobranzas"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Deuda vencida",
+     "actividad": "Gestión de deudas vencidas",
+     "control": "Comunicación al cliente y a Comercial; suspensión del crédito según la política de créditos",
+     "clientes": [
+      "Comercial",
+      "Gestión Estratégica"
+     ],
+     "cliente_otro": "",
+     "salida": "Deuda gestionada"
+    }
+   ],
+   "documentos": [
+    "Manual del Sistema Integrado de Gestión",
+    "Política de créditos y cobranzas"
+   ],
+   "registros": [
+    "Comprobantes de pago",
+    "Reporte de cuentas por cobrar",
+    "Conciliación bancaria"
+   ],
+   "indicadores": [
+    {
+     "nombre": "Morosidad",
+     "calculo": "(Monto vencido / Monto total por cobrar) x 100",
+     "meta": "≤ 10 %",
+     "frecuencia": "mensual",
+     "responsable": "Coordinador Administrativo"
+    },
+    {
+     "nombre": "Días promedio de cobranza",
+     "calculo": "Suma de días entre emisión y cobro / N° de facturas cobradas",
+     "meta": "≤ 30 días",
+     "frecuencia": "mensual",
+     "responsable": "Coordinador Administrativo"
+    }
+   ],
+   "recurso_humano": "Coordinador Administrativo, asistente de facturación y cobranzas",
+   "recurso_economico": "Ninguno",
+   "recurso_tecnologico": "Odoo; equipos de cómputo; banca en línea"
+  },
+  {
+   "proceso": "Mantenimiento",
+   "objetivo": "Mantener los equipos e instrumentos del laboratorio en condiciones operativas mediante mantenimiento preventivo y correctivo.",
+   "responsable": "Gerente Técnico",
+   "alcance": "Se aplica a los equipos e instrumentos del laboratorio de METRINDUST S.A.C. que puedan afectar la calidad de los resultados de calibración.",
+   "tipo": "soporte",
+   "actividades": [
+    {
+     "seccion": "Mantenimiento preventivo y correctivo",
+     "proveedores": [
+      "Mantenimiento"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Equipos e instrumentos del laboratorio",
+     "actividad": "Programación del mantenimiento",
+     "control": "Elaboración y aprobación del Programa de Mantenimiento (MET-PRO-04-r03); seguimiento de cumplimiento y registro de reprogramaciones por el Gerente Técnico",
+     "clientes": [
+      "Mantenimiento"
+     ],
+     "cliente_otro": "",
+     "salida": "Programa de mantenimiento aprobado"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Mantenimiento"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Equipo programado para mantenimiento",
+     "actividad": "Ejecución y registro del mantenimiento",
+     "control": "Mantenimiento realizado por personal competente; registro obligatorio en el Informe de Mantenimiento (MET-PRO-04-r05)",
+     "clientes": [
+      "Mantenimiento"
+     ],
+     "cliente_otro": "",
+     "salida": "Informe de mantenimiento"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Mantenimiento"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Desviación detectada en el equipo",
+     "actividad": "Control de desviaciones durante el mantenimiento",
+     "control": "Comunicación inmediata al jefe inmediato; registro de desviación y aplicación del procedimiento de trabajo no conforme (SIG-PRO-05)",
+     "clientes": [
+      "Mantenimiento"
+     ],
+     "cliente_otro": "",
+     "salida": "Desviación registrada"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Mantenimiento"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Equipo mantenido",
+     "actividad": "Verificación posterior al mantenimiento",
+     "control": "Verificación final del estado operativo del equipo",
+     "clientes": [
+      "Calibración y Verificación"
+     ],
+     "cliente_otro": "",
+     "salida": "Equipo verificado y liberado para uso o enviado a calibración"
+    }
+   ],
+   "documentos": [
+    "Procedimiento de Control del Equipamiento"
+   ],
+   "registros": [
+    "Programa de Mantenimiento, Calibración, Comprobación Intermedia y Caracterización",
+    "Informe de mantenimiento"
+   ],
+   "indicadores": [
+    {
+     "nombre": "Cumplimiento del programa de mantenimiento",
+     "calculo": "(N° de mantenimientos ejecutados / N° de mantenimientos programados) x 100",
+     "meta": "≥ 95 %",
+     "frecuencia": "mensual",
+     "responsable": "Gerente Técnico"
+    }
+   ],
+   "recurso_humano": "Gerente Técnico, personal de mantenimiento, proveedores de servicio",
+   "recurso_economico": "Presupuesto de mantenimiento",
+   "recurso_tecnologico": "Herramientas y repuestos; equipos de cómputo"
+  },
+  {
+   "proceso": "Recursos Humanos",
+   "objetivo": "Establecer el procedimiento a seguir para la selección, autorización y capacitación del personal de METRINDUST S.A.C.",
+   "responsable": "Coordinador Administrativo",
+   "alcance": "• Aplica para los procesos de selección, autorización y capacitación del personal para las funciones establecidas en el MOF - Manual de Organización y Funciones. \n• Aplica a las acciones de formación (internas o externas) que se implementan en la organización.",
+   "tipo": "soporte",
+   "actividades": [
+    {
+     "seccion": "Gestión del personal",
+     "proveedores": [
+      "Recursos Humanos"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Necesidad de personal y requisitos del puesto",
+     "actividad": "Creación de puesto",
+     "control": "Definición y aprobación del perfil del puesto conforme al MOF, revisión por el responsable de área y la Gerencia SIG",
+     "clientes": [
+      "Recursos Humanos"
+     ],
+     "cliente_otro": "",
+     "salida": "Perfil de puesto definido y aprobado en el MOF"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Recursos Humanos"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Currículum vitae de los postulantes",
+     "actividad": "Selección",
+     "control": "Evaluación de CV contra requisitos del MOF; entrevista técnica y evaluación de conocimientos registrada en TH-PRO-01-r01",
+     "clientes": [
+      "Recursos Humanos"
+     ],
+     "cliente_otro": "",
+     "salida": "Postulante seleccionado"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Recursos Humanos"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Personal contratado",
+     "actividad": "Inducción",
+     "control": "Ejecución de inducción general, SIG y específica del cargo; registro obligatorio en TH-PRO-01-r02 antes de iniciar actividades",
+     "clientes": [
+      "Recursos Humanos"
+     ],
+     "cliente_otro": "",
+     "salida": "Personal inducido y registrado en el SIG"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Recursos Humanos"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Personal inducido",
+     "actividad": "Entrenamiento y trabajo bajo supervisión",
+     "control": "Entrenamiento documentado y supervisión directa; evaluación del desempeño mediante MET-PRO-12-r01",
+     "clientes": [
+      "Recursos Humanos"
+     ],
+     "cliente_otro": "",
+     "salida": "Personal entrenado y evaluado bajo supervisión"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Recursos Humanos"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Resultados satisfactorios de evaluaciones y entrenamiento",
+     "actividad": "Autorización y competencia técnica del personal",
+     "control": "Verificación de requisitos técnicos, evaluaciones teóricas y comparación intralaboratorio; la autorización exige entrenamiento concluido o exención sustentada; autorización formal en MET-PRO-12-r02",
+     "clientes": [
+      "Metrología"
+     ],
+     "cliente_otro": "",
+     "salida": "Personal técnico autorizado"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Recursos Humanos"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Necesidades de capacitación identificadas",
+     "actividad": "Capacitación del personal",
+     "control": "Programación, ejecución y evaluación de capacitaciones; registro de asistencia y resultados en TH-PRO-01-r06",
+     "clientes": [
+      "Recursos Humanos"
+     ],
+     "cliente_otro": "",
+     "salida": "Personal capacitado"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Recursos Humanos"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Personal técnico en funciones",
+     "actividad": "Entrevista de seguimiento al personal interno",
+     "control": "Entrevistas inopinadas registradas en MET-PRO-12-r03 para verificar competencias y detectar riesgos",
+     "clientes": [
+      "Metrología"
+     ],
+     "cliente_otro": "",
+     "salida": "Registro de entrevista y acciones de mejora para un mejor servicio"
+    }
+   ],
+   "documentos": [
+    "Manual del Sistema Integrado de Gestión",
+    "Manual de Organización y Funciones (MOF)",
+    "Procedimiento de Autorización del Personal Técnico"
+   ],
+   "registros": [
+    "Evaluación de postulantes",
+    "Registro de inducción",
+    "Entrenamiento y supervisión de actividades",
+    "Autorización del personal",
+    "Registro de capacitación",
+    "Entrevista de seguimiento al personal"
+   ],
+   "indicadores": [
+    {
+     "nombre": "Cumplimiento del programa de capacitación",
+     "calculo": "(N° de capacitaciones ejecutadas / N° de capacitaciones programadas) x 100",
+     "meta": "≥ 90 %",
+     "frecuencia": "semestral",
+     "responsable": "Coordinador Administrativo"
+    },
+    {
+     "nombre": "Personal técnico con autorización vigente",
+     "calculo": "(N° de técnicos con autorización vigente / N° de técnicos que calibran) x 100",
+     "meta": "100 %",
+     "frecuencia": "mensual",
+     "responsable": "Gerente Técnico"
+    }
+   ],
+   "recurso_humano": "Coordinador Administrativo, Gerente Técnico, responsables de área",
+   "recurso_economico": "Presupuesto de contratación y capacitación",
+   "recurso_tecnologico": "Equipos de Cómputo"
+  },
+  {
+   "proceso": "Sistemas",
+   "objetivo": "Mantener operativos y protegidos los equipos informáticos, los sistemas y la información de la organización.",
+   "responsable": "Gerente Técnico",
+   "alcance": "Se aplica a los equipos informáticos, a los sistemas (Odoo, eSYNAPSE 360) y a las copias de respaldo de la información de METRINDUST S.A.C.",
+   "tipo": "soporte",
+   "actividades": [
+    {
+     "seccion": "Equipos informáticos y gestión de la información",
+     "proveedores": [
+      "Sistemas"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Listado de computadoras y estado operativo",
+     "actividad": "Programación del mantenimiento de equipos informáticos",
+     "control": "Revisión y aprobación del cronograma de mantenimiento por el responsable del área, verificando fechas, responsables y equipos incluidos.",
+     "clientes": [
+      "Sistemas"
+     ],
+     "cliente_otro": "",
+     "salida": "Programa de mantenimiento de equipos informáticos"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Sistemas"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Programa de mantenimiento aprobado",
+     "actividad": "Ejecución y registro del mantenimiento",
+     "control": "Uso obligatorio de un formato de registro de mantenimiento donde se consignen actividades realizadas, fecha, responsable y estado final del equipo.",
+     "clientes": [
+      "Sistemas"
+     ],
+     "cliente_otro": "",
+     "salida": "Registro de mantenimiento de computadoras"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Sistemas"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Incidencias detectadas en el mantenimiento",
+     "actividad": "Gestión de incidencias y anomalías durante el mantenimiento",
+     "control": "Registro y seguimiento de incidencias detectadas durante el mantenimiento, asegurando su comunicación al responsable y la definición de acciones correctivas.",
+     "clientes": [
+      "Sistemas"
+     ],
+     "cliente_otro": "",
+     "salida": "Registro de incidencias y acciones tomadas"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Sistemas"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Equipo informático intervenido",
+     "actividad": "Verificación y cierre del mantenimiento de equipos de oficina",
+     "control": "Verificación del correcto funcionamiento del equipo posterior al mantenimiento y validación del cierre mediante firma o conformidad del responsable.",
+     "clientes": [],
+     "cliente_otro": "Todos los procesos",
+     "salida": "Equipo verificado y mantenimiento cerrado"
+    },
+    {
+     "seccion": "",
+     "proveedores": [
+      "Sistemas"
+     ],
+     "proveedor_otro": "",
+     "entrada": "Información de los sistemas (Odoo, eSYNAPSE 360, archivos)",
+     "actividad": "Copias de respaldo y control de accesos",
+     "control": "Respaldo programado y prueba de restauración; usuarios y permisos por rol",
+     "clientes": [],
+     "cliente_otro": "Todos los procesos",
+     "salida": "Información respaldada y accesos controlados"
+    }
+   ],
+   "documentos": [
+    "Manual del Sistema Integrado de Gestión"
+   ],
+   "registros": [
+    "Programa de mantenimiento de equipos informáticos",
+    "Registro de mantenimiento de computadoras",
+    "Registro de incidencias",
+    "Registro de copias de respaldo"
+   ],
+   "indicadores": [
+    {
+     "nombre": "Cumplimiento del programa de mantenimiento informático",
+     "calculo": "(N° de mantenimientos ejecutados / N° de mantenimientos programados) x 100",
+     "meta": "≥ 95 %",
+     "frecuencia": "trimestral",
+     "responsable": "Gerente Técnico"
+    },
+    {
+     "nombre": "Copias de respaldo realizadas",
+     "calculo": "(N° de respaldos realizados / N° de respaldos programados) x 100",
+     "meta": "100 %",
+     "frecuencia": "mensual",
+     "responsable": "Gerente Técnico"
+    }
+   ],
+   "recurso_humano": "Responsable de sistemas; proveedor de soporte informático",
+   "recurso_economico": "Presupuesto de soporte y licencias",
+   "recurso_tecnologico": "Equipos de cómputo; software; medios de respaldo"
+  }
+ ]
+}

@@ -33,9 +33,10 @@ class MisTareasView(APIView):
         u = request.user
         tareas = []
 
-        # Hallazgos asignados (no cerrados)
-        for h in (Hallazgo.objects.filter(responsable=u, is_active=True)
-                  .exclude(estado='cerrado')):
+        # No conformidades asignadas que aún no se derivan a una solicitud de
+        # acción correctiva (su tratamiento sigue en la solicitud).
+        for h in Hallazgo.objects.filter(responsable=u, is_active=True, estado='registrado',
+                                         tipo__in=('nc_mayor', 'nc_menor'), sac__isnull=True):
             tareas.append({
                 'tipo': 'hallazgo', 'modulo': 'Hallazgos', 'ruta': '/hallazgos',
                 'codigo': h.codigo, 'titulo': (h.descripcion or '')[:100],
@@ -94,6 +95,21 @@ class MisTareasView(APIView):
                 'estado': a.get_estado_display(), 'fecha': _f(a.fecha_inicio or a.fecha_programada),
                 'rol': 'equipo',
             })
+
+        # Seguimiento de competencia técnica (mis autorizaciones por vencer / vencidas)
+        from .models import Autorizacion
+        for a in (Autorizacion.objects.filter(usuario=u, estado='vigente', is_active=True)
+                  .select_related('metodo')):
+            es = a.estado_seguimiento
+            if es in ('por_vencer', 'vencido'):
+                tareas.append({
+                    'tipo': 'competencia', 'modulo': 'Competencia Técnica', 'ruta': '/competencia',
+                    'codigo': (a.metodo.codigo if a.metodo else '') or '',
+                    'titulo': (f'Seguimiento de competencia: {a.metodo.nombre}' if a.metodo
+                               else 'Seguimiento de competencia')[:100],
+                    'estado': 'Vencido' if es == 'vencido' else 'Por vencer',
+                    'fecha': _f(a.fecha_proximo_seguimiento),
+                })
 
         return Response({'total': len(tareas), 'tareas': tareas})
 
@@ -163,5 +179,23 @@ class CalendarioView(APIView):
                     'modulo': 'Documentos', 'ruta': '/documentos',
                     'titulo': f'Revisión: {v.documento.codigo}', 'persona': None,
                 })
+
+        # Seguimiento de competencia técnica (atribuible a la persona)
+        from .models import Autorizacion
+        aut = Autorizacion.objects.filter(estado='vigente', is_active=True).select_related('usuario', 'metodo')
+        if usuario_id:
+            aut = aut.filter(usuario_id=usuario_id)
+        for a in aut:
+            prox = a.fecha_proximo_seguimiento
+            if not prox:
+                continue
+            vencido = a.estado_seguimiento == 'vencido'
+            eventos.append({
+                'fecha': _f(prox), 'tipo': 'seguimiento', 'color': 'rojo' if vencido else 'ambar',
+                'modulo': 'Competencia Técnica', 'ruta': '/competencia',
+                'titulo': (f'Seguimiento: {_nombre(a.usuario)}'
+                           + (f' · {a.metodo.nombre}' if a.metodo else ''))[:70],
+                'persona': _nombre(a.usuario),
+            })
 
         return Response({'eventos': eventos})

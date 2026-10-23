@@ -5,15 +5,19 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Inter', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'sans-serif'],
+        sans: ['IBM Plex Sans', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'sans-serif'],
+        condensada: ['IBM Plex Sans Condensed', 'IBM Plex Sans', 'system-ui', 'sans-serif'],
+        mono: ['IBM Plex Mono', 'ui-monospace', 'Consolas', 'monospace'],   // códigos de registro
       },
       colors: {
-        // Paleta eSYNAPSE 360 — laboratorio: azul metrología + acentos
+        // Azul Metrindust (ADR-0007): 600 es el color principal (botones, enlaces, elemento activo)
         esynapse: {
-          50: '#eef6ff', 100: '#d9eaff', 200: '#bcdbff', 300: '#8ec4ff',
-          400: '#59a3ff', 500: '#3380fc', 600: '#1d60f1', 700: '#154bde',
-          800: '#173eb4', 900: '#19398d', 950: '#142456',
+          50: '#eef3fb', 100: '#dce6f6', 200: '#bacdec', 300: '#8eaddf',
+          400: '#5f88cc', 500: '#3a69b6', 600: '#1f4e9b', 700: '#1a4385',
+          800: '#17396f', 900: '#142f5a', 950: '#0d1e3b',
         },
+        // Modo oscuro azul marino en lugar de casi negro (fondo, superficies y bordes)
+        slate: { 800: '#22324a', 900: '#142133', 950: '#0d1724' },
       },
       boxShadow: {
         card: '0 1px 2px 0 rgb(15 23 42 / 0.04), 0 1px 3px 0 rgb(15 23 42 / 0.06)',

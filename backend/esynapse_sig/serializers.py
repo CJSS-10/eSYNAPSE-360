@@ -1,8 +1,36 @@
 """eSYNAPSE 360 — Serializers de M6 Gestión Documental."""
 from rest_framework import serializers
 
-from .models import Documento, VerificacionExterna, VersionDocumento
-from .models import NORMAS_APLICABLES
+from .models import Documento, FormatoImpreso, VerificacionExterna, VersionDocumento
+from .models import NORMAS_APLICABLES, NORMAS_LISTA
+
+
+class FormatoImpresoSerializer(serializers.ModelSerializer):
+    """Formato PDF del sistema y su vínculo con la lista maestra; incluye lo que
+    imprimirá la caja de control para que la pantalla lo muestre."""
+    documento_codigo = serializers.CharField(source='documento.codigo', read_only=True)
+    documento_titulo = serializers.CharField(source='documento.titulo', read_only=True)
+    control = serializers.SerializerMethodField()
+
+    class Meta:
+        model = FormatoImpreso
+        fields = ['id', 'clave', 'nombre', 'modulo', 'codigo_sgc', 'documento',
+                  'documento_codigo', 'documento_titulo', 'control', 'orden', 'is_active']
+        read_only_fields = ['clave', 'nombre', 'modulo', 'codigo_sgc', 'orden', 'is_active']
+
+    def get_control(self, obj):
+        from .ficha_pdf import control_formato
+        try:
+            from core.models import ConfiguracionSistema
+            cfg = ConfiguracionSistema.cargar()
+        except Exception:
+            cfg = None
+        return control_formato(obj.codigo_sgc, cfg)
+
+    def validate_documento(self, doc):
+        if doc and not doc.is_active:
+            raise serializers.ValidationError('El documento está inactivo.')
+        return doc
 
 
 class FirmaVersionSerializer(serializers.ModelSerializer):
@@ -140,7 +168,7 @@ class DocumentoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Documento
-        fields = ['id', 'codigo', 'titulo', 'tipo', 'tipo_display', 'proceso',
+        fields = ['id', 'codigo', 'titulo', 'tipo', 'tipo_display', 'proceso', 'proceso_catalogo',
                   'normas_aplicables', 'normas_display', 'soporte', 'soporte_display',
                   'origen', 'origen_display', 'entidad_emisora', 'dias_verificacion',
                   'archivado', 'fecha_archivado',
@@ -196,7 +224,7 @@ class DocumentoSerializer(serializers.ModelSerializer):
         """
         Interno: crea la Ver. 00 en estado En elaboración (flujo M6).
         Externo: la edición del emisor queda Vigente de inmediato — Metrindust
-        no aprueba normas ajenas, solo las adopta y controla su vigencia (6.7).
+        no aprueba normas ajenas, solo las adopta y controla su vigencia.
         """
         archivo = validated_data.pop('archivo')
         edicion = (validated_data.pop('edicion', '') or '').strip()
@@ -281,7 +309,8 @@ class DocumentoListaSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Documento
-        fields = ['id', 'codigo', 'titulo', 'tipo', 'tipo_display', 'proceso', 'padre_codigo', 'padre_titulo',
+        fields = ['id', 'codigo', 'titulo', 'tipo', 'tipo_display', 'proceso', 'proceso_catalogo', 'padre_codigo',
+                  'padre_titulo',
                   'normas_display', 'soporte', 'soporte_display', 'origen', 'origen_display',
                   'entidad_emisora', 'ultima_verificacion', 'is_active', 'archivado',
                   'estado_actual', 'version_actual', 'proceso_paralelo',
@@ -337,6 +366,24 @@ class DocumentoListaSerializer(serializers.ModelSerializer):
 from .models import Hallazgo  # noqa: E402
 
 
+def responsable_tratamiento(h):
+    """Responsable del tratamiento de un hallazgo: se designa donde se trata — al evaluar la solicitud de acción
+    correctiva (no conformidades) o en Riesgos y oportunidades / mejora continua (observaciones y oportunidades de
+    mejora). El campo propio del hallazgo solo se conserva para registros anteriores."""
+    def nombre(u):
+        return (u.get_full_name() or u.username) if u else None
+    if h.sac_id and h.sac.responsable_id:
+        return nombre(h.sac.responsable)
+    for m in h.mejoras_derivadas.filter(is_active=True):
+        if m.responsable_nombre:
+            return m.responsable_nombre
+    for r in h.riesgos_derivados.filter(is_active=True):
+        nombres = [a.responsable_nombre for a in r.acciones.filter(is_active=True) if a.responsable_nombre]
+        if nombres:
+            return ', '.join(dict.fromkeys(nombres))
+    return nombre(h.responsable)
+
+
 class HallazgoSerializer(serializers.ModelSerializer):
     tipo_display = serializers.CharField(source='get_tipo_display', read_only=True)
     fuente_display = serializers.CharField(source='get_fuente_display', read_only=True)
@@ -347,25 +394,30 @@ class HallazgoSerializer(serializers.ModelSerializer):
     evidencia_url = serializers.SerializerMethodField()
     sac = serializers.SerializerMethodField()
     puede_generar_sac = serializers.SerializerMethodField()
+    motivo_no_derivar = serializers.SerializerMethodField()
+    etapas_abiertas = serializers.SerializerMethodField()
+    registro_cerrado_motivo = serializers.SerializerMethodField()
+    auditoria_codigo = serializers.SerializerMethodField()
 
     class Meta:
         model = Hallazgo
         fields = ['id', 'codigo', 'tipo', 'tipo_display', 'fuente', 'fuente_display',
-                  'proceso', 'descripcion', 'requisito', 'lugar', 'fecha_deteccion',
+                  'proceso', 'proceso_catalogo', 'descripcion', 'requisito', 'lugar', 'fecha_deteccion',
                   'evidencia', 'evidencia_url', 'responsable', 'responsable_nombre',
                   'estado', 'estado_display', 'analisis', 'correccion',
                   'comentarios_cierre', 'cerrado_por_nombre', 'fecha_cierre',
-                  'requiere_ac', 'is_active', 'registrado_por', 'sac', 'puede_generar_sac',
-                  'created_at', 'updated_at']
-        read_only_fields = ['codigo', 'estado', 'comentarios_cierre', 'fecha_cierre',
-                            'requiere_ac', 'is_active']
+                  'requiere_ac', 'tratamiento', 'tratamiento_display', 'is_active', 'registrado_por',
+                  'sac', 'puede_generar_sac', 'motivo_no_derivar', 'reclasificaciones', 'etapas_abiertas',
+                  'registro_cerrado_motivo', 'auditoria', 'auditoria_codigo', 'created_at', 'updated_at']
+        read_only_fields = ['codigo', 'estado', 'comentarios_cierre', 'fecha_cierre', 'analisis', 'correccion',
+                            'requiere_ac', 'tratamiento', 'is_active', 'reclasificaciones', 'auditoria']
         extra_kwargs = {'evidencia': {'write_only': True, 'required': False}}
 
     def _nombre(self, u):
         return (u.get_full_name() or u.username) if u else None
 
     def get_responsable_nombre(self, obj):
-        return self._nombre(obj.responsable)
+        return responsable_tratamiento(obj)
 
     def get_cerrado_por_nombre(self, obj):
         return self._nombre(obj.cerrado_por)
@@ -376,19 +428,36 @@ class HallazgoSerializer(serializers.ModelSerializer):
     def get_evidencia_url(self, obj):
         return obj.evidencia.url if obj.evidencia else None
 
-    def _sac_activa(self, obj):
-        return obj.solicitudes_ac.filter(is_active=True).order_by('-id').first()
+    tratamiento_display = serializers.CharField(source='get_tratamiento_display', read_only=True)
 
     def get_sac(self, obj):
-        sac = self._sac_activa(obj)
+        sac = obj.sac
         if not sac:
             return None
         return {'id': sac.id, 'codigo': sac.codigo, 'estado': sac.estado,
-                'estado_display': sac.get_estado_display()}
+                'estado_display': sac.get_estado_display(),
+                'es_origen': sac.hallazgo_id == obj.id}
+
+    def get_motivo_no_derivar(self, obj):
+        """Por qué la NC aún no puede derivarse a una solicitud (vacío = puede)."""
+        if not obj.es_nc or obj.sac_id or obj.estado == 'cerrado':
+            return ''
+        a = obj.auditoria
+        if a and a.estado not in ('en_informe', 'cerrada'):
+            return f'En consolidación en la auditoría {a.codigo}: se deriva después de la reunión de cierre.'
+        return ''
 
     def get_puede_generar_sac(self, obj):
-        # Solo las No Conformidades generan SAC, y solo si no hay una activa.
-        return obj.tipo in ('nc_mayor', 'nc_menor') and self._sac_activa(obj) is None
+        return obj.es_nc and not obj.sac_id and obj.estado != 'cerrado' and not self.get_motivo_no_derivar(obj)
+
+    def get_etapas_abiertas(self, obj):
+        return obj.etapas_abiertas()
+
+    def get_registro_cerrado_motivo(self, obj):
+        return '' if obj.registro_abierto() else obj.mensaje_registro_cerrado()
+
+    def get_auditoria_codigo(self, obj):
+        return obj.auditoria.codigo if obj.auditoria_id else None
 
 
 class HallazgoListaSerializer(serializers.ModelSerializer):
@@ -396,16 +465,16 @@ class HallazgoListaSerializer(serializers.ModelSerializer):
     fuente_display = serializers.CharField(source='get_fuente_display', read_only=True)
     estado_display = serializers.CharField(source='get_estado_display', read_only=True)
     responsable_nombre = serializers.SerializerMethodField()
+    sac_codigo = serializers.CharField(source='sac.codigo', read_only=True, default=None)
 
     class Meta:
         model = Hallazgo
-        fields = ['id', 'codigo', 'tipo', 'tipo_display', 'fuente_display', 'proceso',
+        fields = ['id', 'codigo', 'tipo', 'tipo_display', 'fuente_display', 'proceso', 'proceso_catalogo',
                   'fecha_deteccion', 'estado', 'estado_display', 'responsable_nombre',
-                  'requiere_ac', 'is_active']
+                  'requiere_ac', 'tratamiento', 'sac_codigo', 'is_active']
 
     def get_responsable_nombre(self, obj):
-        u = obj.responsable
-        return (u.get_full_name() or u.username) if u else None
+        return responsable_tratamiento(obj)
 
 
 # ============================================================
@@ -419,13 +488,16 @@ class AccionSACSerializer(serializers.ModelSerializer):
     estado_display = serializers.CharField(source='get_estado_display', read_only=True)
     responsable_nombre = serializers.SerializerMethodField()
     evidencia_url = serializers.SerializerMethodField()
+    editable = serializers.SerializerMethodField()
+    reabrible = serializers.SerializerMethodField()
 
     class Meta:
         model = AccionSAC
         fields = ['id', 'tipo', 'tipo_display', 'descripcion', 'fecha_propuesta',
                   'responsable', 'responsable_nombre', 'estado', 'estado_display',
-                  'fecha_completada', 'verificacion', 'evidencia_url']
-        read_only_fields = ['estado', 'fecha_completada', 'verificacion']
+                  'fecha_completada', 'verificacion', 'evidencia_url', 'ciclo', 'editable',
+                  'reabrible', 'reaperturas']
+        read_only_fields = ['estado', 'fecha_completada', 'verificacion', 'ciclo', 'reaperturas']
 
     def get_responsable_nombre(self, obj):
         u = obj.responsable
@@ -433,6 +505,12 @@ class AccionSACSerializer(serializers.ModelSerializer):
 
     def get_evidencia_url(self, obj):
         return obj.evidencia.url if obj.evidencia else None
+
+    def get_editable(self, obj):
+        return obj.editable() if obj.pk else False
+
+    def get_reabrible(self, obj):
+        return obj.reabrible() if obj.pk else False
 
 
 class SolicitudACSerializer(serializers.ModelSerializer):
@@ -443,8 +521,11 @@ class SolicitudACSerializer(serializers.ModelSerializer):
     verificador_nombre = serializers.SerializerMethodField()
     registrado_por = serializers.SerializerMethodField()
     hallazgo_codigo = serializers.CharField(source='hallazgo.codigo', read_only=True)
+    hallazgos_vinculados = serializers.SerializerMethodField()
     normas_display = serializers.SerializerMethodField()
-    acciones = AccionSACSerializer(many=True, read_only=True)
+    etapas_abiertas = serializers.SerializerMethodField()
+    clasificacion = serializers.SerializerMethodField()
+    acciones = serializers.SerializerMethodField()
     normas_aplicables = serializers.ListField(
         child=serializers.ChoiceField(choices=[c for c, _ in NORMAS_APLICABLES]),
         required=False, allow_empty=True)
@@ -452,7 +533,7 @@ class SolicitudACSerializer(serializers.ModelSerializer):
     class Meta:
         model = SolicitudAC
         fields = ['id', 'codigo', 'hallazgo', 'hallazgo_codigo', 'fuente', 'fuente_display',
-                  'fuente_detalle', 'normas_aplicables', 'normas_display', 'auditor',
+                  'fuente_detalle', 'normas_aplicables', 'normas_display', 'entidad_auditora', 'auditor',
                   'auditado', 'requisito_auditado', 'descripcion_nc', 'significancia',
                   'significancia_display', 'analisis_extension', 'requiere_ac',
                   'justificacion_evaluacion', 'porques', 'causa_raiz',
@@ -460,15 +541,33 @@ class SolicitudACSerializer(serializers.ModelSerializer):
                   'responsable', 'responsable_nombre', 'verificador', 'verificador_nombre',
                   'estado', 'estado_display', 'evaluacion_eficacia', 'resultado_eficaz',
                   'fecha_verificacion', 'fecha_cierre', 'is_active', 'registrado_por',
-                  'acciones', 'created_at', 'updated_at']
-        read_only_fields = ['codigo', 'estado', 'significancia', 'analisis_extension',
+                  'acciones', 'hallazgos_vinculados', 'ciclo', 'ciclos_anteriores', 'etapas_abiertas',
+                  'clasificacion', 'created_at', 'updated_at', 'fecha_registro',
+                  'verificado_por', 'verificado_por_nombre', 'responsable_cierre_nombre']
+        read_only_fields = ['codigo', 'estado', 'significancia', 'analisis_extension', 'ciclo', 'ciclos_anteriores',
                             'requiere_ac', 'justificacion_evaluacion', 'porques', 'causa_raiz',
                             'aplica_cambios_sig', 'aplica_actualizar_riesgos', 'verificador',
                             'evaluacion_eficacia', 'resultado_eficaz', 'fecha_verificacion',
-                            'fecha_cierre', 'is_active']
+                            'fecha_cierre', 'is_active', 'verificado_por']
+
+    verificado_por_nombre = serializers.SerializerMethodField()
+    responsable_cierre_nombre = serializers.SerializerMethodField()
+
+    def validate_fecha_registro(self, valor):
+        from django.utils import timezone
+        if valor and valor > timezone.localdate():
+            raise serializers.ValidationError('La fecha de registro no puede ser futura.')
+        return valor
 
     def _nombre(self, u):
         return (u.get_full_name() or u.username) if u else None
+
+    def get_verificado_por_nombre(self, obj):
+        return self._nombre(obj.verificado_por or (obj.verificador if obj.fecha_verificacion else None))
+
+    def get_responsable_cierre_nombre(self, obj):
+        from .ficha_pdf import responsable_cierre_sac
+        return responsable_cierre_sac(obj) or None
 
     def get_responsable_nombre(self, obj):
         return self._nombre(obj.responsable)
@@ -478,6 +577,23 @@ class SolicitudACSerializer(serializers.ModelSerializer):
 
     def get_registrado_por(self, obj):
         return self._nombre(obj.created_by)
+
+    def get_etapas_abiertas(self, obj):
+        return obj.etapas_abiertas()
+
+    def get_clasificacion(self, obj):
+        return obj.clasificacion()
+
+    def get_acciones(self, obj):
+        return AccionSACSerializer(obj.acciones.filter(is_active=True).order_by('ciclo', 'fecha_propuesta', 'id'),
+                                   many=True).data
+
+    def get_hallazgos_vinculados(self, obj):
+        """NC que trata la solicitud: la de origen y las ocurrencias sumadas."""
+        return [{'id': h.id, 'codigo': h.codigo, 'tipo_display': h.get_tipo_display(),
+                 'descripcion': h.descripcion, 'fecha_deteccion': h.fecha_deteccion,
+                 'es_origen': h.id == obj.hallazgo_id}
+                for h in obj.hallazgos_vinculados.filter(is_active=True).order_by('id')]
 
     def get_normas_display(self, obj):
         mapa = dict(NORMAS_APLICABLES)
@@ -491,20 +607,24 @@ class SolicitudACListaSerializer(serializers.ModelSerializer):
     responsable_nombre = serializers.SerializerMethodField()
     hallazgo_codigo = serializers.CharField(source='hallazgo.codigo', read_only=True)
     avance_acciones = serializers.SerializerMethodField()
+    clasificacion = serializers.SerializerMethodField()
 
     class Meta:
         model = SolicitudAC
-        fields = ['id', 'codigo', 'fuente_display', 'descripcion_nc', 'responsable_nombre',
+        fields = ['id', 'codigo', 'fuente_display', 'fuente_detalle', 'descripcion_nc', 'responsable_nombre',
                   'estado', 'estado_display', 'significancia', 'requiere_ac', 'fecha_cierre',
-                  'hallazgo_codigo', 'avance_acciones', 'is_active', 'created_at']
+                  'hallazgo_codigo', 'clasificacion', 'avance_acciones', 'is_active', 'created_at']
+
+    def get_clasificacion(self, obj):
+        return obj.clasificacion()
 
     def get_responsable_nombre(self, obj):
         u = obj.responsable
         return (u.get_full_name() or u.username) if u else None
 
     def get_avance_acciones(self, obj):
-        total = obj.acciones.count()
-        hechas = obj.acciones.filter(estado='completada').count()
+        total = obj.acciones.filter(is_active=True).count()
+        hechas = obj.acciones.filter(estado='completada', is_active=True).count()
         return f'{hechas}/{total}' if total else '—'
 
 
@@ -522,16 +642,21 @@ class RequisitoNormaSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = RequisitoNorma
-        fields = ['id', 'norma', 'norma_display', 'codigo', 'titulo', 'es_seccion', 'orden']
+        fields = ['id', 'norma', 'norma_display', 'codigo', 'titulo', 'es_seccion', 'bloque', 'orden']
 
 
 class ItemVerificacionSerializer(serializers.ModelSerializer):
     resultado_display = serializers.CharField(source='get_resultado_display', read_only=True)
+    hallazgo_codigo = serializers.SerializerMethodField()
+
+    def get_hallazgo_codigo(self, obj):
+        return obj.hallazgo.codigo if obj.hallazgo_id and obj.hallazgo.is_active else None
 
     class Meta:
         model = ItemVerificacion
-        fields = ['id', 'codigo', 'titulo', 'es_seccion', 'orden', 'resultado',
-                  'resultado_display', 'evidencia', 'observacion']
+        fields = ['id', 'codigo', 'titulo', 'es_seccion', 'bloque', 'formato', 'orden', 'resultado',
+                  'resultado_display', 'documento_referencia', 'evidencia', 'observacion',
+                  'hallazgo', 'hallazgo_codigo', 'motivo_descarte']
         read_only_fields = ['codigo', 'titulo', 'es_seccion', 'orden']
 
 
@@ -571,7 +696,7 @@ class ActaAuditoriaSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ActaAuditoria
-        fields = ['id', 'tipo', 'tipo_display', 'participantes', 'contenido',
+        fields = ['id', 'tipo', 'tipo_display', 'participantes', 'contenido', 'seccion3',
                   'observaciones_auditado', 'archivo_url', 'created_at']
 
     def get_archivo_url(self, obj):
@@ -585,20 +710,21 @@ class AuditoriaListaSerializer(serializers.ModelSerializer):
     auditor_lider_nombre = serializers.SerializerMethodField()
     normas_display = serializers.SerializerMethodField()
     hallazgos_count = serializers.SerializerMethodField()
+    programa_anio = serializers.IntegerField(source='programa.anio', read_only=True, default=None)
+    programa_estado = serializers.CharField(source='programa.estado', read_only=True, default=None)
 
     class Meta:
         model = Auditoria
-        fields = ['id', 'codigo', 'tipo', 'tipo_display', 'estado', 'estado_display',
+        fields = ['id', 'codigo', 'programa', 'programa_anio', 'programa_estado', 'tipo', 'tipo_display', 'estado', 'estado_display',
                   'modalidad', 'modalidad_display', 'normas_display', 'areas_procesos',
                   'auditor_lider_nombre', 'fecha_programada', 'fecha_inicio', 'fecha_fin',
-                  'mes_programado', 'hallazgos_count', 'is_active', 'created_at']
+                  'mes_programado', 'mes_reprogramado', 'clase', 'hallazgos_count', 'is_active', 'created_at']
 
     def get_auditor_lider_nombre(self, obj):
-        u = obj.auditor_lider
-        return (u.get_full_name() or u.username) if u else None
+        return obj.nombre_lider() or None
 
     def get_normas_display(self, obj):
-        mapa = dict(NORMAS_APLICABLES)
+        mapa = dict(NORMAS_LISTA)
         return [mapa.get(n, n) for n in (obj.normas_aplicables or [])]
 
     def get_hallazgos_count(self, obj):
@@ -612,33 +738,75 @@ class AuditoriaSerializer(serializers.ModelSerializer):
     auditor_lider_nombre = serializers.SerializerMethodField()
     normas_display = serializers.SerializerMethodField()
     programa_anio = serializers.IntegerField(source='programa.anio', read_only=True)
+    programa_estado = serializers.CharField(source='programa.estado', read_only=True, default=None)
     equipo = EquipoAuditoriaSerializer(many=True, read_only=True)
     actas = ActaAuditoriaSerializer(many=True, read_only=True)
     listas = ListaVerificacionSerializer(many=True, read_only=True)
     hallazgos = serializers.SerializerMethodField()
+    # Qué etapas siguen abiertas (editables) según el estado: la pantalla
+    # deshabilita las cerradas y el servidor rechaza cambios en ellas.
+    etapas_abiertas = serializers.SerializerMethodField()
+    plan_aprobado_por_nombre = serializers.SerializerMethodField()
+    pendientes_clasificar = serializers.SerializerMethodField()
     normas_aplicables = serializers.ListField(
-        child=serializers.ChoiceField(choices=[c for c, _ in NORMAS_APLICABLES]),
+        child=serializers.ChoiceField(choices=[c for c, _ in NORMAS_LISTA]),
         required=False, allow_empty=True)
 
     class Meta:
         model = Auditoria
-        fields = ['id', 'codigo', 'programa', 'programa_anio', 'tipo', 'tipo_display',
-                  'normas_aplicables', 'normas_display', 'objetivo', 'alcance', 'criterios',
-                  'documentos_referencia', 'areas_procesos', 'modalidad', 'modalidad_display',
-                  'auditor_lider', 'auditor_lider_nombre', 'mes_programado', 'fecha_programada',
+        fields = ['id', 'codigo', 'programa', 'programa_anio', 'programa_estado', 'tipo', 'tipo_display', 'clase',
+                  'normas_aplicables', 'normas_display', 'requisitos_por_norma', 'observaciones_programa',
+                  'objetivo', 'alcance', 'criterios',
+                  'documentos_referencia', 'fecha_elaboracion_plan', 'areas_procesos', 'cronograma_entrevistas',
+                  'observaciones_plan', 'lugar', 'personas_entrevistadas', 'modalidad', 'modalidad_display',
+                  'auditor_lider', 'auditor_lider_nombre', 'mes_programado', 'mes_reprogramado', 'fecha_programada',
                   'fecha_inicio', 'fecha_fin', 'reprogramada', 'motivo_reprogramacion',
                   'estado', 'estado_display', 'fortalezas', 'debilidades', 'conclusiones',
-                  'fecha_informe', 'equipo', 'actas', 'listas', 'hallazgos', 'is_active',
+                  'fecha_informe', 'equipo', 'actas', 'listas', 'hallazgos', 'etapas_abiertas', 'plan_aprobado_por', 'plan_aprobado_por_nombre',
+                  'fecha_aprobacion_plan', 'pendientes_clasificar', 'is_active',
                   'created_at', 'updated_at']
-        read_only_fields = ['codigo', 'estado', 'fecha_informe', 'is_active', 'reprogramada']
+        read_only_fields = ['codigo', 'estado', 'fecha_informe', 'is_active', 'reprogramada', 'mes_reprogramado',
+                            'plan_aprobado_por', 'fecha_aprobacion_plan',
+                            'auditor_lider']   # se define en el equipo auditor (rol líder)
+
+    def get_etapas_abiertas(self, obj):
+        return obj.etapas_abiertas()
 
     def get_auditor_lider_nombre(self, obj):
-        u = obj.auditor_lider
-        return (u.get_full_name() or u.username) if u else None
+        return obj.nombre_lider() or None
 
     def get_normas_display(self, obj):
-        mapa = dict(NORMAS_APLICABLES)
+        mapa = dict(NORMAS_LISTA)
         return [mapa.get(n, n) for n in (obj.normas_aplicables or [])]
+
+    def validate(self, data):
+        """Una auditoría programada pertenece a un programa anual (si no, no
+        aparece en ningún programa). Las extraordinarias pueden ir sin programa.
+        No se mueve una auditoría a un programa aprobado (solo lectura)."""
+        tipo = data['tipo'] if 'tipo' in data else (self.instance.tipo if self.instance else 'programada')
+        programa = data['programa'] if 'programa' in data else (self.instance.programa if self.instance else None)
+        # Se exige al crear o al cambiar programa/tipo; editar el plan de una
+        # auditoría antigua sin programa no debe quedar bloqueado.
+        toca_programa = not self.instance or 'programa' in data or 'tipo' in data
+        if toca_programa and tipo == 'programada' and not programa:
+            raise serializers.ValidationError({'programa': ['Una auditoría programada debe pertenecer a un programa anual.']})
+        nuevo = data.get('programa')
+        cambia = bool(nuevo) and bool(self.instance) and nuevo != self.instance.programa
+        if nuevo and (not self.instance or cambia) and nuevo.bloqueado:
+            raise serializers.ValidationError({'programa': [f'El programa {nuevo.anio} está aprobado (solo lectura); ábralo para modificación antes de agregarle auditorías.']})
+        # El código lleva el año del programa; una vez en ejecución ya figura en
+        # actas y listas, así que la auditoría no cambia de programa.
+        if cambia and self.instance.estado not in ('programada', 'planificada'):
+            raise serializers.ValidationError({'programa': [f'La auditoría {self.instance.codigo} ya está en ejecución o cerrada; no se puede cambiar de programa.']})
+        # El sistema integrado ya contiene ISO 9001, 14001 y 45001: marcar
+        # también una de ellas duplicaría preguntas en dos listas.
+        normas = data.get('normas_aplicables') or []
+        sueltas = [n for n in normas if n in ('iso_9001', 'iso_14001', 'iso_45001')]
+        if 'sig_integrado' in normas and sueltas:
+            raise serializers.ValidationError({'normas_aplicables': [
+                'El Sistema Integrado ya incluye ISO 9001, ISO 14001 e ISO 45001. Marque el Sistema Integrado '
+                'para auditar los tres sistemas juntos, o solo las normas que se auditen por separado.']})
+        return data
 
     def get_hallazgos(self, obj):
         return [{
@@ -646,18 +814,46 @@ class AuditoriaSerializer(serializers.ModelSerializer):
             'tipo_display': h.get_tipo_display(), 'estado': h.get_estado_display(),
             'descripcion': h.descripcion, 'requisito': h.requisito,
             'requiere_ac': h.requiere_ac,
+            'tratamiento': h.tratamiento, 'tratamiento_display': h.get_tratamiento_display() if h.tratamiento else '',
+            'items': [{'id': it.id, 'norma': it.lista.norma, 'codigo': it.codigo}
+                      for it in h.items_lista.select_related('lista').order_by('lista__norma', 'orden')],
         } for h in obj.hallazgos.filter(is_active=True).order_by('id')]
+
+    def get_pendientes_clasificar(self, obj):
+        return [{'id': it.id, 'norma': it.lista.norma, 'codigo': it.codigo, 'bloque': it.bloque,
+                 'referencia': it.referencia_texto(),
+                 'titulo': it.titulo, 'resultado': it.resultado, 'resultado_display': it.get_resultado_display(),
+                 'evidencia': it.evidencia} for it in obj.items_pendientes()]
+
+    def get_plan_aprobado_por_nombre(self, obj):
+        u = obj.plan_aprobado_por
+        return (u.get_full_name() or u.username) if u else None
 
 
 class ProgramaAuditoriaSerializer(serializers.ModelSerializer):
     estado_display = serializers.CharField(source='get_estado_display', read_only=True)
     auditorias = AuditoriaListaSerializer(many=True, read_only=True)
+    aprobado_por_nombre = serializers.SerializerMethodField()
+    modificado_por_nombre = serializers.SerializerMethodField()
+    bloqueado = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = ProgramaAuditoria
-        fields = ['id', 'anio', 'estado', 'estado_display', 'observaciones',
-                  'auditorias', 'is_active', 'created_at']
-        read_only_fields = ['estado']
+        fields = ['id', 'anio', 'estado', 'estado_display', 'bloqueado', 'revision',
+                  'aprobado_por_nombre', 'fecha_aprobacion',
+                  'modificado_por_nombre', 'fecha_modificacion', 'motivo_modificacion',
+                  'observaciones', 'auditorias', 'is_active', 'created_at']
+        read_only_fields = ['estado', 'revision', 'fecha_aprobacion', 'fecha_modificacion', 'motivo_modificacion']
+
+    @staticmethod
+    def _nombre(u):
+        return (u.get_full_name() or u.username) if u else None
+
+    def get_aprobado_por_nombre(self, obj):
+        return self._nombre(obj.aprobado_por)
+
+    def get_modificado_por_nombre(self, obj):
+        return self._nombre(obj.modificado_por)
 
 
 # ============================================================
@@ -904,3 +1100,260 @@ class SolicitudCambioEquipoSerializer(serializers.ModelSerializer):
 
     def get_archivo_url(self, obj):
         return obj.archivo.url if obj.archivo else None
+
+
+# ============================================================
+# M12 — Competencia técnica y autorización del personal
+# ============================================================
+
+def _nombre_usuario(u):
+    return (u.get_full_name() or u.username) if u else None
+
+
+class MetodoCalibracionSerializer(serializers.ModelSerializer):
+    class Meta:
+        from .models import MetodoCalibracion
+        model = MetodoCalibracion
+        fields = ['id', 'nombre', 'codigo', 'magnitud', 'orden', 'is_active']
+
+
+class ControlValidezSerializer(serializers.ModelSerializer):
+    class Meta:
+        from .models import ControlValidez
+        model = ControlValidez
+        fields = ['id', 'nombre', 'orden', 'is_active']
+
+
+class AutorizacionSerializer(serializers.ModelSerializer):
+    usuario_nombre = serializers.SerializerMethodField()
+    metodo_nombre = serializers.CharField(source='metodo.nombre', read_only=True, default='')
+    autorizado_por_nombre = serializers.SerializerMethodField()
+    estado_display = serializers.CharField(source='get_estado_display', read_only=True)
+    funciones_display = serializers.SerializerMethodField()
+    fecha_proximo_seguimiento = serializers.DateField(read_only=True)
+    estado_seguimiento = serializers.CharField(read_only=True)
+    evidencia_url = serializers.SerializerMethodField()
+
+    class Meta:
+        from .models import Autorizacion
+        model = Autorizacion
+        fields = ['id', 'usuario', 'usuario_nombre', 'metodo', 'metodo_nombre', 'magnitud',
+                  'funciones', 'funciones_display', 'alcance_firma', 'laboratorio',
+                  'fecha_autorizacion', 'autorizado_por', 'autorizado_por_nombre',
+                  'estado', 'estado_display', 'frecuencia_seguimiento_meses',
+                  'fecha_ultimo_seguimiento', 'fecha_proximo_seguimiento', 'estado_seguimiento',
+                  'evidencia_url', 'observaciones', 'exento_entrenamiento', 'sustento_exencion',
+                  'suspendida_en', 'is_active']
+        read_only_fields = ['suspendida_en']
+
+    def get_usuario_nombre(self, obj):
+        return _nombre_usuario(obj.usuario)
+
+    def get_autorizado_por_nombre(self, obj):
+        return _nombre_usuario(obj.autorizado_por)
+
+    def get_funciones_display(self, obj):
+        from .models import FUNCIONES_AUTORIZACION
+        m = dict(FUNCIONES_AUTORIZACION)
+        return [m.get(f, f) for f in (obj.funciones or [])]
+
+    def validate(self, data):
+        """Reglas de la autorización (valores finales: los enviados sobre los guardados)."""
+        inst = self.instance
+
+        def val(c, defecto=None):
+            return data[c] if c in data else (getattr(inst, c) if inst else defecto)
+        errores = {}
+        usuario, metodo, estado = val('usuario'), val('metodo'), val('estado', 'en_entrenamiento')
+        funciones = val('funciones', []) or []
+        if not metodo:
+            errores['metodo'] = ['La autorización es por método: indique el método.']
+        if not funciones:
+            errores['funciones'] = ['Indique al menos una función autorizada.']
+        if 'firmar' in funciones:
+            alcance = val('alcance_firma', '')
+            if not alcance:
+                errores['alcance_firma'] = ['Quien firma certificados debe tener alcance de firma (todos o un laboratorio).']
+            elif alcance == 'laboratorio' and not (val('laboratorio', '') or '').strip():
+                errores['laboratorio'] = ['Indique el laboratorio en el que puede firmar.']
+        if estado == 'vigente' and not val('fecha_autorizacion'):
+            errores['fecha_autorizacion'] = ['Una autorización vigente necesita su fecha de autorización.']
+        from .models import es_gerente_tecnico, motivo_sin_entrenamiento
+        exento = bool(val('exento_entrenamiento', False))
+        if exento:
+            if usuario and not es_gerente_tecnico(usuario):
+                errores['exento_entrenamiento'] = ['Solo el Gerente Técnico puede ser eximido del entrenamiento '
+                                                   '(según el cargo registrado en Usuarios).']
+            if not (val('sustento_exencion', '') or '').strip():
+                errores['sustento_exencion'] = ['Sustente la exención: formación, experiencia, conocimientos técnicos y '
+                                                'desempeño previo (p. ej. ensayos de aptitud).']
+        anterior = inst.estado if inst else None
+        if estado == 'vigente' and usuario and metodo:
+            cambia = (inst is None or anterior != 'vigente' or inst.metodo_id != metodo.pk
+                      or inst.usuario_id != usuario.pk)
+            if anterior == 'revocada':
+                errores['estado'] = ['Una autorización revocada no se reactiva: registre una autorización nueva.']
+            elif cambia and 'estado' not in errores:
+                motivo = motivo_sin_entrenamiento(usuario, metodo, inst if anterior == 'suspendida' else None, exento)
+                if motivo:
+                    errores['estado'] = [motivo]
+        if usuario and metodo and estado in ('vigente', 'en_entrenamiento'):
+            from .models import Autorizacion
+            otra = (Autorizacion.objects.filter(usuario=usuario, metodo=metodo, is_active=True,
+                                                estado__in=('vigente', 'en_entrenamiento'))
+                    .exclude(pk=getattr(inst, 'pk', None)).first())
+            if otra:
+                errores['metodo'] = [f'Esta persona ya tiene una autorización {otra.get_estado_display().lower()} '
+                                     f'para este método: edítela en lugar de crear otra.']
+        if errores:
+            raise serializers.ValidationError(errores)
+        return data
+
+    def get_evidencia_url(self, obj):
+        return obj.evidencia.url if obj.evidencia else None
+
+
+class ProcesoEntrenamientoSerializer(serializers.ModelSerializer):
+    usuario_nombre = serializers.SerializerMethodField()
+    metodo_nombre = serializers.CharField(source='metodo.nombre', read_only=True, default='')
+    tutor_nombre = serializers.SerializerMethodField()
+    tutor_supervision_nombre = serializers.SerializerMethodField()
+    control_validez_nombre = serializers.CharField(source='control_validez.nombre', read_only=True, default='')
+    tipo_display = serializers.CharField(source='get_tipo_display', read_only=True)
+    estado_display = serializers.CharField(source='get_estado_display', read_only=True)
+    evidencia_url = serializers.SerializerMethodField()
+
+    class Meta:
+        from .models import ProcesoEntrenamiento
+        model = ProcesoEntrenamiento
+        fields = ['id', 'usuario', 'usuario_nombre', 'metodo', 'metodo_nombre', 'tipo', 'tipo_display',
+                  'tutor', 'tutor_nombre', 'tutor_supervision', 'tutor_supervision_nombre',
+                  'checklist_entrenamiento', 'periodo_supervision_dias',
+                  'fecha_inicio_supervision', 'checklist_supervision', 'nota_teorica',
+                  'control_validez', 'control_validez_nombre', 'resultado_control',
+                  'estado', 'estado_display', 'comentarios', 'evidencia_url', 'is_active']
+
+    def get_usuario_nombre(self, obj):
+        return _nombre_usuario(obj.usuario)
+
+    def get_tutor_nombre(self, obj):
+        return _nombre_usuario(obj.tutor)
+
+    def get_tutor_supervision_nombre(self, obj):
+        return _nombre_usuario(obj.tutor_supervision)
+
+    def validate(self, data):
+        """Un entrenamiento es para un método, con tutor y al menos una actividad."""
+        inst = self.instance
+
+        def val(c, defecto=None):
+            return data[c] if c in data else (getattr(inst, c) if inst else defecto)
+        if inst is not None and inst.concluido:
+            raise serializers.ValidationError({'detail': (
+                f'Este entrenamiento ya concluyó como {"superado" if inst.estado == "completado" else "no conforme"} '
+                'y es de solo lectura. '
+                'Para un nuevo intento registre un re-entrenamiento.')})
+        errores = {}
+        if val('estado', 'en_proceso') == 'completado':
+            from .models import faltantes_entrenamiento
+            falta = faltantes_entrenamiento(val('checklist_entrenamiento', []), val('checklist_supervision', []),
+                                            val('nota_teorica'), val('control_validez'), val('resultado_control', ''),
+                                            val('tutor_supervision'))
+            if falta:
+                errores['estado'] = ['Para darlo por superado falta: ' + '; '.join(falta) + '.']
+        if not val('metodo'):
+            errores['metodo'] = ['Indique el método en que se entrena.']
+        if not val('tutor'):
+            errores['tutor'] = ['Indique el tutor del entrenamiento.']
+        actividades = [a for a in (val('checklist_entrenamiento', []) or [])
+                       if isinstance(a, dict) and str(a.get('actividad') or '').strip()]
+        if not actividades:
+            errores['checklist_entrenamiento'] = ['Registre al menos una actividad de entrenamiento.']
+        if errores:
+            raise serializers.ValidationError(errores)
+        return data
+
+    def get_evidencia_url(self, obj):
+        return obj.evidencia.url if obj.evidencia else None
+
+
+class EvaluacionSeguimientoSerializer(serializers.ModelSerializer):
+    usuario_nombre = serializers.SerializerMethodField()
+    evaluador_nombre = serializers.SerializerMethodField()
+    control_validez_nombre = serializers.CharField(source='control_validez.nombre', read_only=True, default='')
+    tipo_display = serializers.CharField(source='get_tipo_display', read_only=True)
+    resultado_display = serializers.CharField(source='get_resultado_display', read_only=True)
+    decision_display = serializers.CharField(source='get_decision_display', read_only=True)
+    evidencia_url = serializers.SerializerMethodField()
+
+    class Meta:
+        from .models import EvaluacionSeguimiento
+        model = EvaluacionSeguimiento
+        fields = ['id', 'autorizacion', 'usuario', 'usuario_nombre', 'fecha', 'hora', 'area', 'tipo', 'tipo_display',
+                  'control_validez', 'control_validez_nombre', 'tema', 'evaluador', 'evaluador_nombre',
+                  'preguntas', 'puntaje_obtenido', 'puntaje_total', 'puntaje_minimo', 'puntaje_maximo',
+                  'puntaje_por_pregunta', 'n_preguntas', 'resultado', 'resultado_display',
+                  'decision', 'decision_display', 'conclusiones', 'observaciones', 'evidencia_url', 'is_active']
+
+    def get_usuario_nombre(self, obj):
+        return _nombre_usuario(obj.usuario)
+
+    def get_evaluador_nombre(self, obj):
+        return _nombre_usuario(obj.evaluador)
+
+    def validate(self, data):
+        """
+        Los totales y el resultado de la entrevista se calculan aquí (fórmulas del
+        formato), no en la pantalla; la decisión debe ser coherente con el resultado.
+        """
+        from .models import calcular_puntajes, motivo_sin_entrenamiento
+        inst = self.instance
+
+        def val(c, defecto=None):
+            return data[c] if c in data else (getattr(inst, c) if inst else defecto)
+        errores = {}
+        preguntas = val('preguntas', []) or []
+        for i, p in enumerate([p for p in preguntas if isinstance(p, dict)], start=1):
+            try:
+                est, obt = float(p.get('establecido') or 0), float(p.get('obtenido') or 0)
+            except (TypeError, ValueError):
+                errores['preguntas'] = [f'Pregunta {i}: los puntajes deben ser números.']
+                break
+            if obt < 0 or est < 0:
+                errores['preguntas'] = [f'Pregunta {i}: los puntajes no pueden ser negativos.']
+                break
+            if obt > est:
+                errores['preguntas'] = [f'Pregunta {i}: el puntaje obtenido ({obt:g}) supera al establecido ({est:g}).']
+                break
+        calc = calcular_puntajes(preguntas, val('puntaje_por_pregunta'))
+        if calc['preguntas']:
+            for k in ('preguntas', 'n_preguntas', 'puntaje_total', 'puntaje_maximo', 'puntaje_minimo',
+                      'puntaje_por_pregunta'):
+                data[k] = calc[k]
+            if calc['resultado']:
+                data['resultado'] = calc['resultado']
+        else:
+            for k in ('n_preguntas', 'puntaje_total', 'puntaje_maximo', 'puntaje_minimo'):
+                data[k] = None
+        resultado, decision = val('resultado', ''), val('decision', '')
+        autorizacion = val('autorizacion')
+        if decision and not resultado:
+            errores['resultado'] = ['Registre el resultado antes de decidir.']
+        elif resultado == 'no_satisfactorio' and decision in ('mantener', 'reautorizar'):
+            errores['decision'] = ['Con resultado no satisfactorio no se mantiene ni se reautoriza: '
+                                   'corresponde suspender la autorización y re-entrenar.']
+        if decision in ('suspender', 'reautorizar') and not autorizacion:
+            errores['autorizacion'] = ['Indique la autorización que se suspende o reautoriza.']
+        if decision == 'reautorizar' and autorizacion and 'decision' not in errores:
+            if autorizacion.estado != 'suspendida':
+                errores['decision'] = ['Solo se reautoriza una autorización suspendida.']
+            else:
+                motivo = motivo_sin_entrenamiento(autorizacion.usuario, autorizacion.metodo, autorizacion)
+                if motivo:
+                    errores['decision'] = [motivo]
+        if errores:
+            raise serializers.ValidationError(errores)
+        return data
+
+    def get_evidencia_url(self, obj):
+        return obj.evidencia.url if obj.evidencia else None
