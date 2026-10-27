@@ -1,6 +1,6 @@
 from django.urls import include, path
 
-from .panel import CalendarioView, MisTareasView
+from .panel import BuscarView, CalendarioView, MisTareasView
 from rest_framework.routers import DefaultRouter
 
 from .views import (
@@ -55,5 +55,6 @@ router.register('formatos-impresos', FormatoImpresoViewSet, basename='formatos-i
 urlpatterns = [
     path('mis-tareas/', MisTareasView.as_view(), name='mis-tareas'),
     path('calendario/', CalendarioView.as_view(), name='calendario'),
+    path('buscar/', BuscarView.as_view(), name='buscar'),
     path('', include(router.urls)),
 ]

@@ -41,6 +41,7 @@ MODULOS = [
     ('logistica', 'Logística'),
     ('ordenes_trabajo', 'Órdenes de Trabajo'),
     # Nivel 3 — Soporte
+    ('capacitacion', 'Capacitación e Inducción'),
     ('rrhh', 'Recursos Humanos'),
     ('administracion', 'Administración'),
     ('activos', 'Activos'),

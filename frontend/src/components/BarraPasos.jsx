@@ -18,7 +18,7 @@ export default function BarraPasos({ pasos, actual, cerrado = false, vista, onEl
           const elegido = onElegir && vista === i
           const contenido = (
             <>
-              <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[13px] font-bold ${
+              <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[13px] font-bold transition-colors duration-300 ${
                 hecho ? 'bg-slate-500 text-white dark:bg-slate-600'
                 : enCurso ? 'bg-esynapse-600 text-white'
                 : 'border-2 border-dashed border-slate-300 bg-white text-slate-400 dark:border-slate-600 dark:bg-slate-900'} ${
@@ -33,7 +33,10 @@ export default function BarraPasos({ pasos, actual, cerrado = false, vista, onEl
           return (
             <li key={nombre} className="relative flex flex-1 flex-col pr-2" aria-current={enCurso ? 'step' : undefined}>
               {i < pasos.length - 1 && (
-                <span aria-hidden="true" className={`absolute left-9 right-1 top-[15px] h-[3px] rounded ${hecho ? 'bg-slate-400 dark:bg-slate-500' : 'bg-slate-200 dark:bg-slate-700'}`} />
+                <span aria-hidden="true" className="absolute left-9 right-1 top-[15px] h-[3px] overflow-hidden rounded bg-slate-200 dark:bg-slate-700">
+                  {/* Al avanzar de etapa, el tramo se rellena de izquierda a derecha */}
+                  <span className={`block h-full origin-left bg-slate-400 transition-transform duration-500 ease-out dark:bg-slate-500 ${hecho ? 'scale-x-100' : 'scale-x-0'}`} />
+                </span>
               )}
               {onElegir ? (
                 <button type="button" disabled={futuro} onClick={() => onElegir(i)}

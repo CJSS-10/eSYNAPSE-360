@@ -1,0 +1,4930 @@
+[
+ {
+  "orden": 1,
+  "alcance": "oficinas",
+  "areas": [],
+  "lugar": "",
+  "proceso": null,
+  "actividad": "Iluminación de las oficinas",
+  "aspecto": "Consumo de Energía Eléctrica",
+  "impacto": "Agotamiento del recurso natural Emisión de gases de efecto invernadero",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Ninguno",
+  "criterios": [
+   1,
+   3,
+   1,
+   1,
+   3
+  ],
+  "control_operacional": "- Campañas ambientales. - Publicación de afiches - Procedimiento de uso eficiente de energía eléctrica",
+  "registro_asociado": "- Lista de Asistencia - Foto de publicación de afiches o afiches publicados (PPT con afiches)",
+  "responsable": "Gerente SIG",
+  "origen": "Oficina fila 12"
+ },
+ {
+  "orden": 2,
+  "alcance": "oficinas",
+  "areas": [],
+  "lugar": "",
+  "proceso": null,
+  "actividad": "Procesamiento de información haciendo uso de Equipos de Computo (Elaboración de Documentos)",
+  "aspecto": "Generación, existencia y manejo de residuos no peligrosos (Papel, cartón, plástico)",
+  "impacto": "Agotamiento del recurso natural Emisión de gases de efecto invernadero",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Formato de pesaje de residuos sólidos mensual",
+  "criterios": [
+   1,
+   1,
+   1,
+   1,
+   3
+  ],
+  "control_operacional": "- Capacitación en la Segregación adecuada de Residuos Solidos. - Inspección mensual",
+  "registro_asociado": "- Lista de asistencia - Fotos de uso adecuado del tacho azul - Inspección SSTMA en oficina",
+  "responsable": "Gerente SIG",
+  "origen": "Oficina fila 13"
+ },
+ {
+  "orden": 3,
+  "alcance": "oficinas",
+  "areas": [],
+  "lugar": "",
+  "proceso": null,
+  "actividad": "Procesamiento de información haciendo uso de Equipos de Computo (Elaboración de Documentos)",
+  "aspecto": "Consumo de Energía Eléctrica",
+  "impacto": "Agotamiento del recurso natural Emisión de gases de efecto invernadero",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Ninguno",
+  "criterios": [
+   1,
+   3,
+   1,
+   1,
+   3
+  ],
+  "control_operacional": "- Campañas ambientales. - Publicación de afiches - Procedimiento de uso eficiente de energía eléctrica",
+  "registro_asociado": "- Lista de Asistencia - Tablero de Control - Foto de publicación de afiches o afiches publicados (PPT con afiches)",
+  "responsable": "Gerente SIG",
+  "origen": "Oficina fila 14"
+ },
+ {
+  "orden": 4,
+  "alcance": "oficinas",
+  "areas": [],
+  "lugar": "",
+  "proceso": null,
+  "actividad": "Procesamiento de información haciendo uso de Equipos de Computo (Elaboración de Documentos)",
+  "aspecto": "Consumo de Papel",
+  "impacto": "Agotamiento del recurso natural Emisión de gases de efecto invernadero",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Se cuenta con un espacio para colocar el Papel Borrador (Segundo uso)",
+  "criterios": [
+   1,
+   1,
+   1,
+   1,
+   3
+  ],
+  "control_operacional": "- Sensibilización en el consumo de papel. - Publicación de afiches. - Rehusar el papel impreso a una sola cara. - Procedimiento de uso eficiente de papel.",
+  "registro_asociado": "- Lista de Asistencia - Tablero de Control. - Foto de publicación de afiches o afiches publicados. - Foto de Consumo de Papel borrador.",
+  "responsable": "Gerente SIG",
+  "origen": "Oficina fila 15"
+ },
+ {
+  "orden": 5,
+  "alcance": "oficinas",
+  "areas": [],
+  "lugar": "",
+  "proceso": null,
+  "actividad": "Procesamiento de información haciendo uso de Equipos de Computo (Elaboración de Documentos)",
+  "aspecto": "Uso de Papel con impresión a una cara (Papel Borrador)",
+  "impacto": "Reducción de la contaminación Reducción de la emisión de Co2",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "indirecta",
+  "clase": "positivo",
+  "controles_existentes": "Se cuenta con un espacio para colocar el Papel Borrador (Segundo uso)",
+  "criterios": [
+   null,
+   null,
+   null,
+   null,
+   null
+  ],
+  "control_operacional": "- Sensibilización en el consumo de papel. - Publicación de afiches. - Reciclar el papel impreso a una casa (Se enucentra colocado en un lugar accesible para el uso de todo el personal).",
+  "registro_asociado": "- Lista de Asistencia - Foto de publicación de afiches o afiches publicados.",
+  "responsable": "Gerente SIG",
+  "origen": "Oficina fila 16"
+ },
+ {
+  "orden": 6,
+  "alcance": "oficinas",
+  "areas": [],
+  "lugar": "",
+  "proceso": null,
+  "actividad": "Recepción y emisión de información (Uso de equipo de cómputo)",
+  "aspecto": "Consumo de Energía Eléctrica",
+  "impacto": "Agotamiento del recurso natural Emisión de gases de efecto invernadero",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Ninguno",
+  "criterios": [
+   1,
+   3,
+   1,
+   1,
+   3
+  ],
+  "control_operacional": "- Campañas ambientales. - Publicación de afiches - Procedimiento de uso eficiente de energía eléctrica",
+  "registro_asociado": "- Lista de Asistencia - Tablero de Control - Foto de publicación de afiches o afiches publicados (PPT con afiches)",
+  "responsable": "Gerente SIG",
+  "origen": "Oficina fila 17"
+ },
+ {
+  "orden": 7,
+  "alcance": "oficinas",
+  "areas": [],
+  "lugar": "",
+  "proceso": null,
+  "actividad": "Comunicación (uso de cómputo)",
+  "aspecto": "Consumo de Energía Eléctrica",
+  "impacto": "Agotamiento del recurso natural Emisión de gases de efecto invernadero",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Ninguno",
+  "criterios": [
+   1,
+   3,
+   1,
+   1,
+   3
+  ],
+  "control_operacional": "- Campañas ambientales. - Publicación de afiches - Procedimiento de uso eficiente de energía eléctrica",
+  "registro_asociado": "- Lista de Asistencia - Tablero de Control - Foto de publicación de afiches o afiches publicados (PPT con afiches)",
+  "responsable": "Gerente SIG",
+  "origen": "Oficina fila 18"
+ },
+ {
+  "orden": 8,
+  "alcance": "oficinas",
+  "areas": [],
+  "lugar": "",
+  "proceso": null,
+  "actividad": "Cambio de Fluorescentes / Tóners / Baterías - Pilas / Mascarillas (Residuos Peligrosos)",
+  "aspecto": "Generación, existencia y manejo de residuos peligrosos",
+  "impacto": "Afectación y contaminación de recursos flora/agua/aire",
+  "situaciones": [
+   "A"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Formato de pesaje de residuos sólidos mensual",
+  "criterios": [
+   1,
+   2,
+   1,
+   1,
+   1
+  ],
+  "control_operacional": "- Almacenamiento temporal en los tachos de Residuos peligrosos (Rojo) - Inspecciones mensuales - Gestionar la disposición final de los residuos peligrosos con una empresa EO-RS, autorizada por el MINAM (Ejecutar luego de contar con la cantidad mínima requerida por las empresas operadoras).",
+  "registro_asociado": "- Fotos - Inspección SSTMA en oficinas - Cetificado de Disposición Final",
+  "responsable": "Gerente SIG",
+  "origen": "Oficina fila 19"
+ },
+ {
+  "orden": 9,
+  "alcance": "oficinas",
+  "areas": [],
+  "lugar": "",
+  "proceso": null,
+  "actividad": "Cambio de: Computadoras de escritorio, Laptops, impresoras, calculadoras, teléfonos, microondas, cables, cargadores, audífonos, otros.",
+  "aspecto": "Generación, existencia y manejo de RAEE",
+  "impacto": "Contaminación del suelo.",
+  "situaciones": [
+   "A"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Espacio habilitado para el almacenamiento temporal de los RAEE",
+  "criterios": [
+   1,
+   2,
+   1,
+   1,
+   1
+  ],
+  "control_operacional": "Realizar la Gestión de los RAEE con alguna de las dos alternativas: 1.- Gestión de los RAEE en puntos de acopio autorizados, según el Procedimiento de Manejo de RR.SS. 2.- Gestión de los RAEE con una EO - RS acreditada ante el MINAM",
+  "registro_asociado": "- Foto de la entrega de los RAEE en puntos de acopio autorizados - Certificado de recojo de RAEE",
+  "responsable": "Gerente SIG",
+  "origen": "Oficina fila 20"
+ },
+ {
+  "orden": 10,
+  "alcance": "oficinas",
+  "areas": [],
+  "lugar": "",
+  "proceso": null,
+  "actividad": "Desplazamiento externo (Transporte de Personal a las instalaciones del Cliente)",
+  "aspecto": "Emisión de gases de combustión",
+  "impacto": "Alteración de la calidad del aire",
+  "situaciones": [
+   "A"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Ejecución de las Revisiones Técnicas vehiculares",
+  "criterios": [
+   1,
+   1,
+   1,
+   1,
+   2
+  ],
+  "control_operacional": "- Revisiones técnicas vehiculares de las unidades de transporte - CITV vigentes",
+  "registro_asociado": "- Certificado de Inspección Técnica Vehicular",
+  "responsable": "Gerente SIG",
+  "origen": "Oficina fila 21"
+ },
+ {
+  "orden": 11,
+  "alcance": "oficinas",
+  "areas": [],
+  "lugar": "",
+  "proceso": null,
+  "actividad": "Desplazamiento externo (Transporte de Personal a las instalaciones del Cliente)",
+  "aspecto": "Emisión de ruido ambiental",
+  "impacto": "Contaminación acústica",
+  "situaciones": [
+   "A"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Ejecución de las Revisiones Técnicas vehiculares",
+  "criterios": [
+   1,
+   1,
+   1,
+   1,
+   2
+  ],
+  "control_operacional": "- Revisiones técnicas vehiculares de las unidades de transporte - CITV",
+  "registro_asociado": "- Certificado de Inspección Técnica Vehicular",
+  "responsable": "Gerente SIG",
+  "origen": "Oficina fila 22"
+ },
+ {
+  "orden": 12,
+  "alcance": "oficinas",
+  "areas": [],
+  "lugar": "",
+  "proceso": null,
+  "actividad": "Desplazamiento externo (Transporte de Personal a las instalaciones del Cliente)",
+  "aspecto": "Consumo de hidrocarburos (combustible)",
+  "impacto": "Agotamiento del recurso natural",
+  "situaciones": [
+   "A"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Ninguno",
+  "criterios": [
+   1,
+   3,
+   1,
+   1,
+   2
+  ],
+  "control_operacional": "- Mantenimiento preventivo de vehículos - Velocidad moderada",
+  "registro_asociado": "- Reporte de Mantenimiento",
+  "responsable": "Gerente SIG",
+  "origen": "Oficina fila 23"
+ },
+ {
+  "orden": 13,
+  "alcance": "oficinas",
+  "areas": [],
+  "lugar": "",
+  "proceso": null,
+  "actividad": "Uso de Servicios Higiénicos",
+  "aspecto": "Generación / Vertimiento de aguas residuales domésticas",
+  "impacto": "Alteración de las condiciones del suelo / agua",
+  "situaciones": [
+   "A"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Ninguno",
+  "criterios": [
+   1,
+   3,
+   1,
+   1,
+   3
+  ],
+  "control_operacional": "- Publicación de afiches - Inspecciones mensuales",
+  "registro_asociado": "- Fotos - Inspección SSTMA en Oficina",
+  "responsable": "Gerente SIG",
+  "origen": "Oficina fila 24"
+ },
+ {
+  "orden": 14,
+  "alcance": "oficinas",
+  "areas": [],
+  "lugar": "",
+  "proceso": null,
+  "actividad": "Uso de Servicios Higiénicos",
+  "aspecto": "Consumo de agua",
+  "impacto": "Agotamiento del recurso natural",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Ninguno",
+  "criterios": [
+   1,
+   3,
+   1,
+   1,
+   3
+  ],
+  "control_operacional": "- Capacitación en el Plan de Preparación y Respuesta ante emergencias - Sensibilización en el consumo de agua - Publicación de afiches",
+  "registro_asociado": "- Lista de Asistencia - Foto de publicación de afiches o afiches publicados.",
+  "responsable": "Gerente SIG",
+  "origen": "Oficina fila 25"
+ },
+ {
+  "orden": 15,
+  "alcance": "oficinas",
+  "areas": [],
+  "lugar": "",
+  "proceso": null,
+  "actividad": "Uso de Servicios Higiénicos",
+  "aspecto": "Descarga no controlada de efluentes",
+  "impacto": "Agotamiento del agua",
+  "situaciones": [
+   "E"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Ninguno",
+  "criterios": [
+   1,
+   3,
+   1,
+   1,
+   1
+  ],
+  "control_operacional": "- Capacitación en el Plan d ePreparación y Respuesta ante emergencias - Sensibilización en el consumo de agua - Publicación de afiches",
+  "registro_asociado": "- Lista de Asistencia - Foto de publicación de afiches o afiches publicados.",
+  "responsable": "Gerente SIG",
+  "origen": "Oficina fila 26"
+ },
+ {
+  "orden": 16,
+  "alcance": "oficinas",
+  "areas": [],
+  "lugar": "",
+  "proceso": null,
+  "actividad": "Uso de Servicios Higiénicos",
+  "aspecto": "Generación, existencia y manejo de residuos no peligrosos (Consumo de Papel toalla/ papel higiénico)",
+  "impacto": "Afectación del agua y suelo",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Formato de pesaje de residuos sólidos mensual",
+  "criterios": [
+   1,
+   1,
+   1,
+   1,
+   3
+  ],
+  "control_operacional": "- Capacitación en la Segregación adecuada de Residuos Solidos. - Contenedor de Basura para Residuos No Aprovechables para los SS.HH. - Inspecciones mensuales",
+  "registro_asociado": "- Lista de Asistencia - Fotos - Inspección SSTMA en Oficina",
+  "responsable": "Gerente SIG",
+  "origen": "Oficina fila 27"
+ },
+ {
+  "orden": 17,
+  "alcance": "oficinas",
+  "areas": [],
+  "lugar": "",
+  "proceso": "Sistemas",
+  "actividad": "Mantenimiento, Montaje y Desmontaje de equipos informáticos",
+  "aspecto": "Generación de residuos peligrosos (Cadmio, mercurio, Policloruro de Vinilo, niquel, Berilio, otros)",
+  "impacto": "Afectación del suelo",
+  "situaciones": [
+   "A"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Contenedor de Basura identificado Rojo (Residuos Peligrosos)",
+  "criterios": [
+   1,
+   1,
+   1,
+   1,
+   1
+  ],
+  "control_operacional": "- Almacenamiento temporal en los tachos de Residuos peligrosos (Rojo) - Inspecciones mensuales",
+  "registro_asociado": "- Fotos - Inspección SSTMA en oficinas - Cetificado de Disposiciñon Final",
+  "responsable": "Gerente SIG",
+  "origen": "Oficina fila 28"
+ },
+ {
+  "orden": 18,
+  "alcance": "oficinas",
+  "areas": [],
+  "lugar": "",
+  "proceso": "Sistemas",
+  "actividad": "Mantenimiento, Montaje y Desmontaje de equipos informáticos",
+  "aspecto": "Generación, existencia y manejo de RAEE",
+  "impacto": "Contaminación del suelo.",
+  "situaciones": [
+   "A"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Espacio habilitado para el almacenamiento temporal de los RAEE",
+  "criterios": [
+   1,
+   1,
+   1,
+   1,
+   1
+  ],
+  "control_operacional": "Realizar la Gestión de los RAEE con alguna de las dos alternativas: 1.- Gestión de los RAEE en puntos de acopio autorizados, según el Procedimiento de Manejo de RR.SS. 2.- Gestión de los RAEE con una EO - RS acreditada ante el MINAM",
+  "registro_asociado": "- Foto de la entrega de los RAEE en puntos de acopio autorizados - Certificado de recojo de RAEE/",
+  "responsable": "Gerente SIG",
+  "origen": "Oficina fila 29"
+ },
+ {
+  "orden": 19,
+  "alcance": "oficinas",
+  "areas": [],
+  "lugar": "",
+  "proceso": "Sistemas",
+  "actividad": "Mantenimiento, Montaje y Desmontaje de equipos informáticos",
+  "aspecto": "Consumo de Energía Eléctrica",
+  "impacto": "Agotamiento del recurso natural Emisión de gases de efecto invernadero",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Ninguno",
+  "criterios": [
+   1,
+   3,
+   1,
+   1,
+   3
+  ],
+  "control_operacional": "- Campañas ambientales. - Publicación de afiches - Procedimiento de uso eficiente de energía eléctrica",
+  "registro_asociado": "- Lista de Asistencia - Tablero de Control - Foto de publicación de afiches o afiches publicados (PPT con afiches)",
+  "responsable": "Gerente SIG",
+  "origen": "Oficina fila 30"
+ },
+ {
+  "orden": 20,
+  "alcance": "oficinas",
+  "areas": [],
+  "lugar": "",
+  "proceso": "Mantenimiento",
+  "actividad": "Uso de Servicios",
+  "aspecto": "Generación / Vertimiento de aguas residuales domésticas",
+  "impacto": "Alteración de las condiciones del suelo / agua",
+  "situaciones": [
+   "A"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Ninguno",
+  "criterios": [
+   1,
+   3,
+   1,
+   1,
+   3
+  ],
+  "control_operacional": "- Publicación de afiches - Inspecciones mnsuales",
+  "registro_asociado": "- Fotos - Inspección SSTMA en Oficina",
+  "responsable": "Gerente SIG",
+  "origen": "Oficina fila 31"
+ },
+ {
+  "orden": 21,
+  "alcance": "oficinas",
+  "areas": [],
+  "lugar": "",
+  "proceso": "Mantenimiento",
+  "actividad": "Uso de Servicios",
+  "aspecto": "Consumo de agua",
+  "impacto": "Agotamiento del recurso natural",
+  "situaciones": [
+   "A"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Ninguno",
+  "criterios": [
+   1,
+   3,
+   1,
+   1,
+   3
+  ],
+  "control_operacional": "- Sensibilización en el consumo de agua - Publicación de afiches",
+  "registro_asociado": "- Lista de Asistencia - Foto de publicación de afiches o afiches publicados.",
+  "responsable": "Gerente SIG",
+  "origen": "Oficina fila 32"
+ },
+ {
+  "orden": 22,
+  "alcance": "oficinas",
+  "areas": [],
+  "lugar": "",
+  "proceso": "Mantenimiento",
+  "actividad": "Uso de Servicios",
+  "aspecto": "Descarga no controlada de efluentes",
+  "impacto": "Agotamiento del agua",
+  "situaciones": [
+   "E"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Ninguno",
+  "criterios": [
+   1,
+   3,
+   1,
+   1,
+   3
+  ],
+  "control_operacional": "- Sensibilización en el consumo de agua - Publicación de afiches",
+  "registro_asociado": "- Lista de Asistencia - Foto de publicación de afiches o afiches publicados.",
+  "responsable": "Gerente SIG",
+  "origen": "Oficina fila 33"
+ },
+ {
+  "orden": 23,
+  "alcance": "oficinas",
+  "areas": [],
+  "lugar": "",
+  "proceso": "Mantenimiento",
+  "actividad": "Uso de Servicios",
+  "aspecto": "Generación, existencia y manejo de residuos no peligrosos (Papel Toalla, papel higiénico)",
+  "impacto": "Afectación del agua y suelo",
+  "situaciones": [
+   "A"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Contenedor de Basura identificado Negro (Residuos No Aprovechables para los SS.HH)",
+  "criterios": [
+   1,
+   1,
+   1,
+   1,
+   3
+  ],
+  "control_operacional": "- Capacitación en la Segregación adecuada de Residuos Solidos. - Inspecciones mensuales",
+  "registro_asociado": "- Lista de Asistencia - Fotos - Inspección SSTMA en Oficina",
+  "responsable": "Gerente SIG",
+  "origen": "Oficina fila 34"
+ },
+ {
+  "orden": 24,
+  "alcance": "oficinas",
+  "areas": [],
+  "lugar": "",
+  "proceso": "Mantenimiento",
+  "actividad": "Servicio de Limpieza de Oficina",
+  "aspecto": "Emisión de olores y/o compuestos orgánicos volátiles (Uso de detergentes,compuestos químicos, desinfectantes, aerosol)",
+  "impacto": "Alteración de la calidad del aire y agua",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Ninguno",
+  "criterios": [
+   1,
+   3,
+   1,
+   1,
+   3
+  ],
+  "control_operacional": "- Solicitar al proveedor la Ficha Técnica del insumo químico. - Solicitar al proveedor la Hoja MSDS del insumo químico. - Contar con una bandeja antiderrame para un almacenamiento adecuado de los insumos de limpieza. - Capacitar al personal sobre las Hojas MSDS - Realizar inspecciones mensuales",
+  "registro_asociado": "- Fichas Técnicas de insumos de Limpieza - Hojas MSDS de insumos de limpieza - Lista de Asistencia - Inspección SSTMA en oficina",
+  "responsable": "Coordinador Logístico",
+  "origen": "Oficina fila 35"
+ },
+ {
+  "orden": 25,
+  "alcance": "oficinas",
+  "areas": [],
+  "lugar": "",
+  "proceso": "Mantenimiento",
+  "actividad": "Servicio de Limpieza de Oficina",
+  "aspecto": "Potencial derrame de materiales peligrosos (desinfectantes)",
+  "impacto": "Alteración de las condiciones del suelo / Agua",
+  "situaciones": [
+   "E"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Bandeja antiderrame para insumos de limpieza",
+  "criterios": [
+   1,
+   1,
+   1,
+   1,
+   2
+  ],
+  "control_operacional": "- Capacitación del Plan de Preparación y Respuesta Ante Emergencias - Programar la ejecución de simulacro de derrame de materiales peligrosos.",
+  "registro_asociado": "- Lista de Asistencia - Programa de Simulacros - Acta de realización de simulacros",
+  "responsable": "Gerente SIG",
+  "origen": "Oficina fila 36"
+ },
+ {
+  "orden": 26,
+  "alcance": "oficinas",
+  "areas": [],
+  "lugar": "",
+  "proceso": "Mantenimiento",
+  "actividad": "Servicio de Limpieza de Oficina",
+  "aspecto": "Generación, existencia y manejo de residuos peligrosos (bolsas de detergente, frascos de desinfectante y/o envases de compuestos químicos)",
+  "impacto": "Afectación flora/agua/suelo/aire",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Formato de pesaje de residuos sólidos mensual",
+  "criterios": [
+   1,
+   1,
+   1,
+   1,
+   2
+  ],
+  "control_operacional": "- Almacenamiento temporal en los tachos de Residuos peligrosos (Rojo) - Inspecciones mensuales",
+  "registro_asociado": "- Fotos - Inspección SSTMA en oficinas",
+  "responsable": "Gerente SIG",
+  "origen": "Oficina fila 37"
+ },
+ {
+  "orden": 27,
+  "alcance": "oficinas",
+  "areas": [],
+  "lugar": "",
+  "proceso": "Mantenimiento",
+  "actividad": "Mantenimiento de Pozo a Tierra",
+  "aspecto": "Generación, existencia y manejo de RAEE (Restos de cables)",
+  "impacto": "Contaminación del suelo.",
+  "situaciones": [
+   "A"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Espacio habilitado para el almacenamiento temporal de los RAEE",
+  "criterios": [
+   1,
+   2,
+   1,
+   1,
+   1
+  ],
+  "control_operacional": "Realizar la Gestión de los RAEE con alguna de las dos alternativas: 1.- Gestión de los RAEE en puntos de acopio autorizados, según el Procedimiento de Manejo de RR.SS. 2.- Gestión de los RAEE con una EO - RS acreditada ante el MINAM",
+  "registro_asociado": "- Foto de la entrega de los RAEE en puntos de acopio autorizados - Certificado de recojo de RAEE/",
+  "responsable": "Gerente SIG",
+  "origen": "Oficina fila 38"
+ },
+ {
+  "orden": 28,
+  "alcance": "oficinas",
+  "areas": [],
+  "lugar": "",
+  "proceso": "Mantenimiento",
+  "actividad": "Mantenimiento de Pozo a Tierra",
+  "aspecto": "Generación, existencia y manejo de residuos peligrosos (Evases: latas y/o aerosoles de pintura)",
+  "impacto": "Afectación flora/agua/suelo/aire",
+  "situaciones": [
+   "A"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Formato de pesaje de residuos sólidos mensual",
+  "criterios": [
+   1,
+   1,
+   1,
+   1,
+   2
+  ],
+  "control_operacional": "- Almacenamiento temporal en los tachos de Residuos peligrosos (Rojo) - Inspecciones mensuales",
+  "registro_asociado": "- Fotos - Inspección SSTMA en oficinas",
+  "responsable": "Gerente SIG",
+  "origen": "Oficina fila 39"
+ },
+ {
+  "orden": 29,
+  "alcance": "oficinas",
+  "areas": [],
+  "lugar": "",
+  "proceso": "Mantenimiento",
+  "actividad": "Fumigación",
+  "aspecto": "Uso de plaguicidas",
+  "impacto": "Afectación flora/agua/suelo/aire",
+  "situaciones": [
+   "A"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Solicitar al proveedor las Fichas Técnicas y Hojas MSDS de los insumos utilizados",
+  "criterios": [
+   1,
+   2,
+   1,
+   1,
+   1
+  ],
+  "control_operacional": "- Solicitar la resolución de autorización por el MINAM y resolución de uso de sus insumos químicos para la limpieza y/o desinfección - Solicitar las Fichas Técnicas y Hojas MSDS de los insumos a utilizar",
+  "registro_asociado": "- Resolución de Autorización - Fichas Técnicas y Hojas MSDS de insumos. - Certificado de Fumigación",
+  "responsable": "Gerente SIG",
+  "origen": "Oficina fila 40"
+ },
+ {
+  "orden": 30,
+  "alcance": "oficinas",
+  "areas": [],
+  "lugar": "",
+  "proceso": "Mantenimiento",
+  "actividad": "Fumigación",
+  "aspecto": "Generación, existencia y manejo de residuos peligrosos (Envases de plaguicidas utilziados)",
+  "impacto": "Afectación flora/agua/suelo/aire",
+  "situaciones": [
+   "A"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Formato de pesaje de residuos sólidos mensual",
+  "criterios": [
+   1,
+   2,
+   1,
+   1,
+   1
+  ],
+  "control_operacional": "- Almacenamiento temporal en los tachos de Residuos peligrosos (Rojo) - Inspecciones mensuales",
+  "registro_asociado": "- Fotos - Inspección SSTMA en oficinas",
+  "responsable": "Gerente SIG",
+  "origen": "Oficina fila 41"
+ },
+ {
+  "orden": 31,
+  "alcance": "empresa",
+  "areas": [],
+  "lugar": "",
+  "proceso": null,
+  "actividad": "Todas las Actividades",
+  "aspecto": "Potencial Incendio",
+  "impacto": "Alteración de las condiciones del aire",
+  "situaciones": [
+   "E"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Miembros de Brigada de Emergencias capacitado Equipos de Lucha contra incendio vigentes",
+  "criterios": [
+   1,
+   3,
+   1,
+   3,
+   2
+  ],
+  "control_operacional": "- Capacitar al personal en Lucha Contra incendios - Comunicar sobre el Plan de Preparación y Respuesta ante emergencias. - Realizar inspecciones mensuales de los extintores",
+  "registro_asociado": "-Lista de Asistencia - Lista de Asistencia - Inspección de Extintores",
+  "responsable": "Gerente SIG",
+  "origen": "Oficina fila 42"
+ },
+ {
+  "orden": 32,
+  "alcance": "laboratorios",
+  "areas": [],
+  "lugar": "",
+  "proceso": "Recepción de Equipos y/o Instrumentos",
+  "actividad": "Iluminación Oficina de Logistica",
+  "aspecto": "Consumo de Energía Eléctrica",
+  "impacto": "Agotamiento del recurso natural Emisión de gases de efecto invernadero",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Ninguno",
+  "criterios": [
+   1,
+   3,
+   1,
+   1,
+   3
+  ],
+  "control_operacional": "- Campañas ambientales. - Publicación de afiches - Procedimiento de uso eficiente de energía eléctrica",
+  "registro_asociado": "- Lista de Asistencia - Foto de publicación de afiches o afiches publicados (PPT con afiches)",
+  "responsable": "Gerente SIG",
+  "origen": "Laborat todos en general fila 12"
+ },
+ {
+  "orden": 33,
+  "alcance": "laboratorios",
+  "areas": [],
+  "lugar": "",
+  "proceso": "Recepción de Equipos y/o Instrumentos",
+  "actividad": "Desplazamiento externo (Transporte de Personal a las instalaciones del Cliente)",
+  "aspecto": "Emisión de gases de combustión",
+  "impacto": "Alteración de la calidad del aire",
+  "situaciones": [
+   "A"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Ejecución de las Revisiones Técnicas vehiculares",
+  "criterios": [
+   1,
+   1,
+   1,
+   1,
+   2
+  ],
+  "control_operacional": "- Revisiones técnicas vehiculares de las unidades de transporte - CITV vigentes",
+  "registro_asociado": "- Certificado de Inspección Técnica Vehicular",
+  "responsable": "Gerente SIG",
+  "origen": "Laborat todos en general fila 13"
+ },
+ {
+  "orden": 34,
+  "alcance": "laboratorios",
+  "areas": [],
+  "lugar": "",
+  "proceso": "Recepción de Equipos y/o Instrumentos",
+  "actividad": "Desplazamiento externo (Transporte de Personal a las instalaciones del Cliente)",
+  "aspecto": "Emisión de ruido ambiental",
+  "impacto": "Contaminación acústica",
+  "situaciones": [
+   "A"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Ejecución de las Revisiones Técnicas vehiculares",
+  "criterios": [
+   1,
+   1,
+   1,
+   1,
+   2
+  ],
+  "control_operacional": "- Revisiones técnicas vehiculares de las unidades de transporte - CITV",
+  "registro_asociado": "- Certificado de Inspección Técnica Vehicular",
+  "responsable": "Gerente SIG",
+  "origen": "Laborat todos en general fila 14"
+ },
+ {
+  "orden": 35,
+  "alcance": "laboratorios",
+  "areas": [],
+  "lugar": "",
+  "proceso": "Recepción de Equipos y/o Instrumentos",
+  "actividad": "Desplazamiento externo (Transporte de Personal a las instalaciones del Cliente)",
+  "aspecto": "Consumo de hidrocarburos (combustible)",
+  "impacto": "Agotamiento del recurso natural",
+  "situaciones": [
+   "A"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Ninguno",
+  "criterios": [
+   1,
+   3,
+   1,
+   1,
+   2
+  ],
+  "control_operacional": "- Mantenimiento preventivo de vehículos - Velocidad moderada",
+  "registro_asociado": "- Reporte de Mantenimiento",
+  "responsable": "Gerente SIG",
+  "origen": "Laborat todos en general fila 15"
+ },
+ {
+  "orden": 36,
+  "alcance": "laboratorios",
+  "areas": [],
+  "lugar": "",
+  "proceso": "Metrología",
+  "actividad": "Procesamiento de información haciendo uso de Equipos de Computo (Registro de datos y emisión de certificado de Calibración)",
+  "aspecto": "Generación, existencia y manejo de residuos no peligrosos (Papel, cartón, plástico)",
+  "impacto": "Agotamiento del recurso natural Emisión de gases de efecto invernadero",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Formato de pesaje de residuos sólidos mensual",
+  "criterios": [
+   1,
+   1,
+   1,
+   1,
+   3
+  ],
+  "control_operacional": "- Capacitación en la Segregación adecuada de Residuos Solidos. - Inspección mensual",
+  "registro_asociado": "- Lista de asistencia - Fotos de uso adecuado del tacho azul - Inspección SSTMA en oficina",
+  "responsable": "Gerente SIG",
+  "origen": "Laborat todos en general fila 16"
+ },
+ {
+  "orden": 37,
+  "alcance": "laboratorios",
+  "areas": [],
+  "lugar": "",
+  "proceso": "Metrología",
+  "actividad": "Procesamiento de información haciendo uso de Equipos de Computo (Registro de datos y emisión de certificado de Calibración)",
+  "aspecto": "Consumo de Energía Eléctrica",
+  "impacto": "Agotamiento del recurso natural Emisión de gases de efecto invernadero",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Ninguno",
+  "criterios": [
+   1,
+   3,
+   1,
+   1,
+   3
+  ],
+  "control_operacional": "- Campañas ambientales. - Publicación de afiches - Procedimiento de uso eficiente de energía eléctrica",
+  "registro_asociado": "- Lista de Asistencia - Tablero de Control - Foto de publicación de afiches o afiches publicados (PPT con afiches)",
+  "responsable": "Gerente SIG",
+  "origen": "Laborat todos en general fila 17"
+ },
+ {
+  "orden": 38,
+  "alcance": "laboratorios",
+  "areas": [],
+  "lugar": "",
+  "proceso": "Metrología",
+  "actividad": "Procesamiento de información haciendo uso de Equipos de Computo (Registro de datos y emisión de certificado de Calibración)",
+  "aspecto": "Consumo de Papel",
+  "impacto": "Agotamiento del recurso natural Emisión de gases de efecto invernadero",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Se cuenta con un espacio para colocar el Papel Borrador (Segundo uso)",
+  "criterios": [
+   1,
+   1,
+   1,
+   1,
+   3
+  ],
+  "control_operacional": "- Sensibilización en el consumo de papel. - Publicación de afiches. - Rehusar el papel impreso a una sola cara. - Procedimiento de uso eficiente de papel.",
+  "registro_asociado": "- Lista de Asistencia - Tablero de Control. - Foto de publicación de afiches o afiches publicados. - Foto de Consumo de Papel borrador.",
+  "responsable": "Gerente SIG",
+  "origen": "Laborat todos en general fila 18"
+ },
+ {
+  "orden": 39,
+  "alcance": "laboratorios",
+  "areas": [],
+  "lugar": "",
+  "proceso": "Metrología",
+  "actividad": "Procesamiento de información haciendo uso de Equipos de Computo (Registro de datos y emisión de certificado de Calibración)",
+  "aspecto": "Uso de Papel con impresión a una cara (Papel Borrador)",
+  "impacto": "Reducción de la contaminación Reducción de la emisión de Co2",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "indirecta",
+  "clase": "positivo",
+  "controles_existentes": "Se cuenta con un espacio para colocar el Papel Borrador (Segundo uso)",
+  "criterios": [
+   null,
+   null,
+   null,
+   null,
+   null
+  ],
+  "control_operacional": "- Sensibilización en el consumo de papel. - Publicación de afiches. - Reciclar el papel impreso a una casa (Se enucentra colocado en un lugar accesible para el uso de todo el personal).",
+  "registro_asociado": "- Lista de Asistencia - Foto de publicación de afiches o afiches publicados.",
+  "responsable": "Gerente SIG",
+  "origen": "Laborat todos en general fila 19"
+ },
+ {
+  "orden": 40,
+  "alcance": "laboratorios",
+  "areas": [],
+  "lugar": "",
+  "proceso": "Metrología",
+  "actividad": "Aplicación de gases patrón (H₂S, CO, CH₄, O₂)",
+  "aspecto": "Emisión controlada de gases patrón",
+  "impacto": "Contaminación leve del aire en ambiente interior",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "directa",
+  "clase": "negativo",
+  "controles_existentes": "Ninguna",
+  "criterios": [
+   1,
+   2,
+   1,
+   1,
+   3
+  ],
+  "control_operacional": "Uso de gases de baja concentración, ventilación adecuada, procedimientos normalizados",
+  "registro_asociado": "Registro de señalización y condiciones de seguridad - Registro de simulacros y/o capacitaciones por fugas de gases",
+  "responsable": null,
+  "origen": "Laborat todos en general fila 20"
+ },
+ {
+  "orden": 41,
+  "alcance": "laboratorios",
+  "areas": [],
+  "lugar": "",
+  "proceso": "Metrología",
+  "actividad": "Aplicación de gases patrón",
+  "aspecto": "Uso de gases certificados",
+  "impacto": "Aseguramiento de mediciones confiables y reducción de recalibraciones",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "directa",
+  "clase": "positivo",
+  "controles_existentes": "Inducción y toma de conciencia al personal",
+  "criterios": [
+   null,
+   null,
+   null,
+   null,
+   null
+  ],
+  "control_operacional": "Uso de gases certificados y equipos calibrados Inspecciones de SSTMA",
+  "registro_asociado": "Registro de señalización y condiciones de seguridad - Registro de simulacros y/o capacitaciones por fugas de gases Registro de inspección de SSTMA",
+  "responsable": null,
+  "origen": "Laborat todos en general fila 21"
+ },
+ {
+  "orden": 42,
+  "alcance": "laboratorios",
+  "areas": [],
+  "lugar": "",
+  "proceso": "Metrología",
+  "actividad": "Fuga accidental de gas patrón",
+  "aspecto": "Liberación no controlada de gas",
+  "impacto": "Contaminación del aire y riesgo ambiental puntual",
+  "situaciones": [
+   "E"
+  ],
+  "generacion": "directa",
+  "clase": "negativo",
+  "controles_existentes": "Zona de almacenamiento de gases controlados",
+  "criterios": [
+   3,
+   3,
+   1,
+   1,
+   1
+  ],
+  "control_operacional": "Procedimiento de emergencia, detectores de gas, capacitación, ventilación forzada Inspecciones de SSTMA",
+  "registro_asociado": "Registro de señalización y condiciones de seguridad - Registro de simulacros y/o capacitaciones por fugas de gases Registro de inspección de SSTMA",
+  "responsable": null,
+  "origen": "Laborat todos en general fila 22"
+ },
+ {
+  "orden": 43,
+  "alcance": "laboratorios",
+  "areas": [],
+  "lugar": "",
+  "proceso": "Metrología",
+  "actividad": "Manejo y almacenamiento de balones de gas",
+  "aspecto": "Almacenamiento de gases comprimidos",
+  "impacto": "Riesgo de fuga y contaminación del aire",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "directa",
+  "clase": "negativo",
+  "controles_existentes": "Zona de almacenamiento de gases controlados",
+  "criterios": [
+   1,
+   2,
+   1,
+   1,
+   3
+  ],
+  "control_operacional": "Almacenamiento en jaulas ventiladas, señalización, inspección periódica Inspecciones de SSTMA",
+  "registro_asociado": "Registro de señalización y condiciones de seguridad - Registro de simulacros y/o capacitaciones por fugas de gases Registro de inspección de SSTMA",
+  "responsable": null,
+  "origen": "Laborat todos en general fila 23"
+ },
+ {
+  "orden": 44,
+  "alcance": "laboratorios",
+  "areas": [],
+  "lugar": "",
+  "proceso": "Metrología",
+  "actividad": "Limpieza post calibración y desconexión",
+  "aspecto": "Uso de paños y solventes de limpieza",
+  "impacto": "Generación de residuos contaminados",
+  "situaciones": [
+   "A"
+  ],
+  "generacion": "directa",
+  "clase": "negativo",
+  "controles_existentes": "Procedimiento de Residuos",
+  "criterios": [
+   2,
+   2,
+   1,
+   1,
+   2
+  ],
+  "control_operacional": "Uso de paños reutilizables, segregación de residuos",
+  "registro_asociado": "Evidencias fotograficas de segregación de resaiduos",
+  "responsable": null,
+  "origen": "Laborat todos en general fila 24"
+ },
+ {
+  "orden": 45,
+  "alcance": "laboratorios",
+  "areas": [],
+  "lugar": "",
+  "proceso": "Metrología",
+  "actividad": "Limpieza post calibración",
+  "aspecto": "Generación de residuos sólidos",
+  "impacto": "Contaminación del suelo por mala disposición",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "directa",
+  "clase": "negativo",
+  "controles_existentes": "Procedimiento de Residuos",
+  "criterios": [
+   2,
+   2,
+   1,
+   1,
+   1
+  ],
+  "control_operacional": "Gestión de residuos sólidos según procedimiento Inspecciones de SSTMA",
+  "registro_asociado": "Registro de disposición de residuos peligrosos y RAEE",
+  "responsable": null,
+  "origen": "Laborat todos en general fila 25"
+ },
+ {
+  "orden": 46,
+  "alcance": "laboratorios",
+  "areas": [],
+  "lugar": "",
+  "proceso": "Metrología",
+  "actividad": "Calibración de sondas de oxígeno disuelto, pH y ORP",
+  "aspecto": "Uso de soluciones buffer y electrolitos",
+  "impacto": "Generación de residuos líquidos",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "directa",
+  "clase": "negativo",
+  "controles_existentes": "Ninguna",
+  "criterios": [
+   3,
+   2,
+   1,
+   1,
+   2
+  ],
+  "control_operacional": "Disposición controlada de soluciones, fichas MSDS, capacitación",
+  "registro_asociado": "Registro de disposición de residuos peligrosos y RAEE",
+  "responsable": null,
+  "origen": "Laborat todos en general fila 26"
+ },
+ {
+  "orden": 47,
+  "alcance": "laboratorios",
+  "areas": [],
+  "lugar": "",
+  "proceso": "Metrología",
+  "actividad": "Calibración de sondas electroquímicas",
+  "aspecto": "Uso eficiente de soluciones patrón",
+  "impacto": "Reducción de generación de residuos líquidos",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "directa",
+  "clase": "negativo",
+  "controles_existentes": "Ninguno",
+  "criterios": [
+   1,
+   1,
+   1,
+   1,
+   2
+  ],
+  "control_operacional": "Dosificación controlada y reutilización permitida",
+  "registro_asociado": "Registro de disposición de residuos peligrosos y RAEE",
+  "responsable": null,
+  "origen": "Laborat todos en general fila 27"
+ },
+ {
+  "orden": 48,
+  "alcance": "laboratorios",
+  "areas": [],
+  "lugar": "",
+  "proceso": "Metrología",
+  "actividad": "Calibracion de multiparametros, conductimetro, sondas de ORP y pH, sondas de OD",
+  "aspecto": "Consumo de soluciones quimicas",
+  "impacto": "Contaminación de agua y suelo",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Ninguno",
+  "criterios": [
+   1,
+   2,
+   1,
+   1,
+   2
+  ],
+  "control_operacional": "- Recolección de soluciones agotadas en envases rotulados para disposición final con EPS-RS. - Capacitación al personal en manejo de residuos peligrosos. - Mantener hojas de seguridad (MSDS) disponibles.",
+  "registro_asociado": "-Registro de generación de residuos peligrosos - Hojas MSDS de insumos de limpieza -Manifiesto de residuos peligrosos (EPS-RS)",
+  "responsable": "Gerente SIG",
+  "origen": "Laborat todos en general fila 28"
+ },
+ {
+  "orden": 49,
+  "alcance": "laboratorios",
+  "areas": [],
+  "lugar": "",
+  "proceso": "Metrología",
+  "actividad": "Uso de baños termostáticos ( > 180 °C) (genera dioxido de silicio)",
+  "aspecto": "Emisión de gases",
+  "impacto": "Contaminación de calidad de aire",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Campana extractora",
+  "criterios": [
+   2,
+   3,
+   1,
+   1,
+   2
+  ],
+  "control_operacional": "- Cambiar el tipo de aceite siliconado c100 por otro menos contaminante - Uso de tapa en los baños termostáticos. - Monitoreo ambiental periódico de aire. -Implementación de EPP (respiradores adecuados).",
+  "registro_asociado": "- Ficha técnica y MSDS del nuevo aceite - Registro de entrega y uso de EPP - Programa de vigilancia ambiental",
+  "responsable": "Gerente SIG",
+  "origen": "Laborat todos en general fila 29"
+ },
+ {
+  "orden": 50,
+  "alcance": "laboratorios",
+  "areas": [],
+  "lugar": "",
+  "proceso": "Metrología",
+  "actividad": "Uso de aceites para la calbracion de varios equipos",
+  "aspecto": "Generación de residuos de aceites usados.",
+  "impacto": "Contaminación del suelo y agua por derrames.",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Ninguno",
+  "criterios": [
+   2,
+   2,
+   1,
+   1,
+   1
+  ],
+  "control_operacional": "- Almacenamiento en contenedores herméticos, rotulados. - Bandejas de contención secundaria. - Entrega de aceites usados a operador autorizado. - Plan de contingencia para derrames (kit absorbente).",
+  "registro_asociado": "- Formato de almacenamiento de residuos líquidos peligrosos - Manifiesto de entrega de aceites usados a operador autorizado - Registro de inspección de contenedores - Programa de preparación y respuesta ante emergencias - Registro de incidentes y uso de kit antiderrame",
+  "responsable": "Gerente SIG",
+  "origen": "Laborat todos en general fila 30"
+ },
+ {
+  "orden": 51,
+  "alcance": "laboratorios",
+  "areas": [],
+  "lugar": "",
+  "proceso": "Metrología",
+  "actividad": "Uso considerado de pilas en el proceso de calibracion para los equipos",
+  "aspecto": "Generación de residuos peligrosos (pilas agotadas).",
+  "impacto": "Contaminación de suelo y agua por metales pesados (mercurio, cadmio, plomo).",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Recolección selectiva en contenedores especiales para pilas.",
+  "criterios": [
+   2,
+   2,
+   1,
+   1,
+   2
+  ],
+  "control_operacional": "- Entrega a programa municipal o empresa autorizada. - Promoción de uso de pilas recargables en la medida posible. - Señalización del punto de acopio.",
+  "registro_asociado": "- Registro de segregación y acopio de residuos peligrosos (pilas/baterías) - Constancia de entrega a programa municipal o empresa autorizada - Registro fotográfico del punto de acopio señalizado - Capacitaciones de Gestión Integral de Residuos Solidos",
+  "responsable": "Gerente SIG",
+  "origen": "Laborat todos en general fila 31"
+ },
+ {
+  "orden": 52,
+  "alcance": "laboratorios",
+  "areas": [],
+  "lugar": "",
+  "proceso": "Metrología",
+  "actividad": "Operación de balanzas, comparadores, PC, iluminación, A/C–deshumidificadores",
+  "aspecto": "Consumo de energía eléctrica",
+  "impacto": "Emisiones indirectas de GEI / mayor huella climática",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Ninguna",
+  "criterios": [
+   1,
+   2,
+   1,
+   1,
+   3
+  ],
+  "control_operacional": "Campañas de sensibilización sobre comsumo de energía",
+  "registro_asociado": "Registro de señalización y condiciones de seguridad",
+  "responsable": null,
+  "origen": "Laborat todos en general fila 32"
+ },
+ {
+  "orden": 53,
+  "alcance": "laboratorios",
+  "areas": [],
+  "lugar": "",
+  "proceso": "Metrología",
+  "actividad": "Operación de equipos eléctricos en condiciones no planificadas (equipos encendidos fuera de horario, set points inadecuados)",
+  "aspecto": "Sobreconsumo de energía",
+  "impacto": "Incremento de GEI indirecto y consumo de recursos",
+  "situaciones": [
+   "A"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Inducción y toma de conciencia al personal Capacitación sobre uso de recursos como luz, agua y papel",
+  "criterios": [
+   1,
+   1,
+   1,
+   1,
+   2
+  ],
+  "control_operacional": "Control de horarios, responsables por turno, verificación de encendido de equipos, inspección interna mensual (evidencia fotográfica o checklist)",
+  "registro_asociado": "Registro de inspección de SSTMA",
+  "responsable": null,
+  "origen": "Laborat todos en general fila 33"
+ },
+ {
+  "orden": 54,
+  "alcance": "laboratorios",
+  "areas": [],
+  "lugar": "",
+  "proceso": "Metrología",
+  "actividad": "Lavado/limpieza de material volumétrico y vidriería; uso de sanitarios",
+  "aspecto": "Consumo de agua",
+  "impacto": "Agotamiento de recurso hídrico",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "directa",
+  "clase": "negativo",
+  "controles_existentes": "Inducción y toma de conciencia al personal Capacitación sobre uso de recursos como luz, agua y papel",
+  "criterios": [
+   3,
+   3,
+   1,
+   1,
+   1
+  ],
+  "control_operacional": "Procedimiento de uso eficiente de agua Campañas de sensibilización sobre el consumo de agua",
+  "registro_asociado": "Registro de difusión de campañas ambientales - Registro de simulacros y/o capacitaciones por fuga de agua Registro de inspección de SSTMA",
+  "responsable": null,
+  "origen": "Laborat todos en general fila 34"
+ },
+ {
+  "orden": 55,
+  "alcance": "laboratorios",
+  "areas": [],
+  "lugar": "",
+  "proceso": "Metrología",
+  "actividad": "Lavado/limpieza con detergentes",
+  "aspecto": "Descarga de efluentes con detergentes/suciedad al alcantarillado",
+  "impacto": "Afectación a calidad de agua / carga orgánica",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "directa",
+  "clase": "negativo",
+  "controles_existentes": "Inducción y toma de conciencia al personal Capacitación sobre uso de recursos como luz, agua y papel",
+  "criterios": [
+   1,
+   2,
+   1,
+   1,
+   3
+  ],
+  "control_operacional": "Uso de detergentes autorizados, dosificación controlada, prohibición de vertidos no autorizados, capacitación y supervisión",
+  "registro_asociado": "Registro de señalización y condiciones de seguridad - Hojas de seguridad de los productos Registro de inspección de SSTMA",
+  "responsable": null,
+  "origen": "Laborat todos en general fila 35"
+ },
+ {
+  "orden": 56,
+  "alcance": "laboratorios",
+  "areas": [],
+  "lugar": "",
+  "proceso": "Metrología",
+  "actividad": "Gestión documental, embalajes y operación diaria",
+  "aspecto": "Residuos comunes y reciclables (papel, cartón, plásticos, metales)",
+  "impacto": "Incremento de residuos sólidos / consumo de recursos",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "directa",
+  "clase": "negativo",
+  "controles_existentes": "Procedimiento de Residuos",
+  "criterios": [
+   2,
+   2,
+   1,
+   1,
+   2
+  ],
+  "control_operacional": "Segregación con “puntos limpios”, señalización, digitalizar certificados en PDF con firma (si aplica), compras sostenibles (papel reciclado), indicador: kg/mes y % segregado",
+  "registro_asociado": "Evidencias fotograficas de segregación de residuos",
+  "responsable": null,
+  "origen": "Laborat todos en general fila 36"
+ },
+ {
+  "orden": 57,
+  "alcance": "laboratorios",
+  "areas": [],
+  "lugar": "",
+  "proceso": "Metrología",
+  "actividad": "Limpieza de equipos/superficies con alcohol isopropílico/etanol; uso de guantes/paños",
+  "aspecto": "Residuos peligrosos o especiales (paños/guantes contaminados, envases)",
+  "impacto": "Contaminación por mala disposición / emisión de vapores (COV)",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "directa",
+  "clase": "negativo",
+  "controles_existentes": "Procedimiento de Residuos",
+  "criterios": [
+   2,
+   2,
+   1,
+   1,
+   1
+  ],
+  "control_operacional": "Stock mínimo (“justo”), almacenamiento rotulado con bandeja de contención, SDS disponible, segregación y rotulado de residuos especiales, disposición con operador autorizado cuando corresponda, sustitución por productos menos peligrosos cuando sea viable",
+  "registro_asociado": "Registro de disposición de residuos peligrosos y RAEE",
+  "responsable": null,
+  "origen": "Laborat todos en general fila 37"
+ },
+ {
+  "orden": 58,
+  "alcance": "laboratorios",
+  "areas": [],
+  "lugar": "",
+  "proceso": "Metrología",
+  "actividad": "Almacenamiento de químicos de limpieza",
+  "aspecto": "Derrame menor por manipulación/almacenamiento",
+  "impacto": "Contaminación de superficies y posible descarga a desagüe",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "directa",
+  "clase": "negativo",
+  "controles_existentes": "Ninguna",
+  "criterios": [
+   3,
+   2,
+   1,
+   1,
+   2
+  ],
+  "control_operacional": "Bandejas de contención, kit de derrames, instructivo de respuesta, registro de incidentes ambientales, inspección mensual de envases",
+  "registro_asociado": "Registro de simulacro de productos quimicos o similares",
+  "responsable": null,
+  "origen": "Laborat todos en general fila 38"
+ },
+ {
+  "orden": 59,
+  "alcance": "laboratorios",
+  "areas": [],
+  "lugar": "",
+  "proceso": "Metrología",
+  "actividad": "Derrame significativo de alcohol/detergente",
+  "aspecto": "Derrame accidental mayor",
+  "impacto": "Contaminación y generación de residuos contaminados",
+  "situaciones": [
+   "E"
+  ],
+  "generacion": "directa",
+  "clase": "negativo",
+  "controles_existentes": "Ninguno",
+  "criterios": [
+   1,
+   1,
+   1,
+   1,
+   2
+  ],
+  "control_operacional": "Plan de respuesta a emergencias ambientales, kit de derrames completo (absorbentes/bolsas/rotulado), simulacro corto anual, comunicación interna, disposición de residuos del derrame como especial",
+  "registro_asociado": "Registro de simulacro de productos quimicos o similares",
+  "responsable": null,
+  "origen": "Laborat todos en general fila 39"
+ },
+ {
+  "orden": 60,
+  "alcance": "laboratorios",
+  "areas": [],
+  "lugar": "",
+  "proceso": "Metrología",
+  "actividad": "Recojo/entrega de pesas y material volumétrico",
+  "aspecto": "Emisiones por transporte asociado al servicio",
+  "impacto": "Emisiones atmosféricas (CO₂/NOx) y ruido urbano",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Ninguno",
+  "criterios": [
+   1,
+   2,
+   1,
+   1,
+   2
+  ],
+  "control_operacional": "Optimizar rutas y agrupar entregas/recojos, priorizar transporte con mantenimiento al día, promover atención documental/remota cuando sea posible, indicador: km/mes o salidas optimizadas",
+  "registro_asociado": "Verificación de rutas e los trnasportistas por GPS",
+  "responsable": "Gerente SIG",
+  "origen": "Laborat todos en general fila 40"
+ },
+ {
+  "orden": 61,
+  "alcance": "laboratorios",
+  "areas": [],
+  "lugar": "",
+  "proceso": "Metrología",
+  "actividad": "Uso de guantes, paños, cintas, embalajes, etiquetas",
+  "aspecto": "Consumo de insumos",
+  "impacto": "Mayor generación de residuos / huella por fabricación y transporte",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "directa",
+  "clase": "negativo",
+  "controles_existentes": "Ninguno",
+  "criterios": [
+   2,
+   2,
+   2,
+   1,
+   2
+  ],
+  "control_operacional": "Compras a granel, reutilización de embalaje interno cuando no afecte integridad metrológica, indicador: consumo mensual. Asimismo, evauar establcer: “Kit por calibración” para evitar sobreconsumo.",
+  "registro_asociado": "Registro de compras Segregación de residuos en los tachos correspondientes",
+  "responsable": "Gerente SIG",
+  "origen": "Laborat todos en general fila 41"
+ },
+ {
+  "orden": 62,
+  "alcance": "laboratorios",
+  "areas": [],
+  "lugar": "",
+  "proceso": "Metrología",
+  "actividad": "Baja de equipos (PC, monitores, impresoras, baterías, UPS)",
+  "aspecto": "RAEE",
+  "impacto": "Contaminación por componentes peligrosos / riesgo legal",
+  "situaciones": [
+   "A"
+  ],
+  "generacion": "directa",
+  "clase": "negativo",
+  "controles_existentes": "Zona de Almacenamiento de envases vacios",
+  "criterios": [
+   2,
+   2,
+   1,
+   1,
+   1
+  ],
+  "control_operacional": "Procedimiento RAEE: almacenamiento temporal seguro, entrega a gestor autorizado, actas/constancias, registro de baja de activos, mantenimiento para extender vida útil",
+  "registro_asociado": "Registro de entrega de RAEEa EMAUS u otros similares",
+  "responsable": "Gerente SIG",
+  "origen": "Laborat todos en general fila 42"
+ },
+ {
+  "orden": 63,
+  "alcance": "laboratorios",
+  "areas": [],
+  "lugar": "",
+  "proceso": "Metrología",
+  "actividad": "Operación de compresor/A-C/equipos auxiliares (si aplica)",
+  "aspecto": "Ruido y vibración",
+  "impacto": "Molestias internas/vecinos y disconfort",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "directa",
+  "clase": "negativo",
+  "controles_existentes": "Ninguno",
+  "criterios": [
+   2,
+   2,
+   1,
+   1,
+   1
+  ],
+  "control_operacional": "Mantenimiento preventivo, soportes antivibración, ubicar equipos ruidosos lejos de áreas sensibles, control horario si aplica",
+  "registro_asociado": "Registro de mantenimiento del compresor u otros equipos asociados.",
+  "responsable": "Gerente SIG",
+  "origen": "Laborat todos en general fila 43"
+ },
+ {
+  "orden": 64,
+  "alcance": "laboratorios",
+  "areas": [],
+  "lugar": "",
+  "proceso": "Metrología",
+  "actividad": "Cambio o eliminación de instrumento de parte del instrumento de medición",
+  "aspecto": "Generación, existencia y manejo de residuos peligrosos",
+  "impacto": "Afectación y contaminación de recursos flora/agua/aire",
+  "situaciones": [
+   "A"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Formato de pesaje de residuos sólidos mensual",
+  "criterios": [
+   1,
+   2,
+   1,
+   1,
+   1
+  ],
+  "control_operacional": "- Almacenamiento temporal en los tachos de Residuos peligrosos (Rojo) - Inspecciones mensuales - Gestionar la disposición final de los residuos peligrosos con una empresa EO-RS, autorizada por el MINAM (Ejecutar luego de contar con la cantidad mínima requerida por las empresas operadoras).",
+  "registro_asociado": "- Fotos - Inspección SSTMA en oficinas - Cetificado de Disposición Final",
+  "responsable": "Gerente SIG",
+  "origen": "Laborat todos en general fila 44"
+ },
+ {
+  "orden": 65,
+  "alcance": "laboratorios",
+  "areas": [],
+  "lugar": "",
+  "proceso": "Metrología",
+  "actividad": "Cambio de: Computadoras de escritorio, Laptops, impresoras, calculadoras, teléfonos, microondas, cables, cargadores, audífonos, otros.",
+  "aspecto": "Generación, existencia y manejo de RAEE",
+  "impacto": "Contaminación del suelo.",
+  "situaciones": [
+   "A"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Espacio habilitado para el almacenamiento temporal de los RAEE",
+  "criterios": [
+   1,
+   2,
+   1,
+   1,
+   1
+  ],
+  "control_operacional": "Realizar la Gestión de los RAEE con alguna de las dos alternativas: 1.- Gestión de los RAEE en puntos de acopio autorizados, según el Procedimiento de Manejo de RR.SS. 2.- Gestión de los RAEE con una EO - RS acreditada ante el MINAM",
+  "registro_asociado": "- Foto de la entrega de los RAEE en puntos de acopio autorizados - Punto de RAEE - Certificado de recojo de RAEE",
+  "responsable": "Gerente SIG",
+  "origen": "Laborat todos en general fila 45"
+ },
+ {
+  "orden": 66,
+  "alcance": "laboratorios",
+  "areas": [],
+  "lugar": "",
+  "proceso": "Mantenimiento",
+  "actividad": "Mantenimiento, Montaje y Desmontaje de equipos informáticos",
+  "aspecto": "Generación de residuos peligrosos (Cadmio, mercurio, Policloruro de Vinilo, niquel, Berilio, otros)",
+  "impacto": "Afectación del suelo",
+  "situaciones": [
+   "A"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Contenedor de Basura identificado Rojo (Residuos Peligrosos)",
+  "criterios": [
+   1,
+   1,
+   1,
+   1,
+   1
+  ],
+  "control_operacional": "- Almacenamiento temporal en los tachos de Residuos peligrosos (Rojo) - Inspecciones mensuales",
+  "registro_asociado": "- Fotos - Inspección SSTMA en oficinas - Cetificado de Disposiciñon Final",
+  "responsable": "Gerente SIG",
+  "origen": "Laborat todos en general fila 46"
+ },
+ {
+  "orden": 67,
+  "alcance": "laboratorios",
+  "areas": [],
+  "lugar": "",
+  "proceso": "Mantenimiento",
+  "actividad": "Mantenimiento, Montaje y Desmontaje de equipos informáticos",
+  "aspecto": "Generación, existencia y manejo de RAEE",
+  "impacto": "Contaminación del suelo.",
+  "situaciones": [
+   "A"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Espacio habilitado para el almacenamiento temporal de los RAEE",
+  "criterios": [
+   1,
+   1,
+   1,
+   1,
+   1
+  ],
+  "control_operacional": "Realizar la Gestión de los RAEE con alguna de las dos alternativas: 1.- Gestión de los RAEE en puntos de acopio autorizados, según el Procedimiento de Manejo de RR.SS. 2.- Gestión de los RAEE con una EO - RS acreditada ante el MINAM",
+  "registro_asociado": "- Acta de entrega de mouse o fotos de disposición en puntos RAEE - Certificado de recojo de RAEE",
+  "responsable": "Gerente SIG",
+  "origen": "Laborat todos en general fila 47"
+ },
+ {
+  "orden": 68,
+  "alcance": "laboratorios",
+  "areas": [],
+  "lugar": "",
+  "proceso": "Mantenimiento",
+  "actividad": "Mantenimiento, Montaje y Desmontaje de equipos informáticos",
+  "aspecto": "Consumo de Energía Eléctrica",
+  "impacto": "Agotamiento del recurso natural Emisión de gases de efecto invernadero",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Ninguno",
+  "criterios": [
+   1,
+   3,
+   1,
+   1,
+   3
+  ],
+  "control_operacional": "Campañas ambientales. - Publicación de afiches - Procedimiento de uso eficiente de energía eléctrica",
+  "registro_asociado": "- Lista de Asistencia - Tablero de Control - Foto de publicación de afiches o afiches publicados (PPT con afiches)",
+  "responsable": "Gerente SIG",
+  "origen": "Laborat todos en general fila 48"
+ },
+ {
+  "orden": 69,
+  "alcance": "laboratorios",
+  "areas": [],
+  "lugar": "",
+  "proceso": "Mantenimiento",
+  "actividad": "Servicio de Limpieza de Oficina",
+  "aspecto": "Emisión de olores y/o compuestos orgánicos volátiles (Uso de detergentes,compuestos químicos, desinfectantes, aerosol)",
+  "impacto": "Alteración de la calidad del aire y agua",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Ninguno",
+  "criterios": [
+   1,
+   3,
+   1,
+   1,
+   3
+  ],
+  "control_operacional": "- Solicitar al proveedor la Ficha Técnica del insumo químico. - Solicitar al proveedor la Hoja MSDS del insumo químico. - Contar con una bandeja antiderrame para un almacenamiento adecuado de los insumos de limpieza. - Capacitar al personal sobre las Hojas MSDS - Realizar inspecciones mensuales",
+  "registro_asociado": "- Fichas Técnicas de insumos de Limpieza - Hojas MSDS de insumos de limpieza - Lista de Asistencia - Inspección SSTMA en oficina",
+  "responsable": "Coordinador Logístico",
+  "origen": "Laborat todos en general fila 49"
+ },
+ {
+  "orden": 70,
+  "alcance": "laboratorios",
+  "areas": [],
+  "lugar": "",
+  "proceso": "Mantenimiento",
+  "actividad": "Servicio de Limpieza de Oficina",
+  "aspecto": "Potencial derrame de materiales peligrosos (desinfectantes)",
+  "impacto": "Alteración de las condiciones del suelo / Agua",
+  "situaciones": [
+   "E"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Bandeja antiderrame para insumos de limpieza",
+  "criterios": [
+   1,
+   1,
+   1,
+   1,
+   2
+  ],
+  "control_operacional": "- Capacitación del Plan de Preparación y Respuesta Ante Emergencias - Programar la ejecución de simulacro de derrame de materiales peligrosos.",
+  "registro_asociado": "- Lista de Asistencia - Programa de Simulacros - Acta de realización de simulacros",
+  "responsable": "Gerente SIG",
+  "origen": "Laborat todos en general fila 50"
+ },
+ {
+  "orden": 71,
+  "alcance": "laboratorios",
+  "areas": [],
+  "lugar": "",
+  "proceso": "Mantenimiento",
+  "actividad": "Servicio de Limpieza de Oficina",
+  "aspecto": "Generación, existencia y manejo de residuos peligrosos (bolsas de detergente, frascos de desinfectante y/o envases de compuestos químicos)",
+  "impacto": "Afectación flora/agua/suelo/aire",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Formato de pesaje de residuos sólidos mensual",
+  "criterios": [
+   1,
+   1,
+   1,
+   1,
+   2
+  ],
+  "control_operacional": "- Almacenamiento temporal en los tachos de Residuos peligrosos (Rojo) - Inspecciones mensuales",
+  "registro_asociado": "- Fotos - Inspección SSTMA en oficinas",
+  "responsable": "Gerente SIG",
+  "origen": "Laborat todos en general fila 51"
+ },
+ {
+  "orden": 72,
+  "alcance": "laboratorios",
+  "areas": [],
+  "lugar": "",
+  "proceso": "Mantenimiento",
+  "actividad": "Mantenimiento de Pozo a Tierra",
+  "aspecto": "Generación, existencia y manejo de RAEE (Restos de cables)",
+  "impacto": "Contaminación del suelo.",
+  "situaciones": [
+   "A"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Espacio habilitado para el almacenamiento temporal de los RAEE",
+  "criterios": [
+   1,
+   2,
+   1,
+   1,
+   1
+  ],
+  "control_operacional": "Realizar la Gestión de los RAEE con alguna de las dos alternativas: 1.- Gestión de los RAEE en puntos de acopio autorizados, según el Procedimiento de Manejo de RR.SS. 2.- Gestión de los RAEE con una EO - RS acreditada ante el MINAM",
+  "registro_asociado": "- Foto de la entrega de los RAEE en puntos de acopio autorizados - Certificado de recojo de RAEE/",
+  "responsable": "Gerente SIG",
+  "origen": "Laborat todos en general fila 52"
+ },
+ {
+  "orden": 73,
+  "alcance": "laboratorios",
+  "areas": [],
+  "lugar": "",
+  "proceso": "Mantenimiento",
+  "actividad": "Mantenimiento de Pozo a Tierra",
+  "aspecto": "Generación, existencia y manejo de residuos peligrosos (Evases: latas y/o aerosoles de pintura)",
+  "impacto": "Afectación flora/agua/suelo/aire",
+  "situaciones": [
+   "A"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Formato de pesaje de residuos sólidos mensual",
+  "criterios": [
+   1,
+   1,
+   1,
+   1,
+   2
+  ],
+  "control_operacional": "- Almacenamiento temporal en los tachos de Residuos peligrosos (Rojo) - Inspecciones mensuales",
+  "registro_asociado": "- Fotos - Inspección SSTMA en oficinas",
+  "responsable": "Gerente SIG",
+  "origen": "Laborat todos en general fila 53"
+ },
+ {
+  "orden": 74,
+  "alcance": "laboratorios",
+  "areas": [],
+  "lugar": "",
+  "proceso": "Mantenimiento",
+  "actividad": "Fumigación",
+  "aspecto": "Uso de plaguicidas",
+  "impacto": "Afectación flora/agua/suelo/aire",
+  "situaciones": [
+   "A"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Solicitar al proveedor las Fichas Técnicas y Hojas MSDS de los insumos utilizados",
+  "criterios": [
+   1,
+   2,
+   1,
+   1,
+   1
+  ],
+  "control_operacional": "- Solicitar la Resolución de Autorización por el MINAM. - Solicitar las Fichas Técnicas y Hojas MSDS de los insumos a utilizar",
+  "registro_asociado": "- Resolución de Autorización - Fichas Técnicas y Hojas MSDS de insumos. - Certificado de Fumigación",
+  "responsable": "Gerente SIG",
+  "origen": "Laborat todos en general fila 54"
+ },
+ {
+  "orden": 75,
+  "alcance": "laboratorios",
+  "areas": [],
+  "lugar": "",
+  "proceso": "Mantenimiento",
+  "actividad": "Fumigación",
+  "aspecto": "Generación, existencia y manejo de residuos peligrosos (Envases de plaguicidas utilziados)",
+  "impacto": "Afectación flora/agua/suelo/aire",
+  "situaciones": [
+   "A"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Inspecciones Mensuales",
+  "criterios": [
+   1,
+   2,
+   1,
+   1,
+   1
+  ],
+  "control_operacional": "- Almacenamiento temporal en los tachos de Residuos peligrosos (Rojo) - Inspecciones mensuales",
+  "registro_asociado": "- Fotos - Inspección SSTMA en oficinas",
+  "responsable": "Gerente SIG",
+  "origen": "Laborat todos en general fila 55"
+ },
+ {
+  "orden": 76,
+  "alcance": "areas",
+  "areas": [
+   "Laboratorio de Análisis Químico",
+   "Laboratorio de Gases"
+  ],
+  "lugar": "",
+  "proceso": "Metrología",
+  "actividad": "Calibración de detectores de gases ( O2, H2S, NH3, C3H8, CH4, Iso butileno, CO, CO2, C5H12)",
+  "aspecto": "Emisión de gases",
+  "impacto": "Contamintación de calidad de aire",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Ninguno",
+  "criterios": [
+   2,
+   2,
+   2,
+   1,
+   2
+  ],
+  "control_operacional": "- Purga controlada de gases en sistemas cerrados. - Almacenamiento de cilindros en gabinetes seguros, ventilados y señalizados. -Plan de respuesta ante fugas de gases.",
+  "registro_asociado": "Registro de señalización y condiciones de seguridad - Registro de simulacros y/o capacitaciones por fugas de gases",
+  "responsable": "Gerente SIG",
+  "origen": "Laborat Analisis Quimic y Gases fila 26"
+ },
+ {
+  "orden": 77,
+  "alcance": "areas",
+  "areas": [
+   "Laboratorio de Análisis Químico",
+   "Laboratorio de Gases"
+  ],
+  "lugar": "",
+  "proceso": "Metrología",
+  "actividad": "Calibración de detectores de gases ( O2, H2S, NH3, C3H8, CH4, Iso butileno, CO, CO2, C5H12)",
+  "aspecto": "Generación de residuos plasticos (MR) y metalicos (balones de gas)",
+  "impacto": "Contaminación del suelo, agua y aire",
+  "situaciones": [
+   "A"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Zona de Almacenamiento de envases vacios",
+  "criterios": [
+   2,
+   2,
+   1,
+   1,
+   1
+  ],
+  "control_operacional": "- Procedimiento de decarte de balones de gases. - Tercerizar",
+  "registro_asociado": "- Tablero de Control - Foto de publicación de afiches o afiches publicados (PPT con afiches",
+  "responsable": "Gerente SIG",
+  "origen": "Laborat Analisis Quimic y Gases fila 27"
+ },
+ {
+  "orden": 78,
+  "alcance": "laboratorios",
+  "areas": [],
+  "lugar": "",
+  "proceso": "Metrología",
+  "actividad": "Desplazamiento externo (Transporte de Personal a las instalaciones del Cliente - solo aplica cuando el servicio sea en el cliente)",
+  "aspecto": "Potencial derrames, escapes, fugas de hidrocarburos, combustibles, lubricantes.",
+  "impacto": "Alteración de las condiciones del suelo / Agua",
+  "situaciones": [
+   "E"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Kit Antiderrame",
+  "criterios": [
+   1,
+   3,
+   1,
+   1,
+   3
+  ],
+  "control_operacional": "- Capacitación del Plan de Preparación y Respuesta Ante Emergencias - Kit Antiderrame - Inspeción de Kit Antiderrame - Ejecución de simulacro de derrame de hidrocarburos",
+  "registro_asociado": "- Lista de Asistencia - Acta de Realización de Simulacro - Fotos y/o videos",
+  "responsable": "Gerente SIG",
+  "origen": "Laborat Analisis Quimic y Gases fila 33"
+ },
+ {
+  "orden": 79,
+  "alcance": "laboratorios",
+  "areas": [],
+  "lugar": "",
+  "proceso": "Metrología",
+  "actividad": "Uso de Servicios higienicos",
+  "aspecto": "Generación / Vertimiento de aguas residuales domésticas",
+  "impacto": "Alteración de las condiciones del suelo / agua",
+  "situaciones": [
+   "A"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Ninguno",
+  "criterios": [
+   1,
+   3,
+   1,
+   1,
+   3
+  ],
+  "control_operacional": "- Publicación de afiches - Inspecciones mnsuales",
+  "registro_asociado": "- Fotos - Inspección SSTMA en Oficina",
+  "responsable": "Gerente SIG",
+  "origen": "Laborat Analisis Quimic y Gases fila 34"
+ },
+ {
+  "orden": 80,
+  "alcance": "laboratorios",
+  "areas": [],
+  "lugar": "",
+  "proceso": "Metrología",
+  "actividad": "Uso de Servicios higienicos",
+  "aspecto": "Consumo de agua",
+  "impacto": "Agotamiento del recurso natural",
+  "situaciones": [
+   "A"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Ninguno",
+  "criterios": [
+   1,
+   3,
+   1,
+   1,
+   3
+  ],
+  "control_operacional": "- Sensibilización en el consumo de agua - Publicación de afiches",
+  "registro_asociado": "- Lista de Asistencia - Foto de publicación de afiches o afiches publicados.",
+  "responsable": "Gerente SIG",
+  "origen": "Laborat Analisis Quimic y Gases fila 35"
+ },
+ {
+  "orden": 81,
+  "alcance": "laboratorios",
+  "areas": [],
+  "lugar": "",
+  "proceso": "Metrología",
+  "actividad": "Uso de Servicios higienicos",
+  "aspecto": "Descarga no controlada de efluentes",
+  "impacto": "Agotamiento del agua",
+  "situaciones": [
+   "E"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Ninguno",
+  "criterios": [
+   1,
+   3,
+   1,
+   1,
+   3
+  ],
+  "control_operacional": "- Sensibilización en el consumo de agua - Publicación de afiches",
+  "registro_asociado": "- Lista de Asistencia - Foto de publicación de afiches o afiches publicados.",
+  "responsable": "Gerente SIG",
+  "origen": "Laborat Analisis Quimic y Gases fila 36"
+ },
+ {
+  "orden": 82,
+  "alcance": "laboratorios",
+  "areas": [],
+  "lugar": "",
+  "proceso": "Metrología",
+  "actividad": "Uso de Servicios higienicos",
+  "aspecto": "Generación, existencia y manejo de residuos no peligrosos (Papel Toalla, papel higiénico)",
+  "impacto": "Afectación del agua y suelo",
+  "situaciones": [
+   "A"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Contenedor de Basura identificado Negro (Residuos No Aprovechables para los SS.HH)",
+  "criterios": [
+   1,
+   1,
+   1,
+   1,
+   3
+  ],
+  "control_operacional": "- Capacitación en la Segregación adecuada de Residuos Solidos. - Inspecciones mensuales",
+  "registro_asociado": "- Lista de Asistencia - Fotos - Inspección SSTMA en Oficina",
+  "responsable": "Gerente SIG",
+  "origen": "Laborat Analisis Quimic y Gases fila 37"
+ },
+ {
+  "orden": 83,
+  "alcance": "areas",
+  "areas": [
+   "Laboratorio de Grandes Volúmenes"
+  ],
+  "lugar": "",
+  "proceso": "Metrología",
+  "actividad": "Preparación y operación del sistema (medidor volumétrico y tanque de agua)",
+  "aspecto": "Consumo de agua",
+  "impacto": "Uso de recurso hídrico / presión sobre disponibilidad",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "directa",
+  "clase": "negativo",
+  "controles_existentes": "Inducción y toma de conciencia al personal Capacitación sobre uso de recursos como luz, agua y papel",
+  "criterios": [
+   1,
+   2,
+   1,
+   1,
+   3
+  ],
+  "control_operacional": "Procedimiento de uso eficiente del agua, recirculación cuando sea viable, control de volúmenes por servicio, capacitación al personal",
+  "registro_asociado": "Registro de capacitaciones",
+  "responsable": "Gerente SIG",
+  "origen": "Laborat de Grandes Volumenes fila 20"
+ },
+ {
+  "orden": 84,
+  "alcance": "areas",
+  "areas": [
+   "Laboratorio de Grandes Volúmenes"
+  ],
+  "lugar": "",
+  "proceso": "Metrología",
+  "actividad": "Operación del A/C (aire acondicionado)",
+  "aspecto": "Consumo de energía eléctrica",
+  "impacto": "Emisiones indirectas de GEI / huella de carbono",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Inducción y toma de conciencia al personal Capacitación sobre uso de recursos como luz, agua y papel",
+  "criterios": [
+   1,
+   2,
+   1,
+   1,
+   3
+  ],
+  "control_operacional": "Uso del A/C solo dentro de rangos metrológicos, set points definidos, mantenimiento periodico",
+  "registro_asociado": "Inspección SSTMA",
+  "responsable": "Gerente SIG",
+  "origen": "Laborat de Grandes Volumenes fila 21"
+ },
+ {
+  "orden": 85,
+  "alcance": "areas",
+  "areas": [
+   "Laboratorio de Grandes Volúmenes"
+  ],
+  "lugar": "",
+  "proceso": "Metrología",
+  "actividad": "Falla del sistema A/C (Aire acondicionado)",
+  "aspecto": "Fuga de refrigerante",
+  "impacto": "Contaminación atmosférica y contribución al calentamiento global",
+  "situaciones": [
+   "E"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Informe o reporte de mantenimiento preventivo",
+  "criterios": [
+   1,
+   2,
+   1,
+   1,
+   1
+  ],
+  "control_operacional": "Programa de manteniemitno Reporte de mantenimiento",
+  "registro_asociado": "Registro del programa y reporte o informe de mantenimiento",
+  "responsable": "Gerente SIG",
+  "origen": "Laborat de Grandes Volumenes fila 22"
+ },
+ {
+  "orden": 86,
+  "alcance": "areas",
+  "areas": [
+   "Laboratorio de Grandes Volúmenes"
+  ],
+  "lugar": "",
+  "proceso": "Metrología",
+  "actividad": "Operación de PCs y equipos auxiliares",
+  "aspecto": "Consumo de energía eléctrica",
+  "impacto": "Emisiones indirectas de GEI",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Inducción y toma de conciencia al personal Capacitación sobre uso de recursos como luz, agua y papel",
+  "criterios": [
+   1,
+   2,
+   1,
+   1,
+   3
+  ],
+  "control_operacional": "Apagado de equipos fuera de uso, buenas prácticas energéticas",
+  "registro_asociado": "Inspecicón in situ (ver presencialmente la actividad)",
+  "responsable": "Gerente SIG",
+  "origen": "Laborat de Grandes Volumenes fila 23"
+ },
+ {
+  "orden": 87,
+  "alcance": "areas",
+  "areas": [
+   "Laboratorio de Grandes Volúmenes"
+  ],
+  "lugar": "",
+  "proceso": "Metrología",
+  "actividad": "Manipulación del medidor volumétrico metálico",
+  "aspecto": "Uso de insumos de limpieza (paños, aceites ligeros)",
+  "impacto": "Generación de residuos contaminados leves",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "directa",
+  "clase": "negativo",
+  "controles_existentes": "Inducción y toma de conciencia al personal Capacitación sobre uso de recursos como luz, agua y papel",
+  "criterios": [
+   1,
+   2,
+   1,
+   1,
+   3
+  ],
+  "control_operacional": "Uso mínimo de insumos, paños reutilizables, segregación de residuos",
+  "registro_asociado": "Registro de segregación de residuos peligrosos y regikstro de compra de insumos de limpieza",
+  "responsable": "Gerente SIG",
+  "origen": "Laborat de Grandes Volumenes fila 24"
+ },
+ {
+  "orden": 88,
+  "alcance": "areas",
+  "areas": [
+   "Laboratorio de Grandes Volúmenes"
+  ],
+  "lugar": "",
+  "proceso": "Metrología",
+  "actividad": "Almacenamiento del medidor y accesorios",
+  "aspecto": "Uso de materiales de protección (plásticos, fundas)",
+  "impacto": "Generación de residuos sólidos",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "directa",
+  "clase": "negativo",
+  "controles_existentes": "Inducción y toma de conciencia al personal Capacitación sobre uso de recursos como luz, agua y papel",
+  "criterios": [
+   1,
+   2,
+   1,
+   1,
+   3
+  ],
+  "control_operacional": "Reutilización de fundas y embalajes internos, segregación",
+  "registro_asociado": "Inspecicón in situ (ver presencialmente la actividad)",
+  "responsable": "Gerente SIG",
+  "origen": "Laborat de Grandes Volumenes fila 25"
+ },
+ {
+  "orden": 89,
+  "alcance": "areas",
+  "areas": [
+   "Laboratorio de Grandes Volúmenes"
+  ],
+  "lugar": "",
+  "proceso": "Metrología",
+  "actividad": "Fuga o derrame de agua (mangueras, conexiones)",
+  "aspecto": "Derrame accidental de agua",
+  "impacto": "Afectación a instalaciones / desperdicio de recurso",
+  "situaciones": [
+   "A"
+  ],
+  "generacion": "directa",
+  "clase": "negativo",
+  "controles_existentes": "Inducción y toma de conciencia al personal Capacitación sobre uso de recursos como luz, agua y papel",
+  "criterios": [
+   1,
+   2,
+   1,
+   1,
+   2
+  ],
+  "control_operacional": "Inspección visual de mangueras y conexiones, mantenimiento preventivo",
+  "registro_asociado": "Registros de inspecicón SSTMA",
+  "responsable": "Gerente SIG",
+  "origen": "Laborat de Grandes Volumenes fila 26"
+ },
+ {
+  "orden": 90,
+  "alcance": "areas",
+  "areas": [
+   "Laboratorio de Grandes Volúmenes"
+  ],
+  "lugar": "",
+  "proceso": "Metrología",
+  "actividad": "Fuga mayor o rotura de conexión",
+  "aspecto": "Derrame significativo de agua",
+  "impacto": "Desperdicio de recurso y posible afectación a áreas colindantes",
+  "situaciones": [
+   "E"
+  ],
+  "generacion": "directa",
+  "clase": "negativo",
+  "controles_existentes": "Inducción y toma de conciencia al personal Capacitación sobre uso de recursos como luz, agua y papel",
+  "criterios": [
+   1,
+   2,
+   1,
+   1,
+   1
+  ],
+  "control_operacional": "Procedimiento de emergencia, corte inmediato de suministro, señalización, registro del incidente Simulacros relacionados a fuga de agua",
+  "registro_asociado": "Programa de simulacros y registro de evidencia del simualcro",
+  "responsable": "Gerente SIG",
+  "origen": "Laborat de Grandes Volumenes fila 27"
+ },
+ {
+  "orden": 91,
+  "alcance": "areas",
+  "areas": [
+   "Laboratorio de Grandes Volúmenes"
+  ],
+  "lugar": "",
+  "proceso": "Metrología",
+  "actividad": "Uso eficiente del sistema de medición",
+  "aspecto": "Optimización del uso de agua y energía",
+  "impacto": "Reducción de consumo de recursos",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "directa",
+  "clase": "positivo",
+  "controles_existentes": "Inducción y toma de conciencia al personal Capacitación sobre uso de recursos como luz, agua y papel",
+  "criterios": [
+   null,
+   null,
+   null,
+   null,
+   null
+  ],
+  "control_operacional": "Protocolo de calibración del metodo Capacitaciones sobre uso eficiente de recursos Campañas ambientales",
+  "registro_asociado": "Lista de asistencia de capacitaciones y evidencia de campañas ambientales",
+  "responsable": "Gerente SIG",
+  "origen": "Laborat de Grandes Volumenes fila 28"
+ },
+ {
+  "orden": 92,
+  "alcance": "areas",
+  "areas": [
+   "Laboratorio de Electricidad y Potencia"
+  ],
+  "lugar": "",
+  "proceso": "Metrología",
+  "actividad": "Limpieza y mantenimiento de instrumentos",
+  "aspecto": "Uso de thinner, bencina, aceite, silicona",
+  "impacto": "Emisión de COV, contaminación de suelo/desagüe, residuos peligrosos",
+  "situaciones": [
+   "N",
+   "A"
+  ],
+  "generacion": "directa",
+  "clase": "negativo",
+  "controles_existentes": "Capacitación sobre limpieza y uso de EPPs Procedimiento de residuos Hojas MSDS / SDS",
+  "criterios": [
+   1,
+   2,
+   1,
+   1,
+   3
+  ],
+  "control_operacional": "Almacenamiento rotulado con bandejas de contención, dosificación mínima, SDS disponibles, sustitución progresiva por insumos menos tóxicos, capacitación ambiental",
+  "registro_asociado": "Evidencias fotograficas de bandeja antiderrame",
+  "responsable": null,
+  "origen": "Laborat de Electric y Potencia fila 18"
+ },
+ {
+  "orden": 93,
+  "alcance": "areas",
+  "areas": [
+   "Laboratorio de Electricidad y Potencia"
+  ],
+  "lugar": "",
+  "proceso": "Metrología",
+  "actividad": "Limpieza y mantenimiento",
+  "aspecto": "Residuos contaminados (trapos, guantes, envases)",
+  "impacto": "Contaminación ambiental por mala disposición",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "directa",
+  "clase": "negativo",
+  "controles_existentes": "Procedimiento de Residuos",
+  "criterios": [
+   1,
+   2,
+   1,
+   1,
+   3
+  ],
+  "control_operacional": "Segregación en contenedores exclusivos, rotulado, registro y disposición diferenciada",
+  "registro_asociado": "Registro de disposición de residuos peligrosos y RAEE",
+  "responsable": null,
+  "origen": "Laborat de Electric y Potencia fila 19"
+ },
+ {
+  "orden": 94,
+  "alcance": "areas",
+  "areas": [
+   "Laboratorio de Electricidad y Potencia"
+  ],
+  "lugar": "",
+  "proceso": "Metrología",
+  "actividad": "Pruebas de detectores de tormenta",
+  "aspecto": "Uso de guantes dieléctricos",
+  "impacto": "Incremento de residuos sólidos especiales",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "directa",
+  "clase": "negativo",
+  "controles_existentes": "Ninguna",
+  "criterios": [
+   1,
+   2,
+   1,
+   1,
+   3
+  ],
+  "control_operacional": "Uso solo cuando sea necesario, limpieza y reutilización segura, reemplazo planificado",
+  "registro_asociado": "Registro de disposición de residuos peligrosos y RAEE",
+  "responsable": null,
+  "origen": "Laborat de Electric y Potencia fila 20"
+ },
+ {
+  "orden": 95,
+  "alcance": "areas",
+  "areas": [
+   "Laboratorio de Electricidad y Potencia"
+  ],
+  "lugar": "",
+  "proceso": "Metrología",
+  "actividad": "Operación de equipos y PCs",
+  "aspecto": "Consumo de energía eléctrica",
+  "impacto": "Emisiones indirectas de GEI, uso de recursos energéticos",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Ninguna",
+  "criterios": [
+   1,
+   2,
+   1,
+   1,
+   3
+  ],
+  "control_operacional": "Capacitación de uso eficiente de energía, iluminación LED, mantenimiento preventivo, buenas prácticas energéticas. Procedimiento de uso eficiente de energía",
+  "registro_asociado": "Registros de capacitación Procedimiento de uso eficiente de energía",
+  "responsable": null,
+  "origen": "Laborat de Electric y Potencia fila 21"
+ },
+ {
+  "orden": 96,
+  "alcance": "areas",
+  "areas": [
+   "Laboratorio de Electricidad y Potencia"
+  ],
+  "lugar": "",
+  "proceso": "Metrología",
+  "actividad": "Uso de banco multifunción, bobinas, A/C y deshumidificador",
+  "aspecto": "Consumo de energía eléctrica",
+  "impacto": "Incremento de huella de carbono",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Ninguna",
+  "criterios": [
+   1,
+   2,
+   1,
+   1,
+   3
+  ],
+  "control_operacional": "Mantenimeinto preventivo de equipos y/o inspecciones, campañas de uso eficiente de energía Procdimiento de uso eficiente de energía",
+  "registro_asociado": "Mantenimeinto preventivo de equipos y/o inspecciones, campañas de uso eficiente de energía Procdimiento de uso eficiente de energía",
+  "responsable": null,
+  "origen": "Laborat de Electric y Potencia fila 22"
+ },
+ {
+  "orden": 97,
+  "alcance": "areas",
+  "areas": [
+   "Laboratorio de Electricidad y Potencia"
+  ],
+  "lugar": "",
+  "proceso": "Metrología",
+  "actividad": "Uso de termohigrómetro",
+  "aspecto": "RAEE y baterías",
+  "impacto": "Contaminación por residuos electrónicos",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "directa",
+  "clase": "negativo",
+  "controles_existentes": "Ninguna",
+  "criterios": [
+   1,
+   2,
+   1,
+   1,
+   3
+  ],
+  "control_operacional": "Uso de baterías recargables, procedimiento RAEE, registro de baja y gestor autorizado",
+  "registro_asociado": "Registro de entrega RAEE o residuos peligrosos",
+  "responsable": null,
+  "origen": "Laborat de Electric y Potencia fila 23"
+ },
+ {
+  "orden": 98,
+  "alcance": "areas",
+  "areas": [
+   "Laboratorio de Fuerza y Presión"
+  ],
+  "lugar": "",
+  "proceso": "Metrología",
+  "actividad": "Limpieza y mantenimiento de instrumentos",
+  "aspecto": "Uso de thinner, bencina, aceite, silicona",
+  "impacto": "Emisión de COV, contaminación de suelo/desagüe, residuos peligrosos",
+  "situaciones": [
+   "N",
+   "A"
+  ],
+  "generacion": "directa",
+  "clase": "negativo",
+  "controles_existentes": "Capacitación sobre limpieza y uso de EPPs Procedimiento de residuos Hojas MSDS / SDS",
+  "criterios": [
+   1,
+   2,
+   1,
+   1,
+   3
+  ],
+  "control_operacional": "Almacenamiento rotulado con bandejas de contención, dosificación mínima, SDS disponibles, sustitución progresiva por insumos menos tóxicos, capacitación ambiental",
+  "registro_asociado": "Evidencias fotograficas de bandeja antiderrame",
+  "responsable": "Gerente SIG",
+  "origen": "Laborat de Fuerza y Presión fila 18"
+ },
+ {
+  "orden": 99,
+  "alcance": "areas",
+  "areas": [
+   "Laboratorio de Fuerza y Presión"
+  ],
+  "lugar": "",
+  "proceso": "Metrología",
+  "actividad": "Limpieza y mantenimiento",
+  "aspecto": "Residuos contaminados (trapos, guantes, envases)",
+  "impacto": "Contaminación ambiental por mala disposición",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "directa",
+  "clase": "negativo",
+  "controles_existentes": "Procedimiento de Residuos",
+  "criterios": [
+   1,
+   2,
+   1,
+   1,
+   3
+  ],
+  "control_operacional": "Segregación en contenedores exclusivos, rotulado, registro y disposición diferenciada",
+  "registro_asociado": "Registro de disposición de residuos peligrosos y RAEE",
+  "responsable": null,
+  "origen": "Laborat de Fuerza y Presión fila 19"
+ },
+ {
+  "orden": 100,
+  "alcance": "areas",
+  "areas": [
+   "Laboratorio de Fuerza y Presión"
+  ],
+  "lugar": "",
+  "proceso": "Metrología",
+  "actividad": "Ajustes y montaje",
+  "aspecto": "Uso de cintas teflón",
+  "impacto": "Residuos sólidos no biodegradables",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "directa",
+  "clase": "negativo",
+  "controles_existentes": "Procedimiento de Residuos",
+  "criterios": [
+   1,
+   2,
+   1,
+   1,
+   3
+  ],
+  "control_operacional": "Uso eficiente, segregación como no aprovechable",
+  "registro_asociado": "Registros de Uso eficiente, segregación como no aprovechable",
+  "responsable": "Gerente SIG",
+  "origen": "Laborat de Fuerza y Presión fila 20"
+ },
+ {
+  "orden": 101,
+  "alcance": "areas",
+  "areas": [
+   "Laboratorio de Fuerza y Presión"
+  ],
+  "lugar": "",
+  "proceso": "Metrología",
+  "actividad": "Operación de bancos de presión",
+  "aspecto": "Riesgo de fuga de fluidos",
+  "impacto": "Contaminación del suelo, residuos contaminados",
+  "situaciones": [
+   "A"
+  ],
+  "generacion": "directa",
+  "clase": "negativo",
+  "controles_existentes": "Camapañas de sensibilización ambiental",
+  "criterios": [
+   1,
+   2,
+   1,
+   1,
+   3
+  ],
+  "control_operacional": "Inspección de mangueras y sellos, bandejas de contención y kit de derrames",
+  "registro_asociado": "Registro de Inspección de mangueras y sellos, asi como Kit antiderrame",
+  "responsable": "Gerente SIG",
+  "origen": "Laborat de Fuerza y Presión fila 21"
+ },
+ {
+  "orden": 102,
+  "alcance": "areas",
+  "areas": [
+   "Laboratorio de Fuerza y Presión"
+  ],
+  "lugar": "",
+  "proceso": "Metrología",
+  "actividad": "Operación de bancos y A/C",
+  "aspecto": "Consumo de energía eléctrica",
+  "impacto": "Emisiones indirectas de GEI",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Camapañas de sensibilización ambiental",
+  "criterios": [
+   1,
+   2,
+   1,
+   1,
+   3
+  ],
+  "control_operacional": "Uso del A/C solo durante calibración, apagado al finalizar, mantenimiento preventivo",
+  "registro_asociado": "Registro de Capacitaciones y procedimeintos sobre uso adecado de recursos y uso eficiente de energía",
+  "responsable": "Gerente SIG",
+  "origen": "Laborat de Fuerza y Presión fila 22"
+ },
+ {
+  "orden": 103,
+  "alcance": "areas",
+  "areas": [
+   "Laboratorio de Fuerza y Presión"
+  ],
+  "lugar": "",
+  "proceso": "Metrología",
+  "actividad": "Uso intensivo de herramientas menores",
+  "aspecto": "Chatarra metálica / RAEE",
+  "impacto": "Consumo de recursos y residuos especiales",
+  "situaciones": [
+   "A"
+  ],
+  "generacion": "directa",
+  "clase": "negativo",
+  "controles_existentes": "Registro de residuos RAEE",
+  "criterios": [
+   1,
+   2,
+   1,
+   1,
+   3
+  ],
+  "control_operacional": "Programa de gestión de residuos con tachos de colores: reciclaje de chatarra, disposición a gestor autorizado",
+  "registro_asociado": "Hoja de evidencia de recojo de residuos",
+  "responsable": "Gerente SIG",
+  "origen": "Laborat de Fuerza y Presión fila 23"
+ },
+ {
+  "orden": 104,
+  "alcance": "areas",
+  "areas": [
+   "Laboratorio de Fuerza y Presión"
+  ],
+  "lugar": "",
+  "proceso": "Metrología",
+  "actividad": "Operación de equipos",
+  "aspecto": "Ruido y vibración (menor)",
+  "impacto": "Molestias internas",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "directa",
+  "clase": "negativo",
+  "controles_existentes": "Programa y mantenimiento preventivo de equipos",
+  "criterios": [
+   1,
+   2,
+   1,
+   1,
+   3
+  ],
+  "control_operacional": "Mantenimiento preventivo, soportes antivibración",
+  "registro_asociado": "Registro de mantenimeinto preventivo de equipos",
+  "responsable": "Gerente SIG",
+  "origen": "Laborat de Fuerza y Presión fila 24"
+ },
+ {
+  "orden": 105,
+  "alcance": "areas",
+  "areas": [
+   "Laboratorio de Longitud y Ángulo"
+  ],
+  "lugar": "",
+  "proceso": "Metrología",
+  "actividad": "Limpieza y mantenimiento de instrumentos",
+  "aspecto": "Uso de thinner, bencina, aceite, silicona",
+  "impacto": "Emisión de COV, contaminación de suelo/desagüe, residuos peligrosos",
+  "situaciones": [
+   "N",
+   "A"
+  ],
+  "generacion": "directa",
+  "clase": "negativo",
+  "controles_existentes": "Capacitación sobre limpieza y uso de EPPs Procedimiento de residuos Hojas MSDS / SDS",
+  "criterios": [
+   1,
+   2,
+   1,
+   1,
+   3
+  ],
+  "control_operacional": "Segregación con “puntos limpios”, señalización, digitalizar certificados en PDF con firma (si aplica),",
+  "registro_asociado": "Evidencias fotograficas de bandeja antiderrame",
+  "responsable": "Gerente SIG",
+  "origen": "Laborat de Longitud fila 18"
+ },
+ {
+  "orden": 106,
+  "alcance": "areas",
+  "areas": [
+   "Laboratorio de Longitud y Ángulo"
+  ],
+  "lugar": "",
+  "proceso": "Metrología",
+  "actividad": "Limpieza y mantenimiento",
+  "aspecto": "Residuos contaminados (trapos, guantes, envases)",
+  "impacto": "Contaminación ambiental por mala disposición",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "directa",
+  "clase": "negativo",
+  "controles_existentes": "Procedimiento de Residuos",
+  "criterios": [
+   1,
+   2,
+   1,
+   1,
+   3
+  ],
+  "control_operacional": "Segregación en contenedores exclusivos, rotulado, registro y disposición diferenciada",
+  "registro_asociado": "Registro de disposición de residuos peligrosos y RAEE",
+  "responsable": null,
+  "origen": "Laborat de Longitud fila 19"
+ },
+ {
+  "orden": 107,
+  "alcance": "areas",
+  "areas": [
+   "Laboratorio de Longitud y Ángulo"
+  ],
+  "lugar": "",
+  "proceso": "Metrología",
+  "actividad": "Ajustes y montaje",
+  "aspecto": "Uso de cintas teflón",
+  "impacto": "Residuos sólidos no biodegradables",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "directa",
+  "clase": "negativo",
+  "controles_existentes": "Procedimiento de Residuos",
+  "criterios": [
+   1,
+   2,
+   1,
+   1,
+   3
+  ],
+  "control_operacional": "Uso eficiente, segregación como no aprovechable",
+  "registro_asociado": "Registros de Uso eficiente, segregación como no aprovechable",
+  "responsable": "Gerente SIG",
+  "origen": "Laborat de Longitud fila 20"
+ },
+ {
+  "orden": 108,
+  "alcance": "areas",
+  "areas": [
+   "Laboratorio de Longitud y Ángulo"
+  ],
+  "lugar": "",
+  "proceso": "Metrología",
+  "actividad": "Limpieza de bloques patrón",
+  "aspecto": "Uso de alcoholes/aceites ligeros",
+  "impacto": "Residuos contaminados leves",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "directa",
+  "clase": "negativo",
+  "controles_existentes": "Procedimiento de Residuos Capacitación de residuos",
+  "criterios": [
+   1,
+   2,
+   1,
+   1,
+   3
+  ],
+  "control_operacional": "Uso mínimo de insumos, paños reutilizables, segregación",
+  "registro_asociado": "Registro de camapañas de zsensiblización ambiental",
+  "responsable": "Gerente SIG",
+  "origen": "Laborat de Longitud fila 21"
+ },
+ {
+  "orden": 109,
+  "alcance": "areas",
+  "areas": [
+   "Laboratorio de Longitud y Ángulo"
+  ],
+  "lugar": "",
+  "proceso": "Metrología",
+  "actividad": "Embalaje y protección de patrones",
+  "aspecto": "Residuos de embalaje (plástico, cartón, espuma)",
+  "impacto": "Incremento de residuos sólidos",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "directa",
+  "clase": "negativo",
+  "controles_existentes": "Procedimiento de Residuos Capacitación de residuos",
+  "criterios": [
+   1,
+   2,
+   1,
+   1,
+   3
+  ],
+  "control_operacional": "Reutilización de embalajes internos, reciclaje",
+  "registro_asociado": "Registro de camapañas de zsensiblización ambiental",
+  "responsable": "Gerente SIG",
+  "origen": "Laborat de Longitud fila 22"
+ },
+ {
+  "orden": 110,
+  "alcance": "areas",
+  "areas": [
+   "Laboratorio de Longitud y Ángulo"
+  ],
+  "lugar": "",
+  "proceso": "Metrología",
+  "actividad": "Uso de A/C y deshumidificador",
+  "aspecto": "Consumo de energía eléctrica",
+  "impacto": "Emisiones indirectas de GEI",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Procedimiento de uso eficiente de enrgía Campañas de sensiblización",
+  "criterios": [
+   1,
+   2,
+   1,
+   1,
+   3
+  ],
+  "control_operacional": "Uso controlado según requisitos metrológicos, mantenimiento y registro de horas",
+  "registro_asociado": "Registro de camapañas de zsensiblización ambiental",
+  "responsable": "Gerente SIG",
+  "origen": "Laborat de Longitud fila 23"
+ },
+ {
+  "orden": 111,
+  "alcance": "areas",
+  "areas": [
+   "Laboratorio de Longitud y Ángulo"
+  ],
+  "lugar": "",
+  "proceso": "Metrología",
+  "actividad": "Uso de reglas electrónicas",
+  "aspecto": "RAEE",
+  "impacto": "Contaminación por residuos electrónicos",
+  "situaciones": [
+   "A"
+  ],
+  "generacion": "directa",
+  "clase": "negativo",
+  "controles_existentes": "Procedimiento de Residuos",
+  "criterios": [
+   1,
+   2,
+   1,
+   1,
+   3
+  ],
+  "control_operacional": "Gestión RAEE, registro de baja, disposición con gestor autorizado",
+  "registro_asociado": "Registro de diposición de RAEE",
+  "responsable": "Gerente SIG",
+  "origen": "Laborat de Longitud fila 24"
+ },
+ {
+  "orden": 112,
+  "alcance": "areas",
+  "areas": [
+   "Laboratorio de Temperatura y Humedad"
+  ],
+  "lugar": "",
+  "proceso": "Metrología",
+  "actividad": "Limpieza y mantenimiento de instrumentos",
+  "aspecto": "Uso de thinner, bencina, aceite, silicona",
+  "impacto": "Emisión de COV, contaminación de suelo/desagüe, residuos peligrosos",
+  "situaciones": [
+   "N",
+   "A"
+  ],
+  "generacion": "directa",
+  "clase": "negativo",
+  "controles_existentes": "Capacitación sobre limpieza y uso de EPPs Procedimiento de residuos Hojas MSDS / SDS",
+  "criterios": [
+   1,
+   2,
+   1,
+   1,
+   3
+  ],
+  "control_operacional": "Segregación con “puntos limpios”, señalización, digitalizar certificados en PDF con firma (si aplica),",
+  "registro_asociado": "Evidencias fotograficas de bandeja antiderrame",
+  "responsable": "Gerente SIG",
+  "origen": "Laborat de Temperatura y Humeda fila 18"
+ },
+ {
+  "orden": 113,
+  "alcance": "areas",
+  "areas": [
+   "Laboratorio de Temperatura y Humedad"
+  ],
+  "lugar": "",
+  "proceso": "Metrología",
+  "actividad": "Limpieza y mantenimiento",
+  "aspecto": "Residuos contaminados (trapos, guantes, envases)",
+  "impacto": "Contaminación ambiental por mala disposición",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "directa",
+  "clase": "negativo",
+  "controles_existentes": "Procedimiento de Residuos",
+  "criterios": [
+   1,
+   2,
+   1,
+   1,
+   3
+  ],
+  "control_operacional": "Segregación en contenedores exclusivos, rotulado, registro y disposición diferenciada",
+  "registro_asociado": "Registro de disposición de residuos peligrosos y RAEE",
+  "responsable": "Gerente SIG",
+  "origen": "Laborat de Temperatura y Humeda fila 19"
+ },
+ {
+  "orden": 114,
+  "alcance": "areas",
+  "areas": [
+   "Laboratorio de Temperatura y Humedad"
+  ],
+  "lugar": "",
+  "proceso": "Metrología",
+  "actividad": "Uso de A/C y deshumidificador",
+  "aspecto": "Consumo de energía eléctrica",
+  "impacto": "Emisiones indirectas de GEI",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Procedimiento de uso eficiente de energía Campañas de sensiblización",
+  "criterios": [
+   1,
+   2,
+   1,
+   1,
+   3
+  ],
+  "control_operacional": "Uso controlado según requisitos metrológicos, mantenimiento y registro de horas",
+  "registro_asociado": "Registro de camapañas de zsensiblización ambiental",
+  "responsable": "Gerente SIG",
+  "origen": "Laborat de Temperatura y Humeda fila 20"
+ },
+ {
+  "orden": 115,
+  "alcance": "areas",
+  "areas": [
+   "Laboratorio de Temperatura y Humedad"
+  ],
+  "lugar": "",
+  "proceso": "Metrología",
+  "actividad": "Operación de baño maría y equipos auxiliares",
+  "aspecto": "Consumo de energía eléctrica (baño maría, PCs, iluminación)",
+  "impacto": "Emisiones indirectas de GEI / consumo de recursos energéticos",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Procedimiento de uso eficiente de energía Campañas de sensiblización",
+  "criterios": [
+   1,
+   2,
+   1,
+   2,
+   3
+  ],
+  "control_operacional": "Procedimiento de encendido/apagado, programación por lotes, apagado fuera de uso, mantenimiento preventivo, registro de horas de operación",
+  "registro_asociado": "Procedimiento de encendido/apagado, programación por lotes, apagado fuera de uso, mantenimiento preventivo, registro de horas de operación",
+  "responsable": "Gerente SIG",
+  "origen": "Laborat de Temperatura y Humeda fila 21"
+ },
+ {
+  "orden": 116,
+  "alcance": "areas",
+  "areas": [
+   "Laboratorio de Temperatura y Humedad"
+  ],
+  "lugar": "",
+  "proceso": "Metrología",
+  "actividad": "Control ambiental del laboratorio",
+  "aspecto": "Consumo de energía eléctrica (aire acondicionado)",
+  "impacto": "Emisiones indirectas de GEI / huella de carbono",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Procedimiento de uso eficiente de energía Campañas de sensiblización",
+  "criterios": [
+   1,
+   2,
+   1,
+   2,
+   3
+  ],
+  "control_operacional": "Set points T°/HR metrológicos, uso solo en rangos requeridos, checklist de cierre, mantenimiento de filtros, registro de horas A/C",
+  "registro_asociado": "Set points T°/HR metrológicos, uso solo en rangos requeridos, checklist de cierre, mantenimiento de filtros, registro de horas A/C",
+  "responsable": "Gerente SIG",
+  "origen": "Laborat de Temperatura y Humeda fila 22"
+ },
+ {
+  "orden": 117,
+  "alcance": "areas",
+  "areas": [
+   "Laboratorio de Temperatura y Humedad"
+  ],
+  "lugar": "",
+  "proceso": "Metrología",
+  "actividad": "Preparación y estabilización de patrones/equipos",
+  "aspecto": "Uso de aceites (baños térmicos, lubricación menor)",
+  "impacto": "Residuos contaminados / posible contaminación por mala disposición",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "directa",
+  "clase": "negativo",
+  "controles_existentes": "Procedimiento de Residuos",
+  "criterios": [
+   1,
+   2,
+   1,
+   1,
+   3
+  ],
+  "control_operacional": "Dosificación mínima, almacenamiento rotulado con bandeja de contención, segregación de paños/envases, SDS disponible",
+  "registro_asociado": "Dosificación mínima, almacenamiento rotulado con bandeja de contención, segregación de paños/envases, SDS disponible",
+  "responsable": "Gerente SIG",
+  "origen": "Laborat de Temperatura y Humeda fila 23"
+ },
+ {
+  "orden": 118,
+  "alcance": "areas",
+  "areas": [
+   "Laboratorio de Temperatura y Humedad"
+  ],
+  "lugar": "",
+  "proceso": "Metrología",
+  "actividad": "Limpieza y mantenimiento de equipos",
+  "aspecto": "Uso de solventes y químicos volátiles",
+  "impacto": "Emisión de COV / riesgo de contaminación del suelo o drenaje por derrames",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "directa",
+  "clase": "negativo",
+  "controles_existentes": "Procedimiento de Residuos",
+  "criterios": [
+   1,
+   2,
+   1,
+   1,
+   1
+  ],
+  "control_operacional": "Gabinete ventilado y envases herméticos, bandejas de contención, sustitución por alternativas menos volátiles cuando aplique, capacitación y SDS",
+  "registro_asociado": "Gabinete ventilado y envases herméticos, bandejas de contención, sustitución por alternativas menos volátiles cuando aplique, capacitación y SDS",
+  "responsable": "Gerente SIG",
+  "origen": "Laborat de Temperatura y Humeda fila 24"
+ },
+ {
+  "orden": 119,
+  "alcance": "areas",
+  "areas": [
+   "Laboratorio de Temperatura y Humedad"
+  ],
+  "lugar": "",
+  "proceso": "Metrología",
+  "actividad": "Limpieza y mantenimiento",
+  "aspecto": "Generación de residuos contaminados (trapos, guantes, envases)",
+  "impacto": "Contaminación ambiental por disposición inadecuada",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "directa",
+  "clase": "negativo",
+  "controles_existentes": "Procedimiento de Residuos",
+  "criterios": [
+   1,
+   2,
+   1,
+   1,
+   3
+  ],
+  "control_operacional": "Contenedores exclusivos, rotulado, registro de generación, entrega a operador autorizado cuando corresponda",
+  "registro_asociado": "Contenedores exclusivos, rotulado, registro de generación, entrega a operador autorizado cuando corresponda",
+  "responsable": "Gerente SIG",
+  "origen": "Laborat de Temperatura y Humeda fila 25"
+ },
+ {
+  "orden": 120,
+  "alcance": "areas",
+  "areas": [
+   "Laboratorio de Temperatura y Humedad"
+  ],
+  "lugar": "",
+  "proceso": "Metrología",
+  "actividad": "Medición con termohigrómetro",
+  "aspecto": "Uso de baterías (si aplica) / RAEE al fin de vida",
+  "impacto": "Contaminación por residuos electrónicos / riesgo legal por mala disposición",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "directa",
+  "clase": "negativo",
+  "controles_existentes": "Procedimiento de Residuos",
+  "criterios": [
+   1,
+   2,
+   1,
+   1,
+   3
+  ],
+  "control_operacional": "Uso de baterías recargables, procedimiento RAEE, registro de baja y disposición con gestor autorizado",
+  "registro_asociado": "Uso de baterías recargables, procedimiento RAEE, registro de baja y disposición con gestor autorizado",
+  "responsable": "Gerente SIG",
+  "origen": "Laborat de Temperatura y Humeda fila 26"
+ },
+ {
+  "orden": 121,
+  "alcance": "areas",
+  "areas": [
+   "Laboratorio de Temperatura y Humedad"
+  ],
+  "lugar": "",
+  "proceso": "Metrología",
+  "actividad": "Calibración/operación con baño maría",
+  "aspecto": "Consumo de agua (si se usa en reposición/limpieza del sistema)",
+  "impacto": "Uso de recurso hídrico / efluente al desagüe",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "directa",
+  "clase": "negativo",
+  "controles_existentes": "Capacitación sobre uso eficiente de recursos",
+  "criterios": [
+   1,
+   2,
+   2,
+   2,
+   2
+  ],
+  "control_operacional": "Lavado eficiente, recambio controlado, evitar descargas innecesarias, uso de detergentes biodegradables si aplica",
+  "registro_asociado": "Lavado eficiente, recambio controlado, evitar descargas innecesarias, uso de detergentes biodegradables si aplica",
+  "responsable": "Gerente SIG",
+  "origen": "Laborat de Temperatura y Humeda fila 27"
+ },
+ {
+  "orden": 122,
+  "alcance": "areas",
+  "areas": [
+   "Laboratorio de Temperatura y Humedad"
+  ],
+  "lugar": "",
+  "proceso": "Metrología",
+  "actividad": "Manipulación de aceites/solventes",
+  "aspecto": "Derrame menor (goteo, caída de envase)",
+  "impacto": "Contaminación de superficies y posible descarga al desagüe",
+  "situaciones": [
+   "A"
+  ],
+  "generacion": "directa",
+  "clase": "negativo",
+  "controles_existentes": "Bandeja antiderrame",
+  "criterios": [
+   1,
+   2,
+   2,
+   2,
+   2
+  ],
+  "control_operacional": "Kit de derrames, bandejas de contención, procedimiento de atención y registro de incidentes",
+  "registro_asociado": "Kit de derrames, bandejas de contención, procedimiento de atención y registro de incidentes",
+  "responsable": "Gerente SIG",
+  "origen": "Laborat de Temperatura y Humeda fila 28"
+ },
+ {
+  "orden": 123,
+  "alcance": "areas",
+  "areas": [
+   "Laboratorio de Temperatura y Humedad"
+  ],
+  "lugar": "",
+  "proceso": "Metrología",
+  "actividad": "Fuga/derrame mayor de solventes volátiles",
+  "aspecto": "Derrame significativo / liberación de vapores",
+  "impacto": "Contaminación ambiental y afectación a aire interior",
+  "situaciones": [
+   "E"
+  ],
+  "generacion": "directa",
+  "clase": "negativo",
+  "controles_existentes": "Bandeja antiderrame",
+  "criterios": [
+   1,
+   3,
+   2,
+   2,
+   1
+  ],
+  "control_operacional": "Plan de emergencia ambiental, ventilación inmediata, control de fuentes de ignición, contención y disposición como residuo especial, simulacro anual",
+  "registro_asociado": "Plan de emergencia ambiental, ventilación inmediata, control de fuentes de ignición, contención y disposición como residuo especial, simulacro anual",
+  "responsable": "Gerente SIG",
+  "origen": "Laborat de Temperatura y Humeda fila 29"
+ },
+ {
+  "orden": 124,
+  "alcance": "areas",
+  "areas": [
+   "Laboratorio de Temperatura y Humedad"
+  ],
+  "lugar": "",
+  "proceso": "Metrología",
+  "actividad": "Uso controlado de químicos y gestión correcta",
+  "aspecto": "Optimización de consumo y reducción de residuos",
+  "impacto": "Reducción de impactos ambientales (mejora continua)",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "directa",
+  "clase": "negativo",
+  "controles_existentes": "Procedimiento de Residuos",
+  "criterios": [
+   1,
+   2,
+   1,
+   1,
+   3
+  ],
+  "control_operacional": "Dosificación controlada, compras por “stock justo”, estandarización del método",
+  "registro_asociado": "Dosificación controlada, compras por “stock justo”, estandarización del método",
+  "responsable": "Gerente SIG",
+  "origen": "Laborat de Temperatura y Humeda fila 30"
+ },
+ {
+  "orden": 125,
+  "alcance": "areas",
+  "areas": [
+   "Mantenimiento"
+  ],
+  "lugar": "",
+  "proceso": "Mantenimiento",
+  "actividad": "Limpieza",
+  "aspecto": "Consumo de Energía Eléctrica",
+  "impacto": "Agotamiento del recurso natural Emisión de gases de efecto invernadero",
+  "situaciones": [
+   "A"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Ninguno",
+  "criterios": [
+   1,
+   3,
+   1,
+   1,
+   3
+  ],
+  "control_operacional": "- Campañas ambientales. - Publicación de afiches - Procedimiento de uso eficiente de energía eléctrica",
+  "registro_asociado": "- Lista de Asistencia - Tablero de Control - Foto de publicación de afiches o afiches publicados (PPT con afiches)",
+  "responsable": "Gerente SIG",
+  "origen": "Mantenimiento fila 12"
+ },
+ {
+  "orden": 126,
+  "alcance": "areas",
+  "areas": [
+   "Mantenimiento"
+  ],
+  "lugar": "",
+  "proceso": "Mantenimiento",
+  "actividad": "Cambio o eliminación de gases, pintura, u otro producto como alcohol isopropilico",
+  "aspecto": "Generación, existencia y manejo de residuos peligrosos",
+  "impacto": "Afectación y contaminación de recursos flora/agua/aire",
+  "situaciones": [
+   "A"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Formato de pesaje de residuos sólidos mensual",
+  "criterios": [
+   1,
+   2,
+   1,
+   1,
+   1
+  ],
+  "control_operacional": "- Almacenamiento temporal en los tachos de Residuos peligrosos (Rojo) - Inspecciones mensuales - Gestionar la disposición final de los residuos peligrosos con una empresa EO-RS, autorizada por el MINAM (Ejecutar luego de contar con la cantidad mínima requerida por las empresas operadoras).",
+  "registro_asociado": "- Fotos - Inspección SSTMA en oficinas - Cetificado de Disposición Final",
+  "responsable": "Gerente SIG",
+  "origen": "Mantenimiento fila 13"
+ },
+ {
+  "orden": 127,
+  "alcance": "areas",
+  "areas": [
+   "Mantenimiento"
+  ],
+  "lugar": "",
+  "proceso": "Mantenimiento",
+  "actividad": "Cambio de equipos electronicos de los difirentes laboratorios",
+  "aspecto": "Generación, existencia y manejo de RAEE",
+  "impacto": "Contaminación del suelo.",
+  "situaciones": [
+   "A"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Espacio habilitado para el almacenamiento temporal de los RAEE",
+  "criterios": [
+   1,
+   2,
+   1,
+   1,
+   1
+  ],
+  "control_operacional": "Realizar la Gestión de los RAEE con alguna de las dos alternativas: 1.- Gestión de los RAEE en puntos de acopio autorizados, según el Procedimiento de Manejo de RR.SS. 2.- Gestión de los RAEE con una EO - RS acreditada ante el MINAM",
+  "registro_asociado": "- Foto de la entrega de los RAEE en puntos de acopio autorizados - Punto de RAEE - Certificado de recojo de RAEE",
+  "responsable": "Gerente SIG",
+  "origen": "Mantenimiento fila 14"
+ },
+ {
+  "orden": 128,
+  "alcance": "areas",
+  "areas": [
+   "Mantenimiento"
+  ],
+  "lugar": "",
+  "proceso": "Mantenimiento",
+  "actividad": "Uso de aceites para la calbracion de varios equipos",
+  "aspecto": "Generación de residuos de aceites o solventes usados.",
+  "impacto": "Contaminación del suelo y agua por derrames.",
+  "situaciones": [
+   "A"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Ninguno",
+  "criterios": [
+   2,
+   2,
+   1,
+   1,
+   1
+  ],
+  "control_operacional": "- Almacenamiento en contenedores herméticos, rotulados. - Bandejas de contención secundaria. - Entrega de aceites usados a operador autorizado. - Plan de contingencia para derrames (kit absorbente).",
+  "registro_asociado": "- Formato de almacenamiento de residuos líquidos peligrosos - Manifiesto de entrega de aceites usados a operador autorizado - Registro de inspección de contenedores - Programa de preparación y respuesta ante emergencias - Registro de incidentes y uso de kit antiderrame",
+  "responsable": "Gerente SIG",
+  "origen": "Mantenimiento fila 15"
+ },
+ {
+  "orden": 129,
+  "alcance": "areas",
+  "areas": [
+   "Mantenimiento"
+  ],
+  "lugar": "",
+  "proceso": "Mantenimiento",
+  "actividad": "Mantenimiento de pesas",
+  "aspecto": "Generación de ruido, residuos solidos, vapores",
+  "impacto": "Contaminación al aire, suelo, acustico. Generación del RRSS",
+  "situaciones": [
+   "A"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Ninguno",
+  "criterios": [
+   1,
+   1,
+   1,
+   1,
+   1
+  ],
+  "control_operacional": "Ninguno",
+  "registro_asociado": "Ninguno",
+  "responsable": "Gerente SIG",
+  "origen": "Mantenimiento fila 16"
+ },
+ {
+  "orden": 130,
+  "alcance": "areas",
+  "areas": [
+   "Mantenimiento"
+  ],
+  "lugar": "",
+  "proceso": "Mantenimiento",
+  "actividad": "Uso considerado de pilas en el proceso de mantenimiento de equipos",
+  "aspecto": "Generación de residuos peligrosos (pilas agotadas).",
+  "impacto": "Contaminación de suelo y agua por metales pesados (mercurio, cadmio, plomo).",
+  "situaciones": [
+   "A"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Recolección selectiva en contenedores especiales para pilas.",
+  "criterios": [
+   2,
+   2,
+   1,
+   1,
+   2
+  ],
+  "control_operacional": "- Entrega a programa municipal o empresa autorizada. - Promoción de uso de pilas recargables en la medida posible. - Señalización del punto de acopio.",
+  "registro_asociado": "- Registro de segregación y acopio de residuos peligrosos (pilas/baterías) - Constancia de entrega a programa municipal o empresa autorizada - Registro fotográfico del punto de acopio señalizado - Capacitaciones de Gestión Integral de Residuos Solidos",
+  "responsable": "Gerente SIG",
+  "origen": "Mantenimiento fila 17"
+ },
+ {
+  "orden": 131,
+  "alcance": "areas",
+  "areas": [
+   "Mantenimiento"
+  ],
+  "lugar": "",
+  "proceso": "Mantenimiento",
+  "actividad": "Mantenimiento, Montaje y Desmontaje de equipos electricos y lectronicos de laboratorio",
+  "aspecto": "Generación de residuos peligrosos (Cadmio, mercurio, Policloruro de Vinilo, niquel, Berilio, otros)",
+  "impacto": "Afectación del suelo",
+  "situaciones": [
+   "A"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Contenedor de Basura identificado Rojo (Residuos Peligrosos)",
+  "criterios": [
+   1,
+   2,
+   1,
+   1,
+   1
+  ],
+  "control_operacional": "- Almacenamiento temporal en los tachos de Residuos peligrosos (Rojo) - Inspecciones mensuales",
+  "registro_asociado": "- Fotos - Inspección SSTMA en oficinas - Cetificado de Disposiciñon Final",
+  "responsable": "Gerente SIG",
+  "origen": "Mantenimiento fila 18"
+ },
+ {
+  "orden": 132,
+  "alcance": "areas",
+  "areas": [
+   "Mantenimiento"
+  ],
+  "lugar": "",
+  "proceso": "Mantenimiento",
+  "actividad": "Mantenimiento, Montaje y Desmontaje de equipos electricos y lectronicos de laboratorio",
+  "aspecto": "Generación, existencia y manejo de RAEE",
+  "impacto": "Contaminación del suelo.",
+  "situaciones": [
+   "A"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Espacio habilitado para el almacenamiento temporal de los RAEE",
+  "criterios": [
+   1,
+   2,
+   1,
+   1,
+   1
+  ],
+  "control_operacional": "Realizar la Gestión de los RAEE con alguna de las dos alternativas: 1.- Gestión de los RAEE en puntos de acopio autorizados, según el Procedimiento de Manejo de RR.SS. 2.- Gestión de los RAEE con una EO - RS acreditada ante el MINAM",
+  "registro_asociado": "- Acta de entrega de mouse o fotos de disposición en puntos RAEE - Certificado de recojo de RAEE",
+  "responsable": "Gerente SIG",
+  "origen": "Mantenimiento fila 19"
+ },
+ {
+  "orden": 133,
+  "alcance": "areas",
+  "areas": [
+   "Mantenimiento"
+  ],
+  "lugar": "",
+  "proceso": "Mantenimiento",
+  "actividad": "Mantenimiento, Montaje y Desmontaje de equipos electricos y lectronicos de laboratorio",
+  "aspecto": "Consumo de Energía Eléctrica",
+  "impacto": "Agotamiento del recurso natural Emisión de gases de efecto invernadero",
+  "situaciones": [
+   "A"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Ninguno",
+  "criterios": [
+   1,
+   2,
+   1,
+   1,
+   3
+  ],
+  "control_operacional": "- Campañas ambientales. - Publicación de afiches - Procedimiento de uso eficiente de energía eléctrica",
+  "registro_asociado": "- Lista de Asistencia - Tablero de Control - Foto de publicación de afiches o afiches publicados (PPT con afiches)",
+  "responsable": "Gerente SIG",
+  "origen": "Mantenimiento fila 20"
+ },
+ {
+  "orden": 134,
+  "alcance": "areas",
+  "areas": [
+   "Mantenimiento"
+  ],
+  "lugar": "",
+  "proceso": null,
+  "actividad": "Falla del sistema A/C (Aire acondicionado)",
+  "aspecto": "Fuga de refrigerante",
+  "impacto": "Contaminación atmosférica y contribución al calentamiento global",
+  "situaciones": [
+   "E"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Informe o reporte de mantenimiento preventivo",
+  "criterios": [
+   1,
+   2,
+   1,
+   1,
+   1
+  ],
+  "control_operacional": "Programa de manteniemitno Reporte de mantenimiento",
+  "registro_asociado": "Registro del programa y reporte o informe de mantenimiento",
+  "responsable": "Gerente SIG",
+  "origen": "Mantenimiento fila 21"
+ },
+ {
+  "orden": 135,
+  "alcance": "areas",
+  "areas": [
+   "Mantenimiento"
+  ],
+  "lugar": "",
+  "proceso": null,
+  "actividad": "Mantenimiento del A/C (Aire acondicionado)",
+  "aspecto": "Generación de residuos (filtros usados)",
+  "impacto": "Generación de residuos sólidos",
+  "situaciones": [
+   "A"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Ninguno",
+  "criterios": [
+   1,
+   2,
+   1,
+   1,
+   2
+  ],
+  "control_operacional": "Programa de manteniemitno Reporte de mantenimiento",
+  "registro_asociado": "Registro del programa y reporte o informe de mantenimiento",
+  "responsable": "Gerente SIG",
+  "origen": "Mantenimiento fila 22"
+ },
+ {
+  "orden": 136,
+  "alcance": "areas",
+  "areas": [
+   "Logística"
+  ],
+  "lugar": "",
+  "proceso": "Recepción de Equipos y/o Instrumentos",
+  "actividad": "Iluminación oficina de recepción y despacho por logistica y otras oficinas",
+  "aspecto": "Consumo de Energía Eléctrica",
+  "impacto": "Agotamiento del recurso natural Emisión de gases de efecto invernadero",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Ninguno",
+  "criterios": [
+   1,
+   3,
+   1,
+   1,
+   3
+  ],
+  "control_operacional": "- Campañas ambientales. - Publicación de afiches - Procedimiento de uso eficiente de energía eléctrica",
+  "registro_asociado": "- Lista de Asistencia - Foto de publicación de afiches o afiches publicados (PPT con afiches)",
+  "responsable": "Gerente SIG",
+  "origen": "Recepción Almacen y Despacho fila 12"
+ },
+ {
+  "orden": 137,
+  "alcance": "areas",
+  "areas": [
+   "Logística"
+  ],
+  "lugar": "",
+  "proceso": "Recepción de Equipos y/o Instrumentos",
+  "actividad": "Procesamiento de información haciendo uso de Equipos de Computo (Recepción, almacen y despacho)",
+  "aspecto": "Generación, existencia y manejo de residuos no peligrosos (Papel, cartón, plástico)",
+  "impacto": "Agotamiento del recurso natural Emisión de gases de efecto invernadero",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Formato de pesaje de residuos sólidos mensual",
+  "criterios": [
+   1,
+   1,
+   1,
+   1,
+   3
+  ],
+  "control_operacional": "- Capacitación en la Segregación adecuada de Residuos Solidos. - Inspección mensual",
+  "registro_asociado": "- Lista de asistencia - Fotos de uso adecuado del tacho azul - Inspección SSTMA en oficina",
+  "responsable": "Gerente SIG",
+  "origen": "Recepción Almacen y Despacho fila 13"
+ },
+ {
+  "orden": 138,
+  "alcance": "areas",
+  "areas": [
+   "Logística"
+  ],
+  "lugar": "",
+  "proceso": "Recepción de Equipos y/o Instrumentos",
+  "actividad": "Procesamiento de información haciendo uso de Equipos de Computo (Recepción, almacen y despacho)",
+  "aspecto": "Consumo de Energía Eléctrica",
+  "impacto": "Agotamiento del recurso natural Emisión de gases de efecto invernadero",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Ninguno",
+  "criterios": [
+   1,
+   3,
+   1,
+   1,
+   3
+  ],
+  "control_operacional": "- Campañas ambientales. - Publicación de afiches - Procedimiento de uso eficiente de energía eléctrica",
+  "registro_asociado": "- Lista de Asistencia - Tablero de Control - Foto de publicación de afiches o afiches publicados (PPT con afiches)",
+  "responsable": "Gerente SIG",
+  "origen": "Recepción Almacen y Despacho fila 14"
+ },
+ {
+  "orden": 139,
+  "alcance": "areas",
+  "areas": [
+   "Logística"
+  ],
+  "lugar": "",
+  "proceso": "Recepción de Equipos y/o Instrumentos",
+  "actividad": "Procesamiento de información haciendo uso de Equipos de Computo (Recepción, almacen y despacho)",
+  "aspecto": "Consumo de Papel",
+  "impacto": "Agotamiento del recurso natural Emisión de gases de efecto invernadero",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Se cuenta con un espacio para colocar el Papel Borrador (Segundo uso)",
+  "criterios": [
+   1,
+   1,
+   1,
+   1,
+   3
+  ],
+  "control_operacional": "- Sensibilización en el consumo de papel. - Publicación de afiches. - Rehusar el papel impreso a una sola cara. - Procedimiento de uso eficiente de papel.",
+  "registro_asociado": "- Lista de Asistencia - Tablero de Control. - Foto de publicación de afiches o afiches publicados. - Foto de Consumo de Papel borrador.",
+  "responsable": "Gerente SIG",
+  "origen": "Recepción Almacen y Despacho fila 15"
+ },
+ {
+  "orden": 140,
+  "alcance": "areas",
+  "areas": [
+   "Logística"
+  ],
+  "lugar": "",
+  "proceso": "Recepción de Equipos y/o Instrumentos",
+  "actividad": "Procesamiento de información haciendo uso de Equipos de Computo (Recepción, almacen y despacho)",
+  "aspecto": "Uso de Papel con impresión a una cara (Papel Borrador)",
+  "impacto": "Reducción de la contaminación Reducción de la emisión de Co2",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "indirecta",
+  "clase": "positivo",
+  "controles_existentes": "Se cuenta con un espacio para colocar el Papel Borrador (Segundo uso)",
+  "criterios": [
+   null,
+   null,
+   null,
+   null,
+   null
+  ],
+  "control_operacional": "- Sensibilización en el consumo de papel. - Publicación de afiches. - Reciclar el papel impreso a una casa (Se enucentra colocado en un lugar accesible para el uso de todo el personal).",
+  "registro_asociado": "- Lista de Asistencia - Foto de publicación de afiches o afiches publicados.",
+  "responsable": "Gerente SIG",
+  "origen": "Recepción Almacen y Despacho fila 16"
+ },
+ {
+  "orden": 141,
+  "alcance": "areas",
+  "areas": [
+   "Logística"
+  ],
+  "lugar": "",
+  "proceso": "Recepción de Equipos y/o Instrumentos",
+  "actividad": "Recepción, desempacado,Traslado interno, embalaje y rotulado",
+  "aspecto": "Generación de residuos de embalaje (cartón, plástico, film, espuma)",
+  "impacto": "Incremento de residuos sólidos no peligrosos",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "directa",
+  "clase": "negativo",
+  "controles_existentes": "Procedimiento de segregación de residuos",
+  "criterios": [
+   1,
+   2,
+   1,
+   2,
+   3
+  ],
+  "control_operacional": "Segregación de residuos en zona de recepción, Instructivo de embalaje con consideraciones ambientales",
+  "registro_asociado": "Registro de entrega de residuos (Evidencias fotograficas u otro medio)",
+  "responsable": "Gerente SIG",
+  "origen": "Recepción Almacen y Despacho fila 17"
+ },
+ {
+  "orden": 142,
+  "alcance": "areas",
+  "areas": [
+   "Logística"
+  ],
+  "lugar": "",
+  "proceso": "Recepción de Equipos y/o Instrumentos",
+  "actividad": "Recepción, desempacado,Traslado interno, embalaje y rotulado",
+  "aspecto": "Consumo de insumos (cinta, etiquetas, bolsas)",
+  "impacto": "Mayor consumo de recursos materiales",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "directa",
+  "clase": "negativo",
+  "controles_existentes": "Capacitación un buen uso de recursos y segregación de residuos",
+  "criterios": [
+   1,
+   2,
+   1,
+   2,
+   3
+  ],
+  "control_operacional": "Uso racional de insumos, control de stock, kits de embalaje estandarizados",
+  "registro_asociado": "Inspección SSTMA mensual",
+  "responsable": "Gerente SIG",
+  "origen": "Recepción Almacen y Despacho fila 18"
+ },
+ {
+  "orden": 143,
+  "alcance": "areas",
+  "areas": [
+   "Logística"
+  ],
+  "lugar": "",
+  "proceso": "Recepción de Equipos y/o Instrumentos",
+  "actividad": "Recepción, desempacado,Traslado interno, embalaje y rotulado",
+  "aspecto": "Daño del equipo → reproceso de calibración",
+  "impacto": "Impacto ambiental indirecto por mayor uso de energía e insumos",
+  "situaciones": [
+   "A"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Flayer de buen uso y manejo de empaques",
+  "criterios": [
+   1,
+   1,
+   1,
+   2,
+   1
+  ],
+  "control_operacional": "Capacitación en manipulación segura y consideraciones ambientales en despacho, checklist de embalaje, uso de protecciones adecuadas",
+  "registro_asociado": "Lista de asistencia en capacitación de: manipulación segura y consideraciones ambientales en despacho",
+  "responsable": "Gerente SIG",
+  "origen": "Recepción Almacen y Despacho fila 19"
+ },
+ {
+  "orden": 144,
+  "alcance": "areas",
+  "areas": [
+   "Logística"
+  ],
+  "lugar": "",
+  "proceso": "Recepción de Equipos y/o Instrumentos",
+  "actividad": "Recepción, desempacado,Traslado interno, embalaje y rotulado",
+  "aspecto": "Consumo de energía eléctrica (PCs, balanzas, impresoras)",
+  "impacto": "Emisiones indirectas de GEI",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Capacitación en uso eficiente de recursos",
+  "criterios": [
+   1,
+   2,
+   1,
+   2,
+   3
+  ],
+  "control_operacional": "Digitalización de guías y etiquetas, apagado de equipos fuera de uso",
+  "registro_asociado": "Inspección SSTMA mensual",
+  "responsable": "Gerente SIG",
+  "origen": "Recepción Almacen y Despacho fila 20"
+ },
+ {
+  "orden": 145,
+  "alcance": "areas",
+  "areas": [
+   "Logística"
+  ],
+  "lugar": "",
+  "proceso": "Recepción de Equipos y/o Instrumentos",
+  "actividad": "Almacenamiento temporal",
+  "aspecto": "Consumo de energía (iluminación del almacén)",
+  "impacto": "Emisiones indirectas de GEI",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Capacitación en uso eficiente de recursos",
+  "criterios": [
+   1,
+   2,
+   1,
+   2,
+   3
+  ],
+  "control_operacional": "Iluminación LED, apagado fuera de uso, señalización de ahorro energético",
+  "registro_asociado": "Inspección SSTMA mensual",
+  "responsable": "Gerente SIG",
+  "origen": "Recepción Almacen y Despacho fila 21"
+ },
+ {
+  "orden": 146,
+  "alcance": "areas",
+  "areas": [
+   "Logística"
+  ],
+  "lugar": "",
+  "proceso": "Recepción de Equipos y/o Instrumentos",
+  "actividad": "Almacenamiento temporal",
+  "aspecto": "Uso de fundas y materiales de protección",
+  "impacto": "Generación adicional de residuos sólidos",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Ninguno",
+  "criterios": [
+   1,
+   2,
+   1,
+   2,
+   3
+  ],
+  "control_operacional": "Uso de fundas reutilizables, control de reutilización",
+  "registro_asociado": "Ver en in situ en despacho",
+  "responsable": "Gerente SIG",
+  "origen": "Recepción Almacen y Despacho fila 22"
+ },
+ {
+  "orden": 147,
+  "alcance": "areas",
+  "areas": [
+   "Logística"
+  ],
+  "lugar": "",
+  "proceso": "Recepción de Equipos y/o Instrumentos",
+  "actividad": "Almacenamiento temporal",
+  "aspecto": "Deterioro del equipo por condiciones ambientales",
+  "impacto": "Recalibración → impacto ambiental indirecto",
+  "situaciones": [
+   "A"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Ninguno",
+  "criterios": [
+   1,
+   2,
+   1,
+   2,
+   1
+  ],
+  "control_operacional": "Control de T° y HR, orden y limpieza, inspección periódica",
+  "registro_asociado": "Ver en in situ en despacho",
+  "responsable": "Gerente SIG",
+  "origen": "Recepción Almacen y Despacho fila 23"
+ },
+ {
+  "orden": 148,
+  "alcance": "areas",
+  "areas": [
+   "Logística"
+  ],
+  "lugar": "",
+  "proceso": "Recepción de Equipos y/o Instrumentos",
+  "actividad": "Despacho - retiro por el cliente",
+  "aspecto": "Residuos de embalaje entregados al cliente",
+  "impacto": "Incremento de residuos sólidos",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Procedimiento de segregación de residuos",
+  "criterios": [
+   1,
+   2,
+   1,
+   2,
+   3
+  ],
+  "control_operacional": "Segregación de residuos en zona de recepción / despacho, Instructivo de embalaje con consideraciones ambientales",
+  "registro_asociado": "Registro de entrega de residuos (Evidencias fotograficas u otro medio) Lista de assitencia o acta de entrega del Instrutivo de embalaje",
+  "responsable": "Gerente SIG",
+  "origen": "Recepción Almacen y Despacho fila 24"
+ },
+ {
+  "orden": 149,
+  "alcance": "areas",
+  "areas": [
+   "Logística"
+  ],
+  "lugar": "",
+  "proceso": "Recepción de Equipos y/o Instrumentos",
+  "actividad": "Despacho - retiro por el cliente",
+  "aspecto": "Emisiones por transporte del cliente",
+  "impacto": "Emisiones indirectas de CO₂",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Ninguno",
+  "criterios": [
+   1,
+   2,
+   1,
+   2,
+   3
+  ],
+  "control_operacional": "Promover recojos programados y documentación digital",
+  "registro_asociado": "Ver in situ en recepción / despacho",
+  "responsable": "Gerente SIG",
+  "origen": "Recepción Almacen y Despacho fila 25"
+ },
+ {
+  "orden": 150,
+  "alcance": "areas",
+  "areas": [
+   "Logística"
+  ],
+  "lugar": "",
+  "proceso": "Recepción de Equipos y/o Instrumentos",
+  "actividad": "Despacho - retiro por el cliente",
+  "aspecto": "Uso de documentación impresa",
+  "impacto": "Consumo de papel y residuos",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "directa",
+  "clase": "negativo",
+  "controles_existentes": "Procedimiento de segregación de residuos",
+  "criterios": [
+   1,
+   2,
+   1,
+   2,
+   3
+  ],
+  "control_operacional": "Certificados digitales, impresión solo bajo solicitud",
+  "registro_asociado": "Certiificados digitales",
+  "responsable": "Gerente SIG",
+  "origen": "Recepción Almacen y Despacho fila 26"
+ },
+ {
+  "orden": 151,
+  "alcance": "areas",
+  "areas": [
+   "Logística"
+  ],
+  "lugar": "",
+  "proceso": "Recepción de Equipos y/o Instrumentos",
+  "actividad": "Despacho - Transporte tercerizado",
+  "aspecto": "Emisiones atmosféricas por transporte",
+  "impacto": "Contribución al cambio climático",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Selección de proveedor de tranpsorte formalizado (en caso corresponda a Metrindust)",
+  "criterios": [
+   1,
+   2,
+   1,
+   2,
+   3
+  ],
+  "control_operacional": "Selección de transportistas con capacitaciones en Sistema de gestión ambiental, Manejo eficiente de combustible, segregación de residuos u otros similares, consolidación de envíos, Instructivo Manejo eficiente del combustible y consideraciones ambientales",
+  "registro_asociado": "Lista de asistencia de capacitación Registro de entrega de varios clientes en un solo día List de asistencia o acta de Entrega del instructivo Manejo eficiente del combustible",
+  "responsable": "Gerente SIG",
+  "origen": "Recepción Almacen y Despacho fila 27"
+ },
+ {
+  "orden": 152,
+  "alcance": "areas",
+  "areas": [
+   "Logística"
+  ],
+  "lugar": "",
+  "proceso": "Recepción de Equipos y/o Instrumentos",
+  "actividad": "Despacho - Transporte tercerizado",
+  "aspecto": "Embalaje adicional",
+  "impacto": "Mayor consumo de materiales",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "directa",
+  "clase": "negativo",
+  "controles_existentes": "Ninguno",
+  "criterios": [
+   1,
+   2,
+   1,
+   2,
+   3
+  ],
+  "control_operacional": "Estandarizar embalaje seguro y eficiente",
+  "registro_asociado": "Instructivo de embalaje",
+  "responsable": "Gerente SIG",
+  "origen": "Recepción Almacen y Despacho fila 28"
+ },
+ {
+  "orden": 153,
+  "alcance": "areas",
+  "areas": [
+   "Logística"
+  ],
+  "lugar": "",
+  "proceso": "Recepción de Equipos y/o Instrumentos",
+  "actividad": "Despacho - Transporte tercerizado",
+  "aspecto": "Daños → reprocesos",
+  "impacto": "Impacto ambiental indirecto por recalibración",
+  "situaciones": [
+   "A"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Ninguno",
+  "criterios": [
+   1,
+   2,
+   1,
+   2,
+   1
+  ],
+  "control_operacional": "Registro de incidencias, embalaje reforzado",
+  "registro_asociado": "Registro de Trabajo No Conforme",
+  "responsable": "Gerente SIG",
+  "origen": "Recepción Almacen y Despacho fila 29"
+ },
+ {
+  "orden": 154,
+  "alcance": "areas",
+  "areas": [
+   "Logística"
+  ],
+  "lugar": "",
+  "proceso": "Recepción de Equipos y/o Instrumentos",
+  "actividad": "Despacho - Transporte propio",
+  "aspecto": "Consumo de combustible fósil",
+  "impacto": "Emisiones de CO₂, NOx y MP",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "directa",
+  "clase": "negativo",
+  "controles_existentes": "Ninguno",
+  "criterios": [
+   1,
+   2,
+   1,
+   2,
+   3
+  ],
+  "control_operacional": "Planificación de rutas, consolidación de visitas, conducción ecoeficiente Personal capacitado en Sistema de gestión ambiental, Manejo eficiente de combustible, segregación de residuos u otros similares. Instructivo Manejo eficiente del combustible y consideraciones ambientales",
+  "registro_asociado": "Hoja de planificación o programa de rutas de los transportistas Lista de asistencia de capacitación Lista de Assitencia o acta de entrega de instrutivo de manejo eficiente",
+  "responsable": null,
+  "origen": "Recepción Almacen y Despacho fila 30"
+ },
+ {
+  "orden": 155,
+  "alcance": "areas",
+  "areas": [
+   "Logística"
+  ],
+  "lugar": "",
+  "proceso": "Recepción de Equipos y/o Instrumentos",
+  "actividad": "Despacho - Transporte propio",
+  "aspecto": "Ruido (moto lineal)",
+  "impacto": "Molestias al entorno",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "directa",
+  "clase": "negativo",
+  "controles_existentes": "Registro de mantenimiento preventivo",
+  "criterios": [
+   1,
+   2,
+   1,
+   2,
+   3
+  ],
+  "control_operacional": "Mantenimiento de vehículos",
+  "registro_asociado": "Registro de mantenimiento de vehiculos",
+  "responsable": null,
+  "origen": "Recepción Almacen y Despacho fila 31"
+ },
+ {
+  "orden": 156,
+  "alcance": "areas",
+  "areas": [
+   "Logística"
+  ],
+  "lugar": "",
+  "proceso": "Recepción de Equipos y/o Instrumentos",
+  "actividad": "Despacho - Transporte propio",
+  "aspecto": "Derrame de combustible/aceite",
+  "impacto": "Contaminación del suelo",
+  "situaciones": [
+   "E"
+  ],
+  "generacion": "directa",
+  "clase": "negativo",
+  "controles_existentes": "Capacitación sobre que hacer en caso de derrame de combustible y/o aceite",
+  "criterios": [
+   1,
+   2,
+   1,
+   2,
+   1
+  ],
+  "control_operacional": "Mantenimiento preventivo, kit de derrames",
+  "registro_asociado": "Registro de mantenimiento de vehiculos",
+  "responsable": null,
+  "origen": "Recepción Almacen y Despacho fila 32"
+ },
+ {
+  "orden": 157,
+  "alcance": "areas",
+  "areas": [
+   "Logística"
+  ],
+  "lugar": "",
+  "proceso": "Recepción de Equipos y/o Instrumentos",
+  "actividad": "Cambio de: Computadoras de escritorio, Laptops, impresoras, calculadoras, teléfonos, microondas, cables, cargadores, audífonos, otros.",
+  "aspecto": "Generación, existencia y manejo de RAEE",
+  "impacto": "Contaminación del suelo.",
+  "situaciones": [
+   "A"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Espacio habilitado para el almacenamiento temporal de los RAEE",
+  "criterios": [
+   1,
+   2,
+   1,
+   1,
+   1
+  ],
+  "control_operacional": "Realizar la Gestión de los RAEE con alguna de las dos alternativas: 1.- Gestión de los RAEE en puntos de acopio autorizados, según el Procedimiento de Manejo de RR.SS. 2.- Gestión de los RAEE con una EO - RS acreditada ante el MINAM",
+  "registro_asociado": "- Foto de la entrega de los RAEE en puntos de acopio autorizados - Punto de RAEE - Certificado de recojo de RAEE",
+  "responsable": "Gerente SIG",
+  "origen": "Recepción Almacen y Despacho fila 33"
+ },
+ {
+  "orden": 158,
+  "alcance": "areas",
+  "areas": [
+   "Logística"
+  ],
+  "lugar": "",
+  "proceso": "Recepción de Equipos y/o Instrumentos",
+  "actividad": "Desplazamiento externo (Transporte de Personal a las instalaciones del Cliente - solo aplica cuando el servicio sea en el cliente)",
+  "aspecto": "Emisión de gases de combustión",
+  "impacto": "Alteración de la calidad del aire",
+  "situaciones": [
+   "A"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Ejecución de las Revisiones Técnicas vehiculares",
+  "criterios": [
+   1,
+   1,
+   1,
+   1,
+   2
+  ],
+  "control_operacional": "- Revisiones técnicas vehiculares de las unidades de transporte - CITV vigentes",
+  "registro_asociado": "- Certificado de Inspección Técnica Vehicular",
+  "responsable": "Gerente SIG",
+  "origen": "Recepción Almacen y Despacho fila 34"
+ },
+ {
+  "orden": 159,
+  "alcance": "areas",
+  "areas": [
+   "Logística"
+  ],
+  "lugar": "",
+  "proceso": "Recepción de Equipos y/o Instrumentos",
+  "actividad": "Desplazamiento externo (Transporte de Personal a las instalaciones del Cliente - solo aplica cuando el servicio sea en el cliente)",
+  "aspecto": "Emisión de ruido ambiental",
+  "impacto": "Contaminación acústica",
+  "situaciones": [
+   "A"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Ejecución de las Revisiones Técnicas vehiculares",
+  "criterios": [
+   1,
+   1,
+   1,
+   1,
+   2
+  ],
+  "control_operacional": "- Revisiones técnicas vehiculares de las unidades de transporte - CITV",
+  "registro_asociado": "- Certificado de Inspección Técnica Vehicular",
+  "responsable": "Gerente SIG",
+  "origen": "Recepción Almacen y Despacho fila 35"
+ },
+ {
+  "orden": 160,
+  "alcance": "areas",
+  "areas": [
+   "Logística"
+  ],
+  "lugar": "",
+  "proceso": "Recepción de Equipos y/o Instrumentos",
+  "actividad": "Desplazamiento externo (Transporte de Personal a las instalaciones del Cliente - solo aplica cuando el servicio sea en el cliente)",
+  "aspecto": "Consumo de hidrocarburos (combustible)",
+  "impacto": "Agotamiento del recurso natural",
+  "situaciones": [
+   "A"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Ninguno",
+  "criterios": [
+   1,
+   3,
+   1,
+   1,
+   2
+  ],
+  "control_operacional": "- Mantenimiento preventivo de vehículos - Velocidad moderada",
+  "registro_asociado": "- Reporte de Mantenimiento",
+  "responsable": "Gerente SIG",
+  "origen": "Recepción Almacen y Despacho fila 36"
+ },
+ {
+  "orden": 161,
+  "alcance": "areas",
+  "areas": [
+   "Logística"
+  ],
+  "lugar": "",
+  "proceso": "Recepción de Equipos y/o Instrumentos",
+  "actividad": "Desplazamiento externo (Transporte de Personal a las instalaciones del Cliente - solo aplica cuando el servicio sea en el cliente)",
+  "aspecto": "Potencial derrames, escapes, fugas de hidrocarburos, combustibles, lubricantes.",
+  "impacto": "Alteración de las condiciones del suelo / Agua",
+  "situaciones": [
+   "E"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Kit Antiderrame",
+  "criterios": [
+   1,
+   3,
+   1,
+   1,
+   3
+  ],
+  "control_operacional": "- Capacitación del Plan de Preparación y Respuesta Ante Emergencias - Kit Antiderrame - Inspeción de Kit Antiderrame - Ejecución de simulacro de derrame de hidrocarburos",
+  "registro_asociado": "- Lista de Asistencia - Acta de Realización de Simulacro - Fotos y/o videos",
+  "responsable": "Gerente SIG",
+  "origen": "Recepción Almacen y Despacho fila 37"
+ },
+ {
+  "orden": 162,
+  "alcance": "areas",
+  "areas": [
+   "Logística"
+  ],
+  "lugar": "",
+  "proceso": "Recepción de Equipos y/o Instrumentos",
+  "actividad": "Uso de Servicios higienicos",
+  "aspecto": "Generación / Vertimiento de aguas residuales domésticas",
+  "impacto": "Alteración de las condiciones del suelo / agua",
+  "situaciones": [
+   "A"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Ninguno",
+  "criterios": [
+   1,
+   3,
+   1,
+   1,
+   3
+  ],
+  "control_operacional": "- Publicación de afiches - Inspecciones mnsuales",
+  "registro_asociado": "- Fotos - Inspección SSTMA en Oficina",
+  "responsable": "Gerente SIG",
+  "origen": "Recepción Almacen y Despacho fila 38"
+ },
+ {
+  "orden": 163,
+  "alcance": "areas",
+  "areas": [
+   "Logística"
+  ],
+  "lugar": "",
+  "proceso": "Recepción de Equipos y/o Instrumentos",
+  "actividad": "Uso de Servicios higienicos",
+  "aspecto": "Consumo de agua",
+  "impacto": "Agotamiento del recurso natural",
+  "situaciones": [
+   "A"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Ninguno",
+  "criterios": [
+   1,
+   3,
+   1,
+   1,
+   3
+  ],
+  "control_operacional": "- Sensibilización en el consumo de agua - Publicación de afiches",
+  "registro_asociado": "- Lista de Asistencia - Foto de publicación de afiches o afiches publicados.",
+  "responsable": "Gerente SIG",
+  "origen": "Recepción Almacen y Despacho fila 39"
+ },
+ {
+  "orden": 164,
+  "alcance": "areas",
+  "areas": [
+   "Logística"
+  ],
+  "lugar": "",
+  "proceso": "Recepción de Equipos y/o Instrumentos",
+  "actividad": "Uso de Servicios higienicos",
+  "aspecto": "Descarga no controlada de efluentes",
+  "impacto": "Agotamiento del agua",
+  "situaciones": [
+   "E"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Ninguno",
+  "criterios": [
+   1,
+   3,
+   1,
+   1,
+   3
+  ],
+  "control_operacional": "- Sensibilización en el consumo de agua - Publicación de afiches",
+  "registro_asociado": "- Lista de Asistencia - Foto de publicación de afiches o afiches publicados.",
+  "responsable": "Gerente SIG",
+  "origen": "Recepción Almacen y Despacho fila 40"
+ },
+ {
+  "orden": 165,
+  "alcance": "areas",
+  "areas": [
+   "Logística"
+  ],
+  "lugar": "",
+  "proceso": "Recepción de Equipos y/o Instrumentos",
+  "actividad": "Uso de Servicios higienicos",
+  "aspecto": "Generación, existencia y manejo de residuos no peligrosos (Papel Toalla, papel higiénico)",
+  "impacto": "Afectación del agua y suelo",
+  "situaciones": [
+   "A"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Contenedor de Basura identificado Negro (Residuos No Aprovechables para los SS.HH)",
+  "criterios": [
+   1,
+   1,
+   1,
+   1,
+   3
+  ],
+  "control_operacional": "- Capacitación en la Segregación adecuada de Residuos Solidos. - Inspecciones mensuales",
+  "registro_asociado": "- Lista de Asistencia - Fotos - Inspección SSTMA en Oficina",
+  "responsable": "Gerente SIG",
+  "origen": "Recepción Almacen y Despacho fila 41"
+ },
+ {
+  "orden": 166,
+  "alcance": "otro",
+  "areas": [],
+  "lugar": "Comedor",
+  "proceso": null,
+  "actividad": "Uso del comedor por trabajadores",
+  "aspecto": "Consumo de energía eléctrica (iluminación)",
+  "impacto": "Incremento del consumo energético",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "directa",
+  "clase": "negativo",
+  "controles_existentes": "Luminarias instaladas",
+  "criterios": [
+   1,
+   1,
+   2,
+   2,
+   3
+  ],
+  "control_operacional": "Apagar las luminarias cuando el comedor no esté en uso; uso de iluminación eficiente; señalización de ahorro energético.",
+  "registro_asociado": "Registro de inspección / consumo eléctrico",
+  "responsable": "Gerente SIG",
+  "origen": "Comedor fila 12"
+ },
+ {
+  "orden": 167,
+  "alcance": "otro",
+  "areas": [],
+  "lugar": "Comedor",
+  "proceso": null,
+  "actividad": "Uso de microondas",
+  "aspecto": "Consumo de energía eléctrica",
+  "impacto": "Incremento de huella de carbono",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "directa",
+  "clase": "negativo",
+  "controles_existentes": "Equipos en buen estado",
+  "criterios": [
+   1,
+   1,
+   2,
+   2,
+   3
+  ],
+  "control_operacional": "Uso del microondas solo durante horarios de comida; desconexión del equipo al finalizar su uso; mantenimiento preventivo.",
+  "registro_asociado": "Registro de mantenimiento de equipos",
+  "responsable": "Gerente SIG",
+  "origen": "Comedor fila 13"
+ },
+ {
+  "orden": 168,
+  "alcance": "otro",
+  "areas": [],
+  "lugar": "Comedor",
+  "proceso": null,
+  "actividad": "Uso de televisor",
+  "aspecto": "Consumo de energía eléctrica",
+  "impacto": "Uso ineficiente de recursos energéticos",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "directa",
+  "clase": "negativo",
+  "controles_existentes": "Ninguno",
+  "criterios": [
+   1,
+   1,
+   2,
+   2,
+   3
+  ],
+  "control_operacional": "Apagar el televisor cuando no esté en uso; restricción de uso fuera del horario de almuerzo.",
+  "registro_asociado": "Registro de inspección interna",
+  "responsable": "Gerente SIG",
+  "origen": "Comedor fila 14"
+ },
+ {
+  "orden": 169,
+  "alcance": "otro",
+  "areas": [],
+  "lugar": "Comedor",
+  "proceso": null,
+  "actividad": "Consumo de alimentos (Refrigerio, Almuerzo)",
+  "aspecto": "Generación de residuos orgánicos (restos de alimentos)",
+  "impacto": "Incremento en el volumen de residuos orgánicos.",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Deposición en tacho negro de residuos generales",
+  "criterios": [
+   1,
+   1,
+   1,
+   1,
+   3
+  ],
+  "control_operacional": "- Capacitación en la Segregación adecuada de Residuos Solidos. - Publicación de Afiches - Contenedor de Basura para Residuos orgánicos - Inspecciones mensuales",
+  "registro_asociado": "- Lista de Asistencia - Fotos - Inspección SSTMA en Oficina",
+  "responsable": "Gerente SIG",
+  "origen": "Comedor fila 15"
+ },
+ {
+  "orden": 170,
+  "alcance": "otro",
+  "areas": [],
+  "lugar": "Comedor",
+  "proceso": null,
+  "actividad": "Consumo de alimentos (Refrigerio, Almuerzo)",
+  "aspecto": "Generación, existencia y manejo de residuos no peligrosos (Papel, cartón, plástico)",
+  "impacto": "Agotamiento del recurso natural Emisión de gases de efecto invernadero",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Formato de pesaje de residuos sólidos mensual",
+  "criterios": [
+   1,
+   1,
+   1,
+   1,
+   3
+  ],
+  "control_operacional": "- Capacitación en la Segregación adecuada de Residuos Solidos. - Publicación de Afiches - Contenedor de Basura paraidentificado Verde (Plástico) Azul (Papel y Cartón) - Inspecciones mensuales",
+  "registro_asociado": "- Lista de asistencia - Fotos de uso adecuado del tacho azul",
+  "responsable": "Gerente SIG",
+  "origen": "Comedor fila 16"
+ },
+ {
+  "orden": 171,
+  "alcance": "otro",
+  "areas": [],
+  "lugar": "Comedor",
+  "proceso": null,
+  "actividad": "Uso de Servicios Higiénicos",
+  "aspecto": "Generación / Vertimiento de aguas residuales domésticas",
+  "impacto": "Alteración de las condiciones del suelo / agua",
+  "situaciones": [
+   "A"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Ninguno",
+  "criterios": [
+   1,
+   3,
+   1,
+   1,
+   3
+  ],
+  "control_operacional": "- Publicación de afiches - Inspecciones mensuales",
+  "registro_asociado": "- Fotos - Inspección SSTMA en Oficina",
+  "responsable": "Gerente SIG",
+  "origen": "Comedor fila 17"
+ },
+ {
+  "orden": 172,
+  "alcance": "otro",
+  "areas": [],
+  "lugar": "Comedor",
+  "proceso": null,
+  "actividad": "Uso de Servicios Higiénicos",
+  "aspecto": "Consumo de agua",
+  "impacto": "Agotamiento del recurso natural",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Ninguno",
+  "criterios": [
+   1,
+   3,
+   1,
+   1,
+   3
+  ],
+  "control_operacional": "- Capacitación en el Plan d ePreparación y Respuesta ante emergencias - Sensibilización en el consumo de agua - Publicación de afiches",
+  "registro_asociado": "- Lista de Asistencia - Foto de publicación de afiches o afiches publicados.",
+  "responsable": "Gerente SIG",
+  "origen": "Comedor fila 18"
+ },
+ {
+  "orden": 173,
+  "alcance": "otro",
+  "areas": [],
+  "lugar": "Comedor",
+  "proceso": null,
+  "actividad": "Uso de Servicios Higiénicos",
+  "aspecto": "Descarga no controlada de efluentes",
+  "impacto": "Agotamiento del agua",
+  "situaciones": [
+   "E"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Ninguno",
+  "criterios": [
+   1,
+   3,
+   1,
+   1,
+   1
+  ],
+  "control_operacional": "- Capacitación en el Plan d ePreparación y Respuesta ante emergencias - Sensibilización en el consumo de agua - Publicación de afiches",
+  "registro_asociado": "- Lista de Asistencia - Foto de publicación de afiches o afiches publicados.",
+  "responsable": "Gerente SIG",
+  "origen": "Comedor fila 19"
+ },
+ {
+  "orden": 174,
+  "alcance": "otro",
+  "areas": [],
+  "lugar": "Comedor",
+  "proceso": null,
+  "actividad": "Uso de Servicios Higiénicos",
+  "aspecto": "Generación, existencia y manejo de residuos no peligrosos (Consumo de Papel toalla/ papel higiénico)",
+  "impacto": "Afectación del agua y suelo",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "indirecta",
+  "clase": "negativo",
+  "controles_existentes": "Formato de pesaje de residuos sólidos mensual",
+  "criterios": [
+   1,
+   1,
+   1,
+   1,
+   3
+  ],
+  "control_operacional": "- Capacitación en la Segregación adecuada de Residuos Solidos. - Contenedor de Basura para Residuos No Aprovechables para los SS.HH. - Inspecciones mensuales",
+  "registro_asociado": "- Lista de Asistencia - Fotos - Inspección SSTMA en Oficina",
+  "responsable": "Gerente SIG",
+  "origen": "Comedor fila 20"
+ },
+ {
+  "orden": 175,
+  "alcance": "otro",
+  "areas": [],
+  "lugar": "Comedor",
+  "proceso": null,
+  "actividad": "Limpieza del SS.HH.",
+  "aspecto": "Uso de desinfectantes",
+  "impacto": "Contaminación del agua",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "directa",
+  "clase": "negativo",
+  "controles_existentes": "Uso de productos autorizados",
+  "criterios": [
+   1,
+   3,
+   1,
+   1,
+   2
+  ],
+  "control_operacional": "Uso de productos autorizados y dosificados; prohibición de vertido directo; capacitación al personal de limpieza.",
+  "registro_asociado": "Fichas técnicas / registro de compras",
+  "responsable": "Gerente SIG",
+  "origen": "Comedor fila 21"
+ },
+ {
+  "orden": 176,
+  "alcance": "otro",
+  "areas": [],
+  "lugar": "Comedor",
+  "proceso": null,
+  "actividad": "Limpieza del comedor",
+  "aspecto": "Uso de productos de limpieza",
+  "impacto": "Contaminación del agua",
+  "situaciones": [
+   "N"
+  ],
+  "generacion": "directa",
+  "clase": "negativo",
+  "controles_existentes": "Uso de productos autorizados",
+  "criterios": [
+   1,
+   3,
+   1,
+   1,
+   3
+  ],
+  "control_operacional": "Dosificación adecuada de productos de limpieza que cuenten con ficha técnica; uso de insumos permitidos; almacenamiento seguro.",
+  "registro_asociado": "Fichas técnicas / registro de consumo",
+  "responsable": "Gerente SIG",
+  "origen": "Comedor fila 22"
+ }
+]

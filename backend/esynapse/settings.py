@@ -15,14 +15,41 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 MODO_PRUEBAS = os.environ.get('ESYNAPSE_MODO', '').strip().lower() == 'pruebas'
 
 
-# SECURITY WARNING: keep the secret key used in production secret!
-# En producción: mover a variable de entorno (ej: os.environ['SECRET_KEY'])
-SECRET_KEY = 'django-insecure-8wxz^&kybj@tq)qwom#ona*et=f1w!*o(3gttcdsip29l!8s5v'
+def _secreto_local():
+    """Clave secreta fuera del código: variable de entorno ESYNAPSE_SECRET_KEY o archivo local backend/.env
+    (SECRET_KEY=...), que se crea solo la primera vez. El .env no va a Git ni a la carpeta limpia."""
+    clave = os.environ.get('ESYNAPSE_SECRET_KEY', '').strip()
+    if clave:
+        return clave
+    archivo = BASE_DIR / '.env'
+    if archivo.exists():
+        for linea in archivo.read_text(encoding='utf-8').splitlines():
+            if linea.strip().startswith('SECRET_KEY='):
+                valor = linea.split('=', 1)[1].strip()
+                if valor:
+                    return valor
+    import secrets
+    clave = secrets.token_urlsafe(50)
+    with open(archivo, 'a', encoding='utf-8') as f:
+        f.write(f'SECRET_KEY={clave}\n')
+    return clave
+
+
+SECRET_KEY = _secreto_local()
+
+# Los certificados internos de firma ya emitidos se cifraron con una contraseña derivada de la clave anterior; se
+# conserva esa base solo para abrirlos (los archivos .p12 son locales). Al pasar a certificados reales (fase 3) se
+# reemplaza.
+CLAVE_CERTIFICADOS_BASE = os.environ.get('ESYNAPSE_CLAVE_CERTIFICADOS',
+                                         'django-insecure-8wxz^&kybj@tq)qwom#ona*et=f1w!*o(3gttcdsip29l!8s5v')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+
+# Solo detrás de un proxy inverso propio (producción) se confía en X-Forwarded-For para la IP del log y las firmas.
+PROXY_CONFIABLE = os.environ.get('ESYNAPSE_PROXY_CONFIABLE', '') == '1'
 
 
 # Application definition
@@ -49,6 +76,11 @@ INSTALLED_APPS = [
     'legal',
     'sst',
     'organizacion',
+    'capacitacion',
+    'ambiente',
+    'revision',
+    'tnc',
+    'cumplimiento',
 ]
 
 MIDDLEWARE = [
@@ -123,7 +155,7 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
     ),
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'DEFAULT_PAGINATION_CLASS': 'core.paginacion.PaginacionSIG',
     'PAGE_SIZE': 25,
 }
 

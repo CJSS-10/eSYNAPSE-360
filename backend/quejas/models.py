@@ -250,7 +250,7 @@ class Queja(AuditableModel):
         """Plazos del procedimiento: acuse (24 h), resultado de la validación
         (2 días hábiles, o la fecha comprometida si se amplió) e informe de
         resultados (7 días hábiles desde la validación, si el cliente lo pide)."""
-        ahora = timezone.now()
+        ahora = timezone.localtime()
         coms = list(self.comunicaciones.filter(is_active=True))
 
         def primera(*tipos):

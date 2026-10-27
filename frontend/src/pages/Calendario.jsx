@@ -44,8 +44,9 @@ export default function Calendario() {
 
   const navegar = (dir) => {
     const c = new Date(cursor)
-    if (vista === 'mes') c.setMonth(c.getMonth() + dir)
-    else if (vista === 'anio') c.setFullYear(c.getFullYear() + dir)
+    // Mes y año se mueven desde el día 1: el 31 de octubre + 1 mes no debe saltar a diciembre.
+    if (vista === 'mes') { c.setDate(1); c.setMonth(c.getMonth() + dir) }
+    else if (vista === 'anio') { c.setDate(1); c.setFullYear(c.getFullYear() + dir) }
     else c.setDate(c.getDate() + dir)
     setCursor(c)
   }

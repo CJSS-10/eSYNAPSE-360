@@ -1,4 +1,5 @@
 """eSYNAPSE 360 — Serializers de M6 Gestión Documental."""
+from django.utils import timezone
 from rest_framework import serializers
 
 from .models import Documento, FormatoImpreso, VerificacionExterna, VersionDocumento
@@ -33,6 +34,17 @@ class FormatoImpresoSerializer(serializers.ModelSerializer):
         return doc
 
 
+def _baja(obj):
+    """Quién dio de baja el registro y cuándo (su última modificación)."""
+    u = getattr(obj, 'updated_by', None)
+    return {'anulado_por': (u.get_full_name() or u.username) if u else '', 'anulado_en': obj.updated_at}
+
+
+def _anulados(modelo, serializer, **filtro):
+    return [{**serializer(o).data, **_baja(o)} for o in modelo.todos.filter(is_active=False, **filtro)
+            .select_related('updated_by').order_by('-updated_at')]
+
+
 class FirmaVersionSerializer(serializers.ModelSerializer):
     rol_display = serializers.CharField(source='get_rol_display', read_only=True)
     firmante = serializers.SerializerMethodField()
@@ -40,7 +52,8 @@ class FirmaVersionSerializer(serializers.ModelSerializer):
     class Meta:
         from .models import FirmaVersion
         model = FirmaVersion
-        fields = ['id', 'rol', 'rol_display', 'firmante', 'cargo', 'ip', 'hash_archivo', 'created_at']
+        fields = ['id', 'rol', 'rol_display', 'firmante', 'cargo', 'ip', 'hash_archivo', 'created_at', 'vigente',
+                  'anulada_en', 'motivo_anulacion']
 
     def get_firmante(self, obj):
         return obj.usuario.get_full_name() or obj.usuario.username
@@ -93,13 +106,14 @@ class VersionDocumentoSerializer(serializers.ModelSerializer):
     archivo_url = serializers.SerializerMethodField()
     archivo_publicado_url = serializers.SerializerMethodField()
     firmas = FirmaVersionSerializer(many=True, read_only=True)
+    firmas_anuladas = serializers.SerializerMethodField()
     observaciones = ObservacionVersionSerializer(many=True, read_only=True)
     historial_archivos = ArchivoVersionSerializer(many=True, read_only=True)
 
     class Meta:
         model = VersionDocumento
         fields = ['id', 'version', 'archivo', 'archivo_url', 'archivo_publicado_url',
-                  'hash_publicado', 'firmas', 'observaciones', 'resumen_cambios', 'estado',
+                  'hash_publicado', 'firmas', 'firmas_anuladas', 'observaciones', 'resumen_cambios', 'estado',
                   'estado_display', 'elaborado_por_nombre', 'revisado_por_nombre',
                   'aprobado_por_nombre', 'comentarios_revision', 'fecha_revision',
                   'fecha_aprobacion', 'fecha_vigencia', 'fecha_proxima_revision',
@@ -111,6 +125,11 @@ class VersionDocumentoSerializer(serializers.ModelSerializer):
         if not usuario:
             return None
         return usuario.get_full_name() or usuario.username
+
+    def get_firmas_anuladas(self, obj):
+        from .models import FirmaVersion
+        return FirmaVersionSerializer(FirmaVersion.todos.filter(version=obj, vigente=False).select_related('usuario'),
+                                      many=True).data
 
     def get_elaborado_por_nombre(self, obj):
         return self._nombre(obj.elaborado_por)
@@ -258,7 +277,7 @@ class DocumentoSerializer(serializers.ModelSerializer):
                 version=edicion or '00',
                 archivo=archivo,
                 estado='vigente',
-                fecha_vigencia=fecha_aprob or timezone.now().date(),
+                fecha_vigencia=fecha_aprob or timezone.localdate(),
                 fecha_aprobacion=fa_dt,
                 elaborado_por=request.user if request else None,
             )
@@ -339,7 +358,7 @@ class DocumentoListaSerializer(serializers.ModelSerializer):
 
     def get_fecha_aprobacion(self, obj):
         v = obj.version_vigente
-        return v.fecha_aprobacion.date() if v and v.fecha_aprobacion else None
+        return timezone.localtime(v.fecha_aprobacion).date() if v and v.fecha_aprobacion else None
 
     def get_creado_por(self, obj):
         u = obj.created_by
@@ -690,6 +709,10 @@ class EquipoAuditoriaSerializer(serializers.ModelSerializer):
         return obj.nombre_externo
 
 
+def _equipo_anulado(auditoria):
+    return _anulados(EquipoAuditoria, EquipoAuditoriaSerializer, auditoria=auditoria)
+
+
 class ActaAuditoriaSerializer(serializers.ModelSerializer):
     tipo_display = serializers.CharField(source='get_tipo_display', read_only=True)
     archivo_url = serializers.SerializerMethodField()
@@ -740,6 +763,7 @@ class AuditoriaSerializer(serializers.ModelSerializer):
     programa_anio = serializers.IntegerField(source='programa.anio', read_only=True)
     programa_estado = serializers.CharField(source='programa.estado', read_only=True, default=None)
     equipo = EquipoAuditoriaSerializer(many=True, read_only=True)
+    equipo_anulado = serializers.SerializerMethodField()
     actas = ActaAuditoriaSerializer(many=True, read_only=True)
     listas = ListaVerificacionSerializer(many=True, read_only=True)
     hallazgos = serializers.SerializerMethodField()
@@ -762,7 +786,7 @@ class AuditoriaSerializer(serializers.ModelSerializer):
                   'auditor_lider', 'auditor_lider_nombre', 'mes_programado', 'mes_reprogramado', 'fecha_programada',
                   'fecha_inicio', 'fecha_fin', 'reprogramada', 'motivo_reprogramacion',
                   'estado', 'estado_display', 'fortalezas', 'debilidades', 'conclusiones',
-                  'fecha_informe', 'equipo', 'actas', 'listas', 'hallazgos', 'etapas_abiertas', 'plan_aprobado_por', 'plan_aprobado_por_nombre',
+                  'fecha_informe', 'equipo', 'equipo_anulado', 'actas', 'listas', 'hallazgos', 'etapas_abiertas', 'plan_aprobado_por', 'plan_aprobado_por_nombre',
                   'fecha_aprobacion_plan', 'pendientes_clasificar', 'is_active',
                   'created_at', 'updated_at']
         read_only_fields = ['codigo', 'estado', 'fecha_informe', 'is_active', 'reprogramada', 'mes_reprogramado',
@@ -807,6 +831,9 @@ class AuditoriaSerializer(serializers.ModelSerializer):
                 'El Sistema Integrado ya incluye ISO 9001, ISO 14001 e ISO 45001. Marque el Sistema Integrado '
                 'para auditar los tres sistemas juntos, o solo las normas que se auditen por separado.']})
         return data
+
+    def get_equipo_anulado(self, obj):
+        return _equipo_anulado(obj)
 
     def get_hallazgos(self, obj):
         return [{
@@ -947,6 +974,8 @@ class EquipoSerializer(serializers.ModelSerializer):
     movimientos = MovimientoEquipoSerializer(many=True, read_only=True)
     informes = InformeEquipoSerializer(many=True, read_only=True)
     registros = RegistroEquipoSerializer(many=True, read_only=True)
+    registros_anulados = serializers.SerializerMethodField()
+    actividades_anuladas = serializers.SerializerMethodField()
 
     class Meta:
         model = Equipo
@@ -960,10 +989,17 @@ class EquipoSerializer(serializers.ModelSerializer):
                   'fecha_ultima_calibracion', 'fecha_proxima_calibracion', 'periodicidad_dias',
                   'certificado_url', 'imagen', 'imagen_url', 'observaciones',
                   'calibracion_vigente', 'es_patron', 'actividades', 'movimientos', 'informes',
-                  'registros', 'actualizado_por', 'is_active', 'created_at', 'updated_at']
+                  'registros', 'registros_anulados', 'actividades_anuladas', 'actualizado_por', 'is_active',
+                  'created_at', 'updated_at']
         # 'codigo' ahora lo asigna el usuario al registrar el equipo.
         read_only_fields = ['estado', 'is_active']
         extra_kwargs = {'imagen': {'write_only': True, 'required': False}}
+
+    def get_registros_anulados(self, obj):
+        return _anulados(RegistroEquipo, RegistroEquipoSerializer, equipo=obj)
+
+    def get_actividades_anuladas(self, obj):
+        return _anulados(ActividadPrograma, ActividadProgramaSerializer, equipo=obj)
 
     def get_certificado_url(self, obj):
         return obj.certificado.url if obj.certificado else None
@@ -1194,7 +1230,15 @@ class AutorizacionSerializer(serializers.ModelSerializer):
             if anterior == 'revocada':
                 errores['estado'] = ['Una autorización revocada no se reactiva: registre una autorización nueva.']
             elif cambia and 'estado' not in errores:
-                motivo = motivo_sin_entrenamiento(usuario, metodo, inst if anterior == 'suspendida' else None, exento)
+                # Una suspensión (o revocación) de esta persona en este método exige re-entrenamiento posterior,
+                # aunque se pase antes por «en entrenamiento» o se registre una autorización nueva.
+                from .models import Autorizacion
+                previa = inst if inst is not None and (anterior == 'suspendida' or inst.suspendida_en) else None
+                if previa is None:
+                    previa = (Autorizacion.objects.filter(usuario=usuario, metodo=metodo, is_active=True,
+                                                          estado__in=('suspendida', 'revocada'))
+                              .exclude(pk=getattr(inst, 'pk', None)).order_by('-suspendida_en', '-updated_at').first())
+                motivo = motivo_sin_entrenamiento(usuario, metodo, previa, exento)
                 if motivo:
                     errores['estado'] = [motivo]
         if usuario and metodo and estado in ('vigente', 'en_entrenamiento'):

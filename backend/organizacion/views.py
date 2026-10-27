@@ -1,3 +1,4 @@
+from django.utils import timezone
 from datetime import date
 
 from django.db.models import Q
@@ -8,8 +9,10 @@ from rest_framework.response import Response
 
 from core.permissions import PermisoModular
 
-from .models import CAMPOS_PERFIL, TIPOS_AREA, TIPOS_PUESTO, Area, Puesto, Trabajador, _hist, sincronizar_usuario
-from .serializers import AreaSerializer, PuestoSerializer, TrabajadorSerializer
+from .models import (CAMPOS_PERFIL, MODALIDADES_SUMINISTRO, TENENCIAS, TIPOS_AREA, TIPOS_PUESTO, TIPOS_SUMINISTRO,
+                     Area, Nivel, Puesto, Sede, Suministro, Trabajador, _hist, sincronizar_usuario)
+from .serializers import (AreaSerializer, NivelSerializer, PuestoSerializer, SedeSerializer, SuministroSerializer,
+                          TrabajadorSerializer)
 
 
 class PermisoOrganizacion(BasePermission):
@@ -70,14 +73,135 @@ class _Base(viewsets.ModelViewSet):
     reactivar.operacion = 'editar'
 
 
+class SedeViewSet(_Base):
+    """Sedes de la organización, con sus niveles y suministros."""
+    queryset = Sede.objects.all().select_related('responsable').prefetch_related('niveles')
+    serializer_class = SedeSerializer
+
+    def perform_create(self, serializer):
+        super().perform_create(serializer)
+        self._unica_principal(serializer.instance)
+
+    def perform_update(self, serializer):
+        obj = serializer.instance
+        cambios = self._cambios(obj, serializer.validated_data)
+        obj = serializer.save(updated_by=self.request.user)
+        if cambios:
+            _hist(obj, self.request.user, 'Actualización', campos=', '.join(cambios))
+            obj.save(update_fields=['historial'])
+        self._unica_principal(obj)
+
+    def _unica_principal(self, sede):
+        """Solo una sede es la principal (domicilio fiscal): marcar una desmarca las demás."""
+        if not sede.principal:
+            return
+        for otra in Sede.objects.filter(principal=True).exclude(pk=sede.pk):
+            otra.principal = False
+            _hist(otra, self.request.user, 'Deja de ser la sede principal', motivo=f'ahora lo es {sede.nombre}')
+            otra.save(update_fields=['principal', 'historial'])
+
+    def destroy(self, request, *args, **kwargs):
+        s = self.get_object()
+        if s.areas.filter(is_active=True).exists():
+            return self._error('La sede tiene áreas activas: muévalas a otra sede o desactívelas primero.')
+        if s.suministros.filter(is_active=True).exists():
+            return self._error('La sede tiene suministros activos: desactívelos primero.')
+        s.is_active = False
+        _hist(s, request.user, 'Desactivación')
+        s.updated_by = request.user
+        s.save(update_fields=['is_active', 'historial', 'updated_by', 'updated_at'])
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=False, methods=['get'])
+    def catalogos(self, request):
+        return Response({'tenencias': TENENCIAS, 'tipos_suministro': TIPOS_SUMINISTRO,
+                         'modalidades': MODALIDADES_SUMINISTRO})
+
+
+class NivelViewSet(_Base):
+    queryset = Nivel.objects.all().select_related('sede')
+    serializer_class = NivelSerializer
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        if self.request.query_params.get('sede'):
+            qs = qs.filter(sede_id=self.request.query_params['sede'])
+        return qs
+
+    def perform_create(self, serializer):
+        obj = serializer.save(created_by=self.request.user, updated_by=self.request.user)
+        _hist(obj.sede, self.request.user, 'Nuevo nivel', campos=obj.nombre)
+        obj.sede.save(update_fields=['historial'])
+
+    def perform_update(self, serializer):
+        antes = serializer.instance.nombre
+        obj = serializer.save(updated_by=self.request.user)
+        if obj.nombre != antes:
+            _hist(obj.sede, self.request.user, 'Nivel renombrado', de=antes, a=obj.nombre)
+            obj.sede.save(update_fields=['historial'])
+
+    def destroy(self, request, *args, **kwargs):
+        n = self.get_object()
+        if n.areas.filter(is_active=True).exists():
+            return self._error('El nivel tiene áreas activas: cámbielas de nivel primero.')
+        if n.suministros.filter(is_active=True).exists():
+            return self._error('El nivel tiene suministros activos: desactívelos primero.')
+        n.is_active, n.updated_by = False, request.user
+        n.save(update_fields=['is_active', 'updated_by', 'updated_at'])
+        _hist(n.sede, request.user, 'Nivel desactivado', campos=n.nombre)
+        n.sede.save(update_fields=['historial'])
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=True, methods=['post'])
+    def reactivar(self, request, pk=None):
+        n = self.get_object()
+        n.is_active, n.updated_by = True, request.user
+        n.save(update_fields=['is_active', 'updated_by', 'updated_at'])
+        return Response(self.get_serializer(n).data)
+    reactivar.operacion = 'editar'
+
+
+class SuministroViewSet(_Base):
+    queryset = Suministro.objects.all().select_related('sede', 'nivel', 'responsable', 'sede__responsable')
+    serializer_class = SuministroSerializer
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        p = self.request.query_params
+        if p.get('sede'):
+            qs = qs.filter(sede_id=p['sede'])
+        if p.get('tipo'):
+            qs = qs.filter(tipo=p['tipo'])
+        return qs
+
+    def perform_update(self, serializer):
+        obj = serializer.instance
+        cambios = self._cambios(obj, serializer.validated_data)
+        obj = serializer.save(updated_by=self.request.user)
+        if cambios:
+            _hist(obj, self.request.user, 'Actualización', campos=', '.join(cambios))
+            obj.save(update_fields=['historial'])
+
+    def destroy(self, request, *args, **kwargs):
+        """Se desactiva (deja de pedir registros); sus consumos se conservan."""
+        s = self.get_object()
+        s.is_active = False
+        _hist(s, request.user, 'Desactivación')
+        s.updated_by = request.user
+        s.save(update_fields=['is_active', 'historial', 'updated_by', 'updated_at'])
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
 class AreaViewSet(_Base):
-    queryset = Area.objects.all().select_related('padre', 'proceso', 'responsable')
+    queryset = Area.objects.all().select_related('padre', 'proceso', 'responsable', 'sede', 'nivel')
     serializer_class = AreaSerializer
 
     def get_queryset(self):
         qs = super().get_queryset()
         if self.request.query_params.get('tipo'):
             qs = qs.filter(tipo=self.request.query_params['tipo'])
+        if self.request.query_params.get('sede'):
+            qs = qs.filter(sede_id=self.request.query_params['sede'])
         return qs
 
     def perform_update(self, serializer):
@@ -211,7 +335,7 @@ class TrabajadorViewSet(_Base):
         if not motivo:
             return self._error('Indique el motivo del cese.')
         try:
-            fecha = date.fromisoformat(request.data.get('fecha') or '') if request.data.get('fecha') else date.today()
+            fecha = date.fromisoformat(request.data.get('fecha') or '') if request.data.get('fecha') else timezone.localdate()
         except ValueError:
             return self._error('Fecha de cese no válida.')
         if t.fecha_ingreso and fecha < t.fecha_ingreso:
@@ -220,6 +344,13 @@ class TrabajadorViewSet(_Base):
         datos = {'motivo': motivo}
         if t.usuario and request.data.get('desactivar_usuario', True) not in (False, 'false', '0'):
             u = t.usuario
+            if u == request.user:
+                return self._error('No puede registrar su propio cese con desactivación de su usuario.')
+            if u.is_superuser and not request.user.is_superuser:
+                return self._error('El usuario del propietario del sistema no se desactiva desde aquí.')
+            if not request.user.tiene_permiso('usuarios', 'editar'):
+                return self._error('Desactivar el usuario del sistema requiere el permiso de editar usuarios '
+                                   '(registre el cese sin desactivarlo o pídalo a quien administra usuarios).')
             u.is_active = False
             u.save(update_fields=['is_active'])
             datos['usuario_sistema'] = f'{u.username} desactivado'
@@ -235,7 +366,7 @@ class TrabajadorViewSet(_Base):
         if t.estado != 'cesado':
             return self._error('El trabajador está activo.')
         try:
-            fecha = date.fromisoformat(request.data.get('fecha') or '') if request.data.get('fecha') else date.today()
+            fecha = date.fromisoformat(request.data.get('fecha') or '') if request.data.get('fecha') else timezone.localdate()
         except ValueError:
             return self._error('Fecha de reingreso no válida.')
         _hist(t, request.user, 'Reingreso', cese_anterior=str(t.fecha_cese), motivo=t.motivo_cese)

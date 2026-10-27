@@ -167,7 +167,7 @@ export default function Trazabilidad({ puedeEditar }) {
         <div className="card-esynapse space-y-3 p-5">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-sm font-semibold">Carta de Trazabilidad — {sel.magnitud}</h3>
+              <h3 className="text-sm font-semibold">Carta de trazabilidad — {sel.magnitud}</h3>
               <p className="text-xs text-slate-500 dark:text-slate-400">{sel.procedimiento_calibracion || 'Sin procedimiento'} · {nodos.length} eslabón(es)</p>
             </div>
             {puedeEditar && (

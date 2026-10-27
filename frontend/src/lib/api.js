@@ -1,6 +1,8 @@
 /**
  * eSYNAPSE 360 — Cliente API con JWT y refresh automático.
  */
+import { avisarEscritura } from './avisos.js'
+
 const BASE = '/api'
 
 const tokens = {
@@ -14,6 +16,14 @@ const tokens = {
     localStorage.removeItem('esynapse_access')
     localStorage.removeItem('esynapse_refresh')
   },
+}
+
+// Acceso a los archivos subidos (/media): el servidor entrega una cookie firmada solo para usuarios con sesión; se
+// pide al ingresar, al abrir el sistema con sesión y en cada renovación del token.
+export function activarArchivos() {
+  if (!tokens.access) return Promise.resolve()
+  return fetch(`${BASE}/auth/media/`, { method: 'POST', headers: { Authorization: `Bearer ${tokens.access}` } })
+    .catch(() => {})
 }
 
 // Una sola renovación a la vez: si varias consultas vencen juntas (p. ej. una
@@ -36,11 +46,13 @@ async function renovar() {
   if (!r.ok) {
     // Otra pestaña pudo renovarla primero: si ya hay otro token guardado, se usa ese.
     if (tokens.refresh && tokens.refresh !== refresh) return true
-    tokens.clear()
+    // Solo un refresh rechazado (400/401) cierra la sesión; un 5xx (servidor reiniciándose) no.
+    if (r.status === 400 || r.status === 401) tokens.clear()
     return false
   }
   const data = await r.json()
   tokens.set(data.access, data.refresh)
+  activarArchivos()
   return true
 }
 
@@ -52,7 +64,23 @@ function sesionExpirada() {
   return e
 }
 
-export async function apiFetch(path, { method = 'GET', body, _reintento = false } = {}) {
+// Doble clic: una escritura idéntica (mismo método, ruta y datos) que ya está en curso no se envía dos veces; las dos
+// llamadas reciben la misma respuesta. Evita registros duplicados en todos los formularios.
+const enCurso = new Map()
+
+export function apiFetch(path, opciones = {}) {
+  const { method = 'GET', body, _reintento = false } = opciones
+  if (method === 'GET' || _reintento) return _apiFetch(path, opciones)
+  const clave = `${method} ${path} ${body === undefined ? '' : JSON.stringify(body)}`
+  if (enCurso.has(clave)) return enCurso.get(clave)
+  const p = _apiFetch(path, opciones)
+    .then((r) => { avisarEscritura(method, path); return r })   // aviso «Guardado», «Aprobado»…
+    .finally(() => enCurso.delete(clave))
+  enCurso.set(clave, p)
+  return p
+}
+
+async function _apiFetch(path, { method = 'GET', body, _reintento = false } = {}) {
   const headers = { 'Content-Type': 'application/json' }
   if (tokens.access) headers.Authorization = `Bearer ${tokens.access}`
 
@@ -77,6 +105,19 @@ export async function apiFetch(path, { method = 'GET', body, _reintento = false 
     error.status = r.status
     error.data = data
     throw error
+  }
+  // Listados paginados: si la consulta no pide una página concreta, se traen todas las páginas (las pantallas
+  // trabajan con la lista completa; antes se cortaba en los primeros 25 registros sin avisar).
+  if (method === 'GET' && data && Array.isArray(data.results) && data.next && !/[?&]page=/.test(path)) {
+    const todos = [...data.results]
+    let siguiente = data.next
+    for (let i = 0; siguiente && i < 200; i += 1) {
+      const u = new URL(siguiente, window.location.origin)
+      const d = await apiFetch(`${u.pathname.replace(/^\/api/, '')}${u.search}`)
+      todos.push(...(d.results || []))
+      siguiente = d.next
+    }
+    return { ...data, next: null, results: todos }
   }
   return data
 }
@@ -118,6 +159,7 @@ export async function apiUpload(path, formData, { method = 'POST', _reintento = 
     error.data = data
     throw error
   }
+  if (!_reintento) avisarEscritura(method, path)
   return data
 }
 
@@ -129,7 +171,11 @@ export async function apiBlob(path, { method = 'GET', _reintento = false } = {})
     if (!_reintento && await refrescarToken()) return apiBlob(path, { method, _reintento: true })
     throw sesionExpirada()
   }
-  if (!r.ok) throw new Error(`No se pudo generar el documento (HTTP ${r.status}).`)
+  if (!r.ok) {
+    // El servidor explica el motivo (p. ej. «La auditoría aún no tiene plan» o falta de permiso).
+    const data = await r.json().catch(() => null)
+    throw new Error(mensajeError(data) || `No se pudo generar el documento (HTTP ${r.status}).`)
+  }
   return r.blob()
 }
 
@@ -143,9 +189,14 @@ export const api = {
     const data = await r.json().catch(() => null)
     if (!r.ok) throw new Error(data?.detail || 'Credenciales incorrectas')
     tokens.set(data.access, data.refresh)
+    await activarArchivos()
     return data
   },
-  logout() { tokens.clear() },
+  logout() {
+    fetch(`${BASE}/auth/media/`, { method: 'DELETE' }).catch(() => {})
+    tokens.clear()
+  },
+  activarArchivos,
   haySesion() { return Boolean(tokens.access) },
   me: () => apiFetch('/auth/me/'),
   // Usuarios
@@ -159,7 +210,20 @@ export const api = {
     asignarRoles: (id, roles) => apiFetch(`/usuarios/${id}/asignar_roles/`, { method: 'POST', body: { roles } }),
   },
   // Organización y personal (núcleo): áreas, puestos y trabajadores comunes a todo el sistema
+  ubigeos: () => apiFetch('/ubigeos/'),
   org: {
+    sedes: (params = '') => apiFetch(`/org-sedes/${params}`),
+    crearSede: (data) => apiFetch('/org-sedes/', { method: 'POST', body: data }),
+    editarSede: (id, data) => apiFetch(`/org-sedes/${id}/`, { method: 'PATCH', body: data }),
+    desactivarSede: (id) => apiFetch(`/org-sedes/${id}/`, { method: 'DELETE' }),
+    catalogosSedes: () => apiFetch('/org-sedes/catalogos/'),
+    crearNivel: (data) => apiFetch('/org-niveles/', { method: 'POST', body: data }),
+    editarNivel: (id, data) => apiFetch(`/org-niveles/${id}/`, { method: 'PATCH', body: data }),
+    desactivarNivel: (id) => apiFetch(`/org-niveles/${id}/`, { method: 'DELETE' }),
+    suministros: (params = '') => apiFetch(`/org-suministros/${params}`),
+    crearSuministro: (data) => apiFetch('/org-suministros/', { method: 'POST', body: data }),
+    editarSuministro: (id, data) => apiFetch(`/org-suministros/${id}/`, { method: 'PATCH', body: data }),
+    desactivarSuministro: (id) => apiFetch(`/org-suministros/${id}/`, { method: 'DELETE' }),
     areas: (params = '') => apiFetch(`/org-areas/${params}`),
     crearArea: (data) => apiFetch('/org-areas/', { method: 'POST', body: data }),
     editarArea: (id, data) => apiFetch(`/org-areas/${id}/`, { method: 'PATCH', body: data }),
@@ -316,6 +380,102 @@ export const api = {
     matrizPdf: (ambito, anio) => apiBlob(`/evaluaciones-legales/matriz_pdf/?ambito=${ambito}&anio=${anio || ''}`),
   },
   // M23 — Seguridad y Salud en el Trabajo
+  // Capacitación e inducción (Talento humano)
+  ambiente: {
+    aspectos: (params = '') => apiFetch(`/amb-aspectos/${params}`),
+    crearAspecto: (data) => apiFetch('/amb-aspectos/', { method: 'POST', body: data }),
+    editarAspecto: (id, data) => apiFetch(`/amb-aspectos/${id}/`, { method: 'PATCH', body: data }),
+    retirarAspecto: (id, motivo) => apiFetch(`/amb-aspectos/${id}/retirar/`, { method: 'POST', body: { motivo } }),
+    catalogos: () => apiFetch('/amb-aspectos/catalogos/'),
+    obligaciones: () => apiFetch('/amb-aspectos/obligaciones/'),
+    resumen: () => apiFetch('/amb-aspectos/resumen/'),
+    aprobaciones: () => apiFetch('/amb-aspectos/aprobaciones/'),
+    aprobar: (data) => apiFetch('/amb-aspectos/aprobar/', { method: 'POST', body: data }),
+    aprobarPapel: (fd) => apiUpload('/amb-aspectos/aprobar/', fd),
+    matrizPdf: () => apiBlob('/amb-aspectos/pdf/'),
+    consumos: (params = '') => apiFetch(`/amb-consumos/${params}`),
+    guardarConsumo: (id, fd) => (id ? apiUpload(`/amb-consumos/${id}/`, fd, { method: 'PATCH' }) : apiUpload('/amb-consumos/', fd)),
+    quitarConsumo: (id) => apiFetch(`/amb-consumos/${id}/`, { method: 'DELETE' }),
+    indicadores: (anio, sede = '') => apiFetch(`/amb-consumos/indicadores/?anio=${anio}${sede ? `&sede=${sede}` : ''}`),
+    lecturaAnterior: (suministro, anio, mes, excluir = '') => apiFetch(`/amb-consumos/anterior/?suministro=${suministro}&anio=${anio}&mes=${mes}${excluir ? `&excluir=${excluir}` : ''}`),
+    consumo: (id) => apiFetch(`/amb-consumos/${id}/`),
+    catalogosResiduos: () => apiFetch('/amb-pesajes/catalogos/'),
+    pesajes: (params = '') => apiFetch(`/amb-pesajes/${params}`),
+    guardarPesaje: (id, data) => (id ? apiFetch(`/amb-pesajes/${id}/`, { method: 'PATCH', body: data }) : apiFetch('/amb-pesajes/', { method: 'POST', body: data })),
+    accionPesaje: (id, accion, data = {}) => apiFetch(`/amb-pesajes/${id}/${accion}/`, { method: 'POST', body: data }),
+    pesajePdf: (id) => apiBlob(`/amb-pesajes/${id}/pdf/`),
+    resumenResiduos: (anio, sede = '') => apiFetch(`/amb-pesajes/resumen_anual/?anio=${anio}${sede ? `&sede=${sede}` : ''}`),
+    disposiciones: (params = '') => apiFetch(`/amb-disposiciones/${params}`),
+    guardarDisposicion: (id, fd) => (id ? apiUpload(`/amb-disposiciones/${id}/`, fd, { method: 'PATCH' }) : apiUpload('/amb-disposiciones/', fd)),
+    quitarDisposicion: (id) => apiFetch(`/amb-disposiciones/${id}/`, { method: 'DELETE' }),
+  },
+  tnc: {
+    catalogos: () => apiFetch('/tnc/catalogos/'),
+    opciones: () => apiFetch('/tnc/opciones/'),
+    listar: (params = '') => apiFetch(`/tnc/${params}`),
+    detalle: (id) => apiFetch(`/tnc/${id}/`),
+    crear: (data) => apiFetch('/tnc/', { method: 'POST', body: data }),
+    editar: (id, data) => apiFetch(`/tnc/${id}/`, { method: 'PATCH', body: data }),
+    accion: (id, nombre, data = {}) => apiFetch(`/tnc/${id}/${nombre}/`, { method: 'POST', body: data }),
+    adjuntar: (id, fd) => apiUpload(`/tnc/${id}/adjuntar/`, fd),
+    pdf: (id) => apiBlob(`/tnc/${id}/pdf/`),
+  },
+  cumplimiento: {
+    opciones: () => apiFetch('/cumplimiento/opciones/'),
+    matriz: (norma) => apiFetch(`/cumplimiento/matriz/?norma=${norma}`),
+    tablero: () => apiFetch('/cumplimiento/tablero/'),
+    evaluar: (data) => apiFetch('/cumplimiento/evaluar/', { method: 'POST', body: data }),
+    hallazgo: (data) => apiFetch('/cumplimiento/hallazgo/', { method: 'POST', body: data }),
+    corte: (data) => apiFetch('/cumplimiento/corte/', { method: 'POST', body: data }),
+    pdf: (norma, sede) => apiBlob(`/cumplimiento/pdf/?norma=${norma}&sede=${sede || ''}`),
+    crearOtro: (data) => apiFetch('/cumplimiento-otros/', { method: 'POST', body: data }),
+    bajaOtro: (id, data) => apiFetch(`/cumplimiento-otros/${id}/baja/`, { method: 'POST', body: data }),
+  },
+  revision: {
+    catalogos: () => apiFetch('/rd-revisiones/catalogos/'),
+    revisiones: (params = '') => apiFetch(`/rd-revisiones/${params}`),
+    revision: (id) => apiFetch(`/rd-revisiones/${id}/`),
+    crear: (data) => apiFetch('/rd-revisiones/', { method: 'POST', body: data }),
+    editar: (id, data) => apiFetch(`/rd-revisiones/${id}/`, { method: 'PATCH', body: data }),
+    accion: (id, nombre, data = {}) => apiFetch(`/rd-revisiones/${id}/${nombre}/`, { method: 'POST', body: data }),
+    informePdf: (id) => apiBlob(`/rd-revisiones/${id}/pdf/`),
+    planPdf: (id) => apiBlob(`/rd-revisiones/${id}/plan_pdf/`),
+    programa: (anio) => apiFetch(`/rd-programas/anio/?anio=${anio}`),
+    crearPrograma: (anio) => apiFetch('/rd-programas/', { method: 'POST', body: { anio } }),
+    editarPrograma: (id, data) => apiFetch(`/rd-programas/${id}/`, { method: 'PATCH', body: data }),
+    itemPrograma: (id, data) => apiFetch(`/rd-programas/${id}/item/`, { method: 'POST', body: data }),
+    programaPdf: (id) => apiBlob(`/rd-programas/${id}/pdf/`),
+    acuerdos: (params = '') => apiFetch(`/rd-acuerdos/${params}`),
+    seguimiento: (id, fd) => apiUpload(`/rd-acuerdos/${id}/`, fd, { method: 'PATCH' }),
+    cerrarAcuerdo: (id, password) => apiFetch(`/rd-acuerdos/${id}/cerrar/`, { method: 'POST', body: { password } }),
+  },
+  capacitacion: {
+    catalogos: () => apiFetch('/cap-programas/catalogos/'),
+    programa: (anio) => apiFetch(`/cap-programas/anio/?anio=${anio}`),
+    crearPrograma: (anio) => apiFetch('/cap-programas/', { method: 'POST', body: { anio } }),
+    accionPrograma: (id, nombre, data = {}) => apiFetch(`/cap-programas/${id}/${nombre}/`, { method: 'POST', body: data }),
+    aprobarProgramaPapel: (id, formData) => apiUpload(`/cap-programas/${id}/aprobar/`, formData),
+    programaPdf: (id) => apiBlob(`/cap-programas/${id}/pdf/`),
+    firmantes: () => apiFetch('/cap-programas/firmantes/'),
+    resumen: (anio) => apiFetch(`/cap-programas/resumen/?anio=${anio}`),
+    situacion: (anio, trabajador) => apiFetch(`/cap-programas/situacion/?anio=${anio}${trabajador ? `&trabajador=${trabajador}` : ''}`),
+    sesiones: (params = '') => apiFetch(`/cap-sesiones/${params}`),
+    sesion: (id) => apiFetch(`/cap-sesiones/${id}/`),
+    crearSesion: (data) => apiFetch('/cap-sesiones/', { method: 'POST', body: data }),
+    editarSesion: (id, data) => apiFetch(`/cap-sesiones/${id}/`, { method: 'PATCH', body: data }),
+    accionSesion: (id, nombre, data = {}) => apiFetch(`/cap-sesiones/${id}/${nombre}/`, { method: 'POST', body: data }),
+    subirSesion: (id, nombre, formData) => apiUpload(`/cap-sesiones/${id}/${nombre}/`, formData),
+    sesionPdf: (id) => apiBlob(`/cap-sesiones/${id}/pdf/`),
+    inducciones: (params = '') => apiFetch(`/cap-inducciones/${params}`),
+    induccion: (id) => apiFetch(`/cap-inducciones/${id}/`),
+    crearInduccion: (data) => apiFetch('/cap-inducciones/', { method: 'POST', body: data }),
+    accionInduccion: (id, nombre, data = {}) => apiFetch(`/cap-inducciones/${id}/${nombre}/`, { method: 'POST', body: data }),
+    induccionPdf: (id) => apiBlob(`/cap-inducciones/${id}/pdf/`),
+    plantillas: () => apiFetch('/cap-plantillas/'),
+    editarPlantilla: (id, data) => apiFetch(`/cap-plantillas/${id}/`, { method: 'PATCH', body: data }),
+    documentosSig: () => apiFetch('/cap-plantillas/documentos_sig/'),
+  },
+
   sst: {
     filas: (params = '') => apiFetch(`/sst-iperc/${params}`),
     fila: (id) => apiFetch(`/sst-iperc/${id}/`),
@@ -453,6 +613,8 @@ export const api = {
     crearProgramaSsoma: (data) => apiFetch('/sst-programa-ssoma/', { method: 'POST', body: data }),
     editarProgramaSsoma: (id, data) => apiFetch(`/sst-programa-ssoma/${id}/`, { method: 'PATCH', body: data }),
     accionProgramaSsoma: (id, nombre, data = {}) => apiFetch(`/sst-programa-ssoma/${id}/${nombre}/`, { method: 'POST', body: data }),
+    firmantesSsoma: () => apiFetch('/sst-programa-ssoma/firmantes/'),
+    aprobarSsomaPapel: (id, fd) => apiUpload(`/sst-programa-ssoma/${id}/aprobar/`, fd),
     programaSsomaPdf: (id) => apiBlob(`/sst-programa-ssoma/${id}/pdf/`),
   },
   // M7 — Procesos
@@ -583,6 +745,7 @@ export const api = {
     reprogramar: (id, data) => apiFetch(`/auditorias/${id}/reprogramar/`, { method: 'POST', body: data }),
     agregarIntegrante: (id, data) => apiFetch(`/auditorias/${id}/agregar_integrante/`, { method: 'POST', body: data }),
     quitarIntegrante: (id, integranteId) => apiFetch(`/auditorias/${id}/quitar_integrante/`, { method: 'POST', body: { integrante_id: integranteId } }),
+    restaurarIntegrante: (id, integranteId) => apiFetch(`/auditorias/${id}/restaurar_integrante/`, { method: 'POST', body: { integrante_id: integranteId } }),
     registrarActa: (id, data) => apiFetch(`/auditorias/${id}/registrar_acta/`, { method: 'POST', body: data }),
     generarLista: (id, norma) => apiFetch(`/auditorias/${id}/generar_lista/`, { method: 'POST', body: { norma } }),
     evaluarItem: (id, data) => apiFetch(`/auditorias/${id}/evaluar_item/`, { method: 'POST', body: data }),
@@ -618,6 +781,7 @@ export const api = {
   },
   // Transversales: buzón de tareas y calendario
   misTareas: () => apiFetch('/mis-tareas/'),
+  buscar: (q) => apiFetch(`/buscar/?q=${encodeURIComponent(q)}`),
   calendario: (usuarioId) => apiFetch(`/calendario/${usuarioId ? `?usuario=${usuarioId}` : ''}`),
   // M13 — Equipos
   equipos: {
@@ -640,6 +804,7 @@ export const api = {
     programar: (id, data) => apiFetch(`/equipos/${id}/programar/`, { method: 'POST', body: data }),
     programaPdf: (params = '') => apiBlob(`/equipos/programa_pdf/${params}`),
     eliminarRegistro: (id, registroId) => apiFetch(`/equipos/${id}/eliminar_registro/`, { method: 'POST', body: { registro_id: registroId } }),
+    restaurar: (id, entidad, oid) => apiFetch(`/equipos/${id}/restaurar/`, { method: 'POST', body: { entidad, id: oid } }),
     agregarActividad: (id, data) => apiFetch(`/equipos/${id}/agregar_actividad/`, { method: 'POST', body: data }),
     registrarMovimiento: (id, data) => apiFetch(`/equipos/${id}/registrar_movimiento/`, { method: 'POST', body: data }),
     registrarRetorno: (id, data) => apiFetch(`/equipos/${id}/registrar_retorno/`, { method: 'POST', body: data }),
@@ -730,7 +895,12 @@ export const api = {
     reenviar: (id, payload = null) => apiFetch(`/solicitudes-competencia/${id}/reenviar/`, { method: 'POST', body: payload ? { payload } : {} }),
   },
   // Configuración del sistema (marca + licenciamiento de módulos)
-  configPublica: () => apiFetch('/configuracion/publica/'),
+  // Pública: sin credenciales (un token vencido haría que el servidor la rechace y no cargaría la configuración).
+  configPublica: async () => {
+    const r = await fetch(`${BASE}/configuracion/publica/`)
+    if (!r.ok) throw new Error(`HTTP ${r.status}`)
+    return r.json()
+  },
   config: {
     obtener: () => apiFetch('/configuracion/sistema/'),
     actualizar: (formData) => apiUpload('/configuracion/sistema/', formData, { method: 'PATCH' }),

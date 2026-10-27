@@ -6,6 +6,8 @@ grises, y la foto del equipo.
 """
 from io import BytesIO
 
+from django.utils import timezone
+
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_CENTER, TA_LEFT
 from reportlab.lib.pagesizes import A4
@@ -181,7 +183,7 @@ def _hoja_ficha_tecnica(W, equipo, cfg):
     rh = lambda pt: pt * k
     sep = lambda pt=15: Spacer(1, rh(pt) * 0.6)
     out = [fila([('G', 'N', Paragraph('FECHA DE ACTUALIZACIÓN:', lblwc), azul),
-                 ('O', 'W', Paragraph(_f(equipo.updated_at.date() if getattr(equipo, 'updated_at', None) else None), valc))], alto=rh(21)),
+                 ('O', 'W', Paragraph(_f(timezone.localtime(equipo.updated_at).date() if getattr(equipo, 'updated_at', None) else None), valc))], alto=rh(21)),
            sep(),
            fila([('A', 'AC', Paragraph('DATOS GENERALES', lblw), azul)], alto=rh(15), borde=False),
            fila([('A', 'C', Paragraph('Clasificación', lbl))], alto=rh(18.75), borde=False)]
@@ -264,15 +266,17 @@ def _doc_hoja_de_vida(titulo_pdf):
     return buf, doc, W, alto_util, cfg, _pag
 
 
-def generar_ficha_pdf(equipo) -> bytes:
-    """Hoja de Vida completa del equipo, como el libro Excel del formato: la
-    Ficha Técnica y una hoja por cada bitácora (mantenimiento preventivo,
-    calibraciones, verificaciones, comprobaciones intermedias,
+def generar_ficha_pdf(equipo, completa=False) -> bytes:
+    """Ficha Técnica del equipo (cada pestaña de la hoja de vida se imprime por separado, César 2026-10-24).
+    completa=True arma la Hoja de Vida entera, como el libro Excel del formato: la Ficha Técnica y una hoja por
+    cada bitácora (mantenimiento preventivo, calibraciones, verificaciones, comprobaciones intermedias,
     caracterización e historial de sucesos)."""
-    buf, doc, W, alto_util, cfg, pag = _doc_hoja_de_vida(f'Hoja de Vida {equipo.codigo}')
+    buf, doc, W, alto_util, cfg, pag = _doc_hoja_de_vida(
+        f'{"Hoja de Vida" if completa else "Ficha Técnica"} {equipo.codigo}')
     story = _hoja_ficha_tecnica(W, equipo, cfg)
     ident = f'<b>{equipo.codigo}</b> · {(equipo.nombre or "").replace("&", "&amp;")}'
-    for tipo in ('mantenimiento', 'calibracion', 'verificacion', 'comprobacion_intermedia', 'caracterizacion', 'suceso'):
+    for tipo in (('mantenimiento', 'calibracion', 'verificacion', 'comprobacion_intermedia', 'caracterizacion',
+                  'suceso') if completa else ()):
         regs = list(equipo.registros.filter(tipo=tipo).order_by('fecha', 'id')) if hasattr(equipo, 'registros') else []
         story.append(PageBreak())
         story += _hoja_bitacora(W, alto_util, tipo, regs, identificacion=ident)
@@ -314,9 +318,9 @@ def generar_inventario_pdf(equipos, laboratorio='') -> bytes:
     tdb = ParagraphStyle('ivtdb', parent=td, fontName='Helvetica-Bold')
     tdl = ParagraphStyle('ivtdl', parent=td, alignment=TA_LEFT)
 
-    hoy = timezone.now().date()
+    hoy = timezone.localdate()
     fechas_upd = [e.updated_at for e in equipos if getattr(e, 'updated_at', None)]
-    fecha_act = (max(fechas_upd).date() if fechas_upd else hoy)
+    fecha_act = (timezone.localtime(max(fechas_upd)).date() if fechas_upd else hoy)
     story = [_cabecera_met12(W, 'INVENTARIO DE EQUIPOS', 'MET-PRO-04-r02', cfg), Spacer(1, 6),
              fila([('B', 'B', Paragraph('FECHA DE ACTUALIZACIÓN', ParagraphStyle('ivfa', parent=lblw, fontSize=6.8)), azul), ('C', 'D', Paragraph(_f(fecha_act), valc)),
                    ('I', 'J', Paragraph('LABORATORIO:', lblw), azul), ('K', 'M', Paragraph(str(laboratorio or ''), valc))], alto=16),
@@ -458,7 +462,7 @@ def generar_programa_pdf(equipos, anio, laboratorio='') -> bytes:
     story.append(hdr)
     story.append(Spacer(1, 6))
 
-    hoy = timezone.now().date()
+    hoy = timezone.localdate()
     # Fecha de actualización y laboratorio, como dos bloques separados del formato.
     info = Table([['', Paragraph('FECHA DE ACTUALIZACIÓN:', lblw), Paragraph(_f(hoy), valc), '',
                    Paragraph('LABORATORIO:', lblw), Paragraph(laboratorio or '', valc), '']],
@@ -930,7 +934,7 @@ def generar_intervalo_pdf(equipo, puntos) -> bytes:
     story.append(Spacer(1, 5))
 
     # Fila 7 del formato: fecha de actualización (B:D + E:H) y laboratorio (J:L + M:O)
-    info = Table([['', Paragraph('FECHA DE ACTUALIZACIÓN:', lblw), Paragraph(_f(timezone.now().date()), valc), '',
+    info = Table([['', Paragraph('FECHA DE ACTUALIZACIÓN:', lblw), Paragraph(_f(timezone.localdate()), valc), '',
                    Paragraph('LABORATORIO:', lblw), Paragraph(equipo.laboratorio or '', valc), '']],
                  colWidths=[W * 0.06, W * 0.19, W * 0.22, W * 0.06, W * 0.17, W * 0.2, W * 0.1], rowHeights=[6 * mm])
     info.setStyle(TableStyle([
@@ -1839,7 +1843,7 @@ def generar_plan_auditoria_pdf(a) -> bytes:
         return t
 
     import datetime as _dt
-    fecha_elab = getattr(a, 'fecha_elaboracion_plan', None) or _dt.date.today()
+    fecha_elab = getattr(a, 'fecha_elaboracion_plan', None) or timezone.localdate()
     normas_cod = set()
     for n in (getattr(a, 'normas_aplicables', None) or []):
         normas_cod.update(['iso_9001', 'iso_14001', 'iso_45001'] if n == 'sig_integrado' else [n])
@@ -1995,7 +1999,7 @@ def generar_acta_pdf(acta) -> bytes:
     modalidad = getattr(a, 'modalidad', '') if a else ''
     fecha = (getattr(a, 'fecha_fin', None) if es_cierre else getattr(a, 'fecha_inicio', None)) if a else None
     if not fecha and getattr(acta, 'created_at', None):
-        fecha = acta.created_at.date()
+        fecha = timezone.localtime(acta.created_at).date()
 
     story = [_cabecera_met12(W, titulo, codigo, cfg), Spacer(1, rh(7.5))]
 
@@ -2125,7 +2129,7 @@ def _cabecera_lab_auditoria(W, a, cfg):
         ('Nombre del Laboratorio:', empresa_nombre(cfg, vacio=''), val),
         ('Dirección:', getattr(cfg, 'direccion', '') if cfg else '', val),
         ('Fechas de Auditoría:', fechas, val),
-        ('Fecha de Emisión:', _f(_dt.date.today()), val),
+        ('Fecha de Emisión:', _f(timezone.localdate()), val),
     ]
     t = Table([[Paragraph(k, lbl), Paragraph(str(v or ''), st)] for k, v, st in datos],
               colWidths=_tw(W, 2929, 6710), rowHeights=[6.2 * mm] * 5)
@@ -2474,7 +2478,7 @@ def generar_informe_auditoria_pdf(a) -> bytes:
                     auditados.append(nom)
     import datetime as _dt
     f_inf = getattr(a, 'fecha_informe', None)
-    fecha_informe = f_inf.date() if f_inf else _dt.date.today()
+    fecha_informe = timezone.localtime(f_inf).date() if f_inf else timezone.localdate()
 
     story = []
     # 1. Registro de auditoría
@@ -2648,11 +2652,11 @@ def generar_programa_anual_pdf(programa) -> bytes:
     enc_cols = [U(9), U(10), U(2), U(9), U(6), U(3), U(8), U(1), U(2), U(8), U(1)]
     enc = Table([
         [Paragraph('ELABORADO POR', lbl), Paragraph(_nom_u(getattr(programa, 'created_by', None)), td), '',
-         Paragraph('FECHA DE ELABORACIÓN', lbl), Paragraph(_f(f_elab.date()) if f_elab else '', tdc), '',
+         Paragraph('FECHA DE ELABORACIÓN', lbl), Paragraph(_f(timezone.localtime(f_elab).date()) if f_elab else '', tdc), '',
          Paragraph('AUDITORÍA INTERNA', tdc), '', '', Paragraph('AUDITORÍA EXTERNA', tdc), ''],
         [''] * 11,
         [Paragraph('APROBADO POR', lbl), Paragraph(_nom_u(getattr(programa, 'aprobado_por', None)), td), '',
-         Paragraph('FECHA DE APROBACIÓN', lbl), Paragraph(_f(f_apro.date()) if f_apro else '', tdc), '', '', '', '', '', ''],
+         Paragraph('FECHA DE APROBACIÓN', lbl), Paragraph(_f(timezone.localtime(f_apro).date()) if f_apro else '', tdc), '', '', '', '', '', ''],
     ], colWidths=enc_cols, rowHeights=[rh(18.75), rh(7.5), rh(18.75)])
     enc.setStyle(TableStyle([
         ('BOX', (0, 0), (1, 0), 0.5, colors.black), ('LINEAFTER', (0, 0), (0, 0), 0.5, colors.black),
@@ -2672,7 +2676,7 @@ def generar_programa_anual_pdf(programa) -> bytes:
         txt = f'Revisión {rev} del programa'
         quien = _nom_u(getattr(programa, 'modificado_por', None))
         if quien or f_mod:
-            txt += ' — modificado' + (f' por {quien}' if quien else '') + (f' el {_f(f_mod.date())}' if f_mod else '')
+            txt += ' — modificado' + (f' por {quien}' if quien else '') + (f' el {_f(timezone.localtime(f_mod).date())}' if f_mod else '')
         if getattr(programa, 'motivo_modificacion', ''):
             txt += f': {programa.motivo_modificacion}'
         story.append(Paragraph(txt, ParagraphStyle('pgrev', fontName='Helvetica-Oblique', fontSize=6.5, leading=8)))
@@ -2754,11 +2758,18 @@ def _p_ajustado(texto, estilo, ancho, minimo=4.6, una_linea=False, relleno=5):
 
 
 def _solo_fecha(v):
-    """Fecha sin hora (las fechas de cierre y verificación son fecha y hora)."""
+    """Fecha sin hora, en hora de Lima. Acepta date, datetime con zona o texto ISO (las firmas e historiales
+    guardan fecha y hora con zona; las antiguas están en UTC y se convierten)."""
     if not v:
         return ''
+    if isinstance(v, str) and len(v) > 10:
+        from django.utils.dateparse import parse_datetime
+        dt = parse_datetime(v)
+        if dt is None:
+            return v[:10]
+        v = timezone.localtime(dt) if timezone.is_aware(dt) else dt
     if hasattr(v, 'hour') and hasattr(v, 'date'):
-        v = v.date()
+        v = (timezone.localtime(v) if timezone.is_aware(v) else v).date()
     return _f(v)
 
 
@@ -3033,7 +3044,7 @@ def generar_sac_pdf(sac) -> bytes:
     g.fila(h, [('A', 'AI', '9. EVALUACIÓN DE LA EFICACIA', 'band')])
     g.espacio(sp)
     g.fila(h, [('A', 'AA', 'EVALUACIÓN', 'hdr'), ('AB', 'AE', 'FECHA', 'hdr'), ('AF', 'AI', 'RESPONSABLE', 'hdr')])
-    evals = [(f'(Ciclo {c.get("ciclo")}, no eficaz) {c.get("evaluacion", "")}', (c.get('fecha') or '')[:10],
+    evals = [(f'(Ciclo {c.get("ciclo")}, no eficaz) {c.get("evaluacion", "")}', _solo_fecha(c.get('fecha') or ''),
               c.get('verificado_por', '')) for c in ciclos]
     if getattr(sac, 'estado', '') == 'cerrada_conforme' and getattr(sac, 'evaluacion_eficacia', ''):
         evals.append((sac.evaluacion_eficacia, _solo_fecha(sac.fecha_verificacion), _verificador_real(sac)))
@@ -3137,7 +3148,7 @@ def generar_seguimiento_sac_pdf(solicitudes, fecha_actualizacion=None) -> bytes:
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'), ('ALIGN', (0, 0), (0, 4), 'CENTER'),
         ('TOPPADDING', (0, 0), (-1, -1), 0), ('BOTTOMPADDING', (0, 0), (-1, -1), 0)]))
     fa = Table([[Paragraph('FECHA DE ACTUALIZACIÓN', th), '',
-                 Paragraph(_f(fecha_actualizacion or _dt.date.today()), tdb), '', '', '', '']],
+                 Paragraph(_f(fecha_actualizacion or timezone.localdate()), tdb), '', '', '', '']],
                colWidths=cw, rowHeights=[ft * 1.9])
     fa.setStyle(TableStyle([('SPAN', (0, 0), (1, 0)), ('SPAN', (2, 0), (6, 0)),
                             ('BACKGROUND', (0, 0), (1, 0), AZUL_LISTA),

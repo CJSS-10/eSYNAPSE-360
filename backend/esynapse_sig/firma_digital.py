@@ -30,7 +30,8 @@ CA_PFX = DIR_CERTS / 'ca_esynapse360.pfx'
 
 def _password_interna() -> bytes:
     """Contraseña de los certificados internos, derivada del SECRET_KEY del proyecto."""
-    return hashlib.sha256(('esynapse-ca-' + settings.SECRET_KEY).encode()).hexdigest()[:32].encode()
+    base = getattr(settings, 'CLAVE_CERTIFICADOS_BASE', settings.SECRET_KEY)
+    return hashlib.sha256(('esynapse-ca-' + base).encode()).hexdigest()[:32].encode()
 
 
 def _crear_ca():

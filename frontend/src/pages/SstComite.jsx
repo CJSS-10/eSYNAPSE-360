@@ -3,8 +3,9 @@ import { FileText, Pencil, Plus, X } from 'lucide-react'
 import Modal from '../components/Modal.jsx'
 import { Vistas as Sub } from '../components/NavModulo.jsx'
 import CampoAmpliable from '../components/CampoAmpliable.jsx'
+import FirmaComite from '../components/FirmaComite.jsx'
 import { api } from '../lib/api.js'
-import { fecha, fechaHora } from '../lib/fecha.js'
+import { fecha, fechaHora, hoy as hoyLocal } from '../lib/fecha.js'
 
 const inp = 'input-esynapse'
 const lbl = 'mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300'
@@ -30,7 +31,7 @@ const useTrabajadores = () => {
   useEffect(() => { api.org.trabajadores().then((x) => setT(x.filter((w) => w.estado === 'activo'))).catch(() => {}) }, [])
   return t
 }
-const hoyIso = () => new Date().toISOString().slice(0, 10)
+const hoyIso = () => hoyLocal()
 
 /* ================================================================================== COMITÉ */
 export function Comite(props) {
@@ -319,6 +320,7 @@ export function ProgramaSsoma({ puestos, confirmar, abrirPdf, setError, puedeCre
   const [p, setP] = useState(undefined)
   const [act, setAct] = useState(null)
   const [obj, setObj] = useState(null)
+  const [aprob, setAprob] = useState(false)
   const [err, setErr] = useState('')
   const cargar = useCallback(() => api.sst.programaSsoma(anio).then(setP).catch((e) => setError(e.message)), [anio, setError])
   useEffect(() => { setP(undefined); cargar() }, [cargar])
@@ -342,7 +344,8 @@ export function ProgramaSsoma({ puestos, confirmar, abrirPdf, setError, puedeCre
     const ev = await confirmar({ titulo: `Ejecutado en ${MESES[m - 1]}`, mensaje: a.descripcion, textoConfirmar: 'Registrar', entrada: { etiqueta: 'Evidencia (registro, acta, informe… p. ej. INS-003-2026)', obligatorio: true } })
     if (ev !== null) run(api.sst.accionProgramaSsoma(p.id, 'ejecutar', { actividad: a.id, mes: m, ejecutado: true, evidencia: ev }))
   }
-  const aprobar = async () => { const c = await confirmar({ titulo: 'Aprobar el programa', mensaje: 'Firma de aprobación. Lo programado queda cerrado; los cambios posteriores se hacen por reprogramación.', textoConfirmar: 'Firmar', entrada: { etiqueta: 'Su contraseña (firma)', tipo: 'password', obligatorio: true } }); if (c !== null) run(api.sst.accionProgramaSsoma(p.id, 'aprobar', { password: c })) }
+  // La aprobación la firman todos los titulares del Comité de SST (o el acta en papel firmada por todos).
+  const aprobar = () => { setErr(''); setAprob(true) }
   const reprogramar = async () => { const m = await confirmar({ titulo: 'Reprogramar', mensaje: 'Abre una nueva versión del programa para cambiar lo programado; se guarda lo anterior en el historial. Luego se aprueba de nuevo.', textoConfirmar: 'Reprogramar', entrada: { etiqueta: 'Motivo', obligatorio: true } }); if (m !== null) run(api.sst.accionProgramaSsoma(p.id, 'reprogramar', { motivo: m })) }
   const quitar = async (a) => { const m = await confirmar({ titulo: 'Retirar la actividad', mensaje: a.descripcion, textoConfirmar: 'Retirar', peligro: true, entrada: { etiqueta: 'Motivo', obligatorio: true } }); if (m !== null) run(api.sst.accionProgramaSsoma(p.id, 'quitar_actividad', { id: a.id, motivo: m })) }
   const ind = (oid) => p.indicadores.find((i) => i.objetivo === oid)
@@ -352,7 +355,7 @@ export function ProgramaSsoma({ puestos, confirmar, abrirPdf, setError, puedeCre
         <input type="number" className="input-esynapse w-24" value={anio} onChange={(e) => setAnio(Number(e.target.value))} />
         {p && <><Chip par={EST_PROGRAMA[p.estado]} /><span className="text-xs text-slate-500">Versión {p.version} · actualizado {fecha(p.fecha_actualizacion) || '—'}</span>
           <button className="btn-secondary !py-1 text-xs" onClick={() => abrirPdf(api.sst.programaSsomaPdf(p.id))}><FileText className="h-3.5 w-3.5" /> PDF</button>
-          {p.estado === 'aprobado' && puedeEditar && <button className="btn-secondary !py-1 text-xs" onClick={reprogramar}>Reprogramar</button>}
+          {p.estado === 'aprobado' && puedeAprobar && <button className="btn-secondary !py-1 text-xs" onClick={reprogramar}>Reprogramar</button>}
           {editable && puedeAprobar && <button className="btn-primary !py-1 text-xs" onClick={aprobar}>Aprobar</button>}</>}
         <span className="ml-auto text-[11px] text-slate-500">{p?.estado === 'aprobado' ? 'Clic en un mes programado (P) para registrar su ejecución con evidencia.' : p ? 'Clic en las celdas para programar los meses.' : ''}</span>
       </div>
@@ -403,10 +406,13 @@ export function ProgramaSsoma({ puestos, confirmar, abrirPdf, setError, puedeCre
           <div className="grid gap-2 text-xs md:grid-cols-3">
             <div className="card-esynapse p-2"><p className="text-slate-500">Elaborado</p><p>{p.elaborado?.nombre ? `${p.elaborado.nombre} · ${p.elaborado.cargo || ''}` : '—'}</p></div>
             <div className="card-esynapse p-2"><p className="text-slate-500">Revisado</p><p>{p.revisado?.nombre ? `${p.revisado.nombre} · ${p.revisado.cargo || ''}` : '—'}</p></div>
-            <div className="card-esynapse p-2"><p className="text-slate-500">Aprobado</p>{(p.aprobado || []).length ? p.aprobado.map((a, i) => <p key={i}>{a.nombre} · {a.cargo} · {fecha((a.fecha || '').slice(0, 10))}</p>) : '—'}</div>
+            <div className="card-esynapse p-2"><p className="text-slate-500">Aprobado</p>{(p.aprobado || []).length ? p.aprobado.map((a, i) => <p key={i}>{a.nombre} · {a.cargo} · {fecha(a.fecha)}</p>) : '—'}</div>
           </div>
         </>
       )}
+      {aprob && p && <FirmaComite titulo={`Aprobación del Programa SSOMA ${p.anio} (versión ${p.version}) por el Comité de SST`} cargar={api.sst.firmantesSsoma}
+        enviar={(datos) => api.sst.accionProgramaSsoma(p.id, 'aprobar', datos)} enviarPapel={(fd) => api.sst.aprobarSsomaPapel(p.id, fd)}
+        onCerrar={() => setAprob(false)} alAprobar={(r) => { setP(r); setAprob(false) }} />}
     </div>
   )
 }

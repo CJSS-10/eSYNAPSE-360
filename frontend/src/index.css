@@ -203,7 +203,61 @@ table:not(.tabla-sig):not(.tabla-ficha) th > span.flex, table:not(.tabla-sig):no
 /* Fechas, plazos y cantidades (columnas a la derecha) nunca se parten */
 table.tabla-sig td.text-right, table.tabla-ficha td.text-right { white-space: nowrap; }
 table td.font-mono, table th.font-mono { white-space: nowrap; }   /* códigos en una sola línea */
-
+/* Encabezados de columna (decisión de César del 24-10-2026): en todas las tablas del sistema van centrados
+   horizontal y verticalmente, sea cual sea la alineación de los datos de su columna. */
+table thead th { text-align: center !important; vertical-align: middle !important; }
+table thead th > :is(div, span, button, label).flex,
+table thead th > :is(div, span, button, label).inline-flex { justify-content: center !important; }
 /* Entrada del panel de detalle desde la derecha */
 @keyframes panel-entra { from { transform: translateX(24px); opacity: .6; } to { transform: none; opacity: 1; } }
 .panel-entrada { animation: panel-entra .18s ease-out; }
+
+/* Movimiento (propuesta del 27-10-2026, aprobada por César para Ingreso y Tablero).
+   Duraciones: pulsación 120 ms · respuesta 180–250 ms · entrada 280–340 ms · datos 600–750 ms.
+   Solo se animan transform y opacity. Con «reducir animaciones» del sistema operativo no se anima. */
+@keyframes mov-subir { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes mov-llenar { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes mov-rebote { 0% { transform: scale(.4); } 60% { transform: scale(1.18); } 100% { transform: scale(1); } }
+@keyframes mov-deriva { from { transform: translateX(0); } to { transform: translateX(-240px); } }
+@keyframes mov-girar { to { transform: rotate(360deg); } }
+@keyframes mov-barrido { 0%, 100% { transform: rotate(-70deg); } 50% { transform: rotate(55deg); } }
+@keyframes mov-sacudir { 0%, 100% { transform: none; } 20% { transform: translateX(-8px); } 40% { transform: translateX(7px); } 60% { transform: translateX(-5px); } 80% { transform: translateX(3px); } }
+.mov-entra { animation: mov-subir .34s cubic-bezier(.2, .7, .2, 1) both; }
+.mov-llenar { transform-origin: left center; animation: mov-llenar .7s cubic-bezier(.2, .7, .2, 1) both; }
+.mov-rebote { animation: mov-rebote .45s cubic-bezier(.3, .7, .3, 1.2) both; }
+.mov-sacudir { animation: mov-sacudir .42s ease-in-out; }
+.mov-senal { animation: mov-deriva 16s linear infinite; }
+.mov-anillo { transform-box: view-box; transform-origin: 50% 50%; animation: mov-girar 60s linear infinite; }
+.mov-aguja { transform-box: view-box; transform-origin: 50% 50%; animation: mov-barrido 7s ease-in-out infinite; }
+.mov-tarjeta { transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease; }
+.mov-tarjeta:hover { transform: translateY(-3px); box-shadow: 0 14px 30px -18px rgba(13, 30, 59, .45); }
+.mov-pulsar { transition: transform .12s ease; }
+.mov-pulsar:active { transform: scale(.97); }
+@media (prefers-reduced-motion: reduce) {
+  .mov-senal, .mov-anillo, .mov-aguja { animation: none !important; }
+  .mov-tarjeta:hover { transform: none; }
+}
+/* Indicador que se desliza (pestañas, control segmentado, menú lateral) */
+.mov-indicador { transition: left .25s cubic-bezier(.2, .7, .2, 1), top .25s cubic-bezier(.2, .7, .2, 1), width .25s cubic-bezier(.2, .7, .2, 1), height .25s cubic-bezier(.2, .7, .2, 1); }
+/* Grupo que se despliega con animación de altura */
+.mov-acordeon { display: grid; transition: grid-template-rows .28s cubic-bezier(.2, .7, .2, 1); }
+.mov-acordeon > * { overflow: hidden; min-height: 0; }
+/* Fondo de ventanas y fichas */
+@keyframes mov-aparecer { from { opacity: 0; } to { opacity: 1; } }
+@keyframes mov-panel { from { transform: translateX(48px); opacity: .5; } to { transform: none; opacity: 1; } }
+@keyframes mov-ventana { from { transform: translateY(8px) scale(.98); opacity: 0; } to { transform: none; opacity: 1; } }
+.mov-fondo { animation: mov-aparecer .2s ease-out both; }
+.mov-panel { animation: mov-panel .28s cubic-bezier(.2, .8, .2, 1) both; }
+.mov-ventana { animation: mov-ventana .22s cubic-bezier(.2, .8, .2, 1) both; }
+/* Botones: se hunden levemente al pulsarlos (pulsación, 120 ms) */
+.btn-primary, .btn-secondary, .btn-ghost, .btn-danger {
+  transition-property: color, background-color, border-color, box-shadow, transform;
+  transition-duration: 150ms, 150ms, 150ms, 150ms, 120ms;
+}
+.btn-primary:not(:disabled):active, .btn-secondary:not(:disabled):active,
+.btn-ghost:not(:disabled):active, .btn-danger:not(:disabled):active { transform: scale(.97); }
+/* Aviso de confirmación: entra desde abajo; la marca se dibuja */
+@keyframes mov-aviso { from { transform: translateY(14px) scale(.96); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes mov-trazo { from { stroke-dashoffset: 24; } to { stroke-dashoffset: 0; } }
+.mov-aviso { animation: mov-aviso .28s cubic-bezier(.2, .8, .2, 1) both; }
+.mov-check path, .mov-check polyline { stroke-dasharray: 24; animation: mov-trazo .35s .1s ease-out both; }

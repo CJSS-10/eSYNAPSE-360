@@ -240,7 +240,11 @@ class ResultadoSerializer(serializers.ModelSerializer):
         return _nombre(obj.created_by)
 
     def validate_periodo(self, v):
-        return v.replace(day=1)
+        from django.utils import timezone
+        v = v.replace(day=1)
+        if v > timezone.localdate().replace(day=1):
+            raise serializers.ValidationError('No se registran resultados de periodos futuros.')
+        return v
 
     def validate(self, data):
         proceso = data.get('proceso', getattr(self.instance, 'proceso', None))

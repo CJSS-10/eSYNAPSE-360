@@ -23,7 +23,7 @@ def _nombre(u):
 def _firma(request):
     u = request.user
     return {'usuario_id': u.pk, 'nombre': _nombre(u), 'cargo': getattr(u, 'cargo', ''),
-            'sigla': getattr(u, 'sigla_cargo', ''), 'fecha': timezone.now().isoformat(timespec='seconds'),
+            'sigla': getattr(u, 'sigla_cargo', ''), 'fecha': timezone.localtime().isoformat(timespec='seconds'),
             'ip': get_client_ip(request)}
 
 
@@ -231,19 +231,11 @@ class IPERCViewSet(_Base, viewsets.ModelViewSet):
     revisar_area.operacion = 'editar'
 
     # --- Aprobación por el Comité de SST ("realizado y aprobado por") ---
-    @staticmethod
-    def _cargo_comite(m):
-        if m.cargo == 'presidente':
-            return 'Presidente del Comité de SST'
-        if m.cargo == 'secretario':
-            return 'Secretario(a) del Comité de SST'
-        return f'Miembro {m.get_condicion_display().lower()} del Comité de SST'
 
     @action(detail=False, methods=['get'])
     def aprobaciones(self, request):
         """Estado de aprobación por hoja, historial y titulares del comité vigente (con su forma de firmar)."""
-        from .comite import ComiteSST
-        from .epp_api import _estado_pin
+        from .comite_firmas import titulares_para_firmar
         hojas = sorted(set(FilaIPERC.objects.filter(is_active=True).values_list('area', flat=True)))
         estados = []
         for h in hojas:
@@ -251,17 +243,13 @@ class IPERCViewSet(_Base, viewsets.ModelViewSet):
             estados.append({'area': h, 'estado': est, 'fecha': ap.fecha if ap else None,
                             'cambios': FilaIPERC.objects.filter(area=h, updated_at__gt=ap.created_at).count()
                             if ap else None})
-        hoy = timezone.localdate()
-        c = ComiteSST.objects.filter(is_active=True, fecha_instalacion__lte=hoy, fecha_fin__gte=hoy).first()
-        titulares = [{'id': m.pk, 'nombre': m.trabajador.nombre_completo, 'cargo': self._cargo_comite(m),
-                      'representacion': m.get_representacion_display(), 'firma': _estado_pin(m.trabajador)}
-                     for m in (c.titulares().select_related('trabajador__usuario') if c else [])]
+        c, titulares = titulares_para_firmar()
         historial = [{'id': a.pk, 'fecha': a.fecha, 'areas': a.areas, 'firmas': a.firmas,
                       'reunion': a.reunion.codigo if a.reunion_id else None, 'observaciones': a.observaciones,
                       'archivo_url': a.archivo.url if a.archivo else None, 'registro': a.registro}
                      for a in AprobacionIPERC.objects.all().select_related('reunion')[:30]]
         return Response({'areas': estados, 'comite': c.periodo if c else None, 'titulares': titulares,
-                         'quorum': len(titulares) // 2 + 1 if titulares else 0, 'historial': historial})
+                         'quorum': len(titulares), 'historial': historial})
     aprobaciones.operacion = 'leer'
 
     @action(detail=False, methods=['post'])
@@ -270,19 +258,9 @@ class IPERCViewSet(_Base, viewsets.ModelViewSet):
         firmas: [{miembro, clave | pin | pin_nuevo + pin_confirmacion}]}: cada titular firma con la contraseña de su
         usuario o, si no tiene usuario, con su PIN. En papel (multipart): {areas, fecha, firmantes, archivo, password}:
         se adjunta el acta firmada y quien registra firma con su contraseña."""
-        import json
         from django.utils.dateparse import parse_date
-        from .comite import ComiteSST, ReunionComite
-        from .epp_api import firma_persona
-
-        def lista(v):
-            if isinstance(v, str):
-                try:
-                    v = json.loads(v)
-                except ValueError:
-                    v = [x for x in v.split(',') if x.strip()]
-            return list(v or [])
-        areas = [str(a).strip() for a in lista(request.data.get('areas')) if str(a).strip()]
+        from .comite_firmas import firmas_del_comite, lista_de
+        areas = [str(a).strip() for a in lista_de(request.data.get('areas')) if str(a).strip()]
         hojas = set(FilaIPERC.objects.filter(is_active=True).values_list('area', flat=True))
         if not areas:
             return self._error('Elija las hojas de la matriz que aprueba el Comité.')
@@ -290,59 +268,15 @@ class IPERCViewSet(_Base, viewsets.ModelViewSet):
         if fuera:
             return self._error(f'La hoja «{fuera[0]}» no existe en la matriz.')
         fecha = parse_date(str(request.data.get('fecha') or '')[:10]) or timezone.localdate()
-        if fecha > timezone.localdate():
-            return self._error('La fecha de aprobación no puede ser futura.')
-        c = ComiteSST.objects.filter(is_active=True, fecha_instalacion__lte=fecha, fecha_fin__gte=fecha).first()
-        if not c:
-            return self._error('No hay un Comité de SST vigente en esa fecha.')
-        titulares = {m.pk: m for m in c.titulares().select_related('trabajador__usuario')}
-        quorum = len(titulares) // 2 + 1
-        reunion = None
-        if request.data.get('reunion'):
-            reunion = ReunionComite.objects.filter(pk=request.data['reunion'], comite=c, is_active=True).first()
-            if not reunion:
-                return self._error('Reunión no encontrada en el comité vigente.')
-        papel = bool(request.FILES.get('archivo'))
-        firmas = []
-        if papel:
-            ids = [int(x) for x in lista(request.data.get('firmantes')) if str(x).isdigit()]
-            ajenos = [i for i in ids if i not in titulares]
-            if ajenos or len(set(ids)) < quorum:
-                return self._error(f'Marque a los titulares que firmaron el acta (al menos {quorum}).')
-            error = self._clave(request, 'el registro de la aprobación')
-            if error:
-                return error
-            for i in dict.fromkeys(ids):
-                m = titulares[i]
-                firmas.append({'miembro_id': m.pk, 'trabajador_id': m.trabajador_id,
-                               'nombre': m.trabajador.nombre_completo, 'cargo': self._cargo_comite(m),
-                               'metodo': 'papel', 'fecha': fecha.isoformat()})
-        else:
-            datos = lista(request.data.get('firmas'))
-            ids = [int(f.get('miembro') or 0) for f in datos if isinstance(f, dict)]
-            if any(i not in titulares for i in ids) or len(ids) != len(set(ids)):
-                return self._error('Solo firman los miembros titulares del comité, una vez cada uno.')
-            if len(ids) < quorum:
-                return self._error(f'Se requiere la firma de al menos {quorum} titular(es) (mitad más uno); '
-                                   f'firmaron {len(ids)}.')
-            # Primero se validan todas las credenciales; los PIN nuevos se guardan solo si todas son válidas.
-            nuevos = []
-            for f in datos:
-                m = titulares[int(f['miembro'])]
-                fm, error = firma_persona(request, m.trabajador, datos=f, clave='clave', crear_pin=False)
-                if error:
-                    return error
-                if fm['metodo'] == 'pin' and f.get('pin_nuevo'):
-                    nuevos.append((m, f))
-                firmas.append({**fm, 'miembro_id': m.pk, 'cargo': self._cargo_comite(m)})
-            for m, f in nuevos:
-                firma_persona(request, m.trabajador, datos=f, clave='clave')
+        datos, error = firmas_del_comite(request, fecha)
+        if error:
+            return error
         ap = AprobacionIPERC.objects.create(
-            fecha=fecha, areas=areas, reunion=reunion, firmas=firmas,
-            archivo=request.FILES.get('archivo') if papel else None,
+            fecha=fecha, areas=areas, reunion=datos['reunion'], firmas=datos['firmas'],
+            archivo=request.FILES.get('archivo') if datos['papel'] else None,
             observaciones=(request.data.get('observaciones') or '').strip(), registro=_firma(request),
             created_by=request.user, updated_by=request.user)
-        return Response({'id': ap.pk, 'fecha': ap.fecha, 'areas': ap.areas, 'firmas': len(firmas)},
+        return Response({'id': ap.pk, 'fecha': ap.fecha, 'areas': ap.areas, 'firmas': len(datos['firmas'])},
                         status=status.HTTP_201_CREATED)
     aprobar_comite.operacion = 'aprobar'
 
@@ -683,8 +617,8 @@ class ATSViewSet(_Base, viewsets.ModelViewSet):
         a = self.get_object()
         if a.estado == 'anulado':
             return self._error('El ATS ya está anulado.')
-        if a.estado == 'revisado':
-            return self._error('El ATS ya fue revisado: queda como registro del trabajo realizado.')
+        if a.estado in ('revisado', 'validado'):
+            return self._error('El ATS ya fue revisado o validado: queda como registro del trabajo realizado.')
         motivo = (request.data.get('motivo') or '').strip()
         if not motivo:
             return self._error('Indique el motivo (p. ej., cambiaron las condiciones y se elaboró uno nuevo).')
@@ -693,7 +627,7 @@ class ATSViewSet(_Base, viewsets.ModelViewSet):
         a.updated_by = request.user
         a.save(update_fields=['estado', 'motivo_anulacion', 'historial', 'updated_by', 'updated_at'])
         return self._respuesta(a)
-    anular.operacion = 'editar'
+    anular.operacion = 'eliminar'
 
     @action(detail=True, methods=['post'])
     def guardar_como_tipo(self, request, pk=None):

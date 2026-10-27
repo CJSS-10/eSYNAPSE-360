@@ -13,8 +13,9 @@ import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
 import { useConfig } from '../context/ConfigContext.jsx'
 import { useConfirm } from '../context/ConfirmContext.jsx'
-import { fechaHora } from '../lib/fecha.js'
+import { fecha, fechaHora } from '../lib/fecha.js'
 import TituloModulo from '../components/ui/TituloModulo.jsx'
+import { useAbrirDesdeEnlace } from '../lib/enlaces.js'
 
 const NORMAS = [
   ['sig_integrado', 'Sistema Integrado (9001·14001·45001)'],
@@ -890,6 +891,8 @@ export default function Auditorias() {
     )
   }
 
+  useAbrirDesdeEnlace(abrir)   // enlace directo ?abrir=<id> (búsqueda, Mis tareas, campana)
+
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -1354,6 +1357,17 @@ export default function Auditorias() {
                 </div>
               ))}
               {(detalle.equipo || []).length === 0 && <p className="text-xs text-slate-400">Sin integrantes aún.</p>}
+              {(detalle.equipo_anulado || []).length > 0 && (
+                <details className="text-xs text-slate-400">
+                  <summary className="cursor-pointer">Mostrar anulados ({detalle.equipo_anulado.length})</summary>
+                  {detalle.equipo_anulado.map((m) => (
+                    <div key={m.id} className="mt-1 flex items-center justify-between">
+                      <span><span className="line-through">{m.rol_display}: {m.nombre}</span> · quitado el {fecha(m.anulado_en)}{m.anulado_por ? ` por ${m.anulado_por}` : ''}</span>
+                      {edPlan && <button onClick={() => accion(() => api.auditorias.restaurarIntegrante(detalle.id, m.id))} className="text-esynapse-600 hover:underline">restaurar</button>}
+                    </div>
+                  ))}
+                </details>
+              )}
               {edPlan && !hayLider && (
                 <p className="text-[11px] text-amber-600 dark:text-amber-400">Agregue al auditor líder con el rol "Auditor líder": es quien figura en el plan, las actas y el informe. Sin él no se aprueba el plan.</p>
               )}

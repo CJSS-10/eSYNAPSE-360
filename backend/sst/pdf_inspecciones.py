@@ -219,7 +219,7 @@ def _firmas(W, ins):
                    [P('CARGO', TH), P(getattr(insp, 'cargo', '') if insp else '', TDL), P('CARGO', TH),
                     P(f.get('cargo', ''), TDL)],
                    [P('FIRMA', TH), P('', TDL), P('FIRMA / FECHA', TH),
-                    P((f'Firmado electrónicamente · {_solo_fecha((f.get("fecha") or "")[:10])}') if f else '', TDL)]],
+                    P((f'Firmado electrónicamente · {_solo_fecha(f.get("fecha") or "")}') if f else '', TDL)]],
                   [6, 20, 6, 20], W, extra=[('SPAN', (0, 0), (1, 0)), ('SPAN', (2, 0), (3, 0))], cabeceras=[0])
 
 
@@ -337,7 +337,7 @@ def generar_monitoreo_pdf(m) -> bytes:
         KeepTogether(_tabla([[P('RESPONSABLE DEL REGISTRO', TH), ''],
                              [P('Nombre:', THL), P(f.get('nombre', ''), TDL)],
                              [P('Cargo:', THL), P(f.get('cargo', ''), TDL)],
-                             [P('Fecha:', THL), P(_solo_fecha((f.get('fecha') or '')[:10]), TDL)],
+                             [P('Fecha:', THL), P(_solo_fecha(f.get('fecha') or ''), TDL)],
                              [P('Firma:', THL), P('Firmado electrónicamente' if f.get('usuario_id') else
                                                   (f.get('origen') or ''), TDL)]],
                             [8, 30], W * 0.6, extra=[('SPAN', (0, 0), (1, 0))], cabeceras=[0], izquierda=True)),

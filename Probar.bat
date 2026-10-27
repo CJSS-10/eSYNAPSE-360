@@ -11,7 +11,7 @@ echo.
 
 cd /d "%~dp0backend"
 call venv\Scripts\activate
-python manage.py test core esynapse_sig quejas procesos cambios riesgos legal sst organizacion
+python manage.py test core esynapse_sig quejas procesos cambios riesgos legal sst organizacion capacitacion ambiente revision tnc cumplimiento
 set RESULTADO=%ERRORLEVEL%
 
 echo.

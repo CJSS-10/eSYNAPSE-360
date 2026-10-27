@@ -8,14 +8,15 @@ import { useCatalogoProcesos } from '../components/SelectorProceso.jsx'
 import { api } from '../lib/api.js'
 import { useAuth } from '../context/AuthContext.jsx'
 import { useConfirm } from '../context/ConfirmContext.jsx'
-import { fecha, fechaHora } from '../lib/fecha.js'
+import { fecha, fechaHora, hoy as hoyLocal } from '../lib/fecha.js'
 import { sev } from '../lib/severidad.js'
 import TituloModulo from '../components/ui/TituloModulo.jsx'
 import Pestanas from '../components/ui/Pestanas.jsx'
+import { useAbrirDesdeEnlace } from '../lib/enlaces.js'
 
 const inp = 'input-esynapse'
 const lbl = 'mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300'
-const hoy = () => new Date().toISOString().slice(0, 10)
+const hoy = () => hoyLocal()
 
 // Colores de nivel (escala de la matriz) y de situación (regla 10).
 // Escala de severidad única del sistema: [nombre, etiqueta, celda del mapa de calor].
@@ -92,6 +93,9 @@ export default function Riesgos() {
   const confirmar = useConfirm()
   const procesos = useCatalogoProcesos()
   const [pestana, setPestana] = useState('matriz')
+  const [irRyo, setIrRyo] = useState(null)
+  // Enlace directo ?abrir=<id> (búsqueda global): abre el riesgo u oportunidad en la matriz
+  useAbrirDesdeEnlace((id) => { setPestana('matriz'); setIrRyo(id) })
   const [cat, setCat] = useState(null)
   const [usuarios, setUsuarios] = useState([])
   const [contexto, setContexto] = useState([])
@@ -153,7 +157,7 @@ export default function Riesgos() {
       )}
       {error && <p ref={errorRef} className="rounded-lg bg-red-500/10 p-3 text-sm text-red-600 dark:text-red-400">{error}</p>}
 
-      {pestana === 'matriz' && <Matriz {...comun} derivados={derivados} />}
+      {pestana === 'matriz' && <Matriz {...comun} derivados={derivados} abrirId={irRyo} onAbierto={() => setIrRyo(null)} />}
       {pestana === 'mejoras' && <Mejoras {...comun} derivados={derivados} />}
       {pestana === 'contexto' && <Contexto {...comun} />}
       {pestana === 'indicadores' && <Indicadores cat={cat} />}
@@ -162,7 +166,7 @@ export default function Riesgos() {
 }
 
 /* ------------------------------------------------------------------ Matriz */
-function Matriz({ cat, usuarios, procesos, contexto, confirmar, firmar, setError, abrirPdf, puedeCrear, puedeEditar, puedeAprobar, derivados, cargarComunes }) {
+function Matriz({ cat, usuarios, procesos, contexto, confirmar, firmar, setError, abrirPdf, puedeCrear, puedeEditar, puedeAprobar, derivados, cargarComunes, abrirId, onAbierto }) {
   const [items, setItems] = useState([])
   const [f, setF] = useState({ tipo: '', proceso: '', categoria: '', nivel: '', situacion: '', buscar: '' })
   const [d, setD] = useState(null)
@@ -174,6 +178,7 @@ function Matriz({ cat, usuarios, procesos, contexto, confirmar, firmar, setError
   const cargar = useCallback(async () => setItems(await ultima(api.riesgos.listar(params()))), [params])
   useEffect(() => { cargar().catch((e) => setError(e.message)) }, [cargar, setError])
   const abrir = async (id) => { setErrLocal(''); setD(await api.riesgos.detalle(id)) }
+  useEffect(() => { if (abrirId) { abrir(abrirId).catch(() => {}); onAbierto() } }, [abrirId])  // eslint-disable-line react-hooks/exhaustive-deps
 
   const crear = async (e) => {
     e.preventDefault(); setErrLocal('')
@@ -317,7 +322,16 @@ function DetalleRiesgo({ d, setD, recargar, cat, usuarios, procesos, contexto, c
     if (clave !== null) accion(() => api.riesgos.accion(d.id, 'aceptar_riesgo', { password: clave }))
   }
   const decidirCartera = (decision) => conMotivo(decision === 'abordar' ? 'Abordar la oportunidad' : 'Descartar la oportunidad', 'decidir_cartera', 'Motivo de la decisión', { decision })()
-  const guardarAccion = () => accion(() => api.riesgos.accion(d.id, accF.id ? 'editar_accion' : 'agregar_accion', { ...accF, accion_id: accF.id, responsable: accF.responsable || null }))
+  const guardarAccion = async () => {
+    const original = accF.id ? (d.acciones || []).find((x) => x.id === accF.id) : null
+    let motivo
+    // Mover el plazo de una acción que ya está en la matriz pide motivo (queda en el historial).
+    if (original && d.estado !== 'borrador' && (original.fecha_maxima || '') !== (accF.fecha_maxima || '')) {
+      motivo = await confirmar({ titulo: 'Cambio del plazo máximo', mensaje: `De ${fecha(original.fecha_maxima) || '—'} a ${fecha(accF.fecha_maxima) || '—'}. Queda en el historial del registro.`, textoConfirmar: 'Guardar', entrada: { etiqueta: 'Motivo del cambio', obligatorio: true, multilinea: true } })
+      if (motivo === null) return
+    }
+    accion(() => api.riesgos.accion(d.id, accF.id ? 'editar_accion' : 'agregar_accion', { ...accF, accion_id: accF.id, responsable: accF.responsable || null, ...(motivo ? { motivo } : {}) }))
+  }
   const quitarAccion = async (a) => { if (await confirmar({ titulo: 'Quitar acción', mensaje: `¿Quitar «${a.actividad}»?`, textoConfirmar: 'Quitar', peligro: true })) accion(() => api.riesgos.accion(d.id, 'quitar_accion', { accion_id: a.id })) }
   const guardarSeg = () => accion(() => { const fd = new FormData(); Object.entries(seg).forEach(([k, v]) => { if (v) fd.append(k, v) }); return api.riesgos.subir(d.id, 'seguimiento_accion', fd) })
   const incumplimiento = async (a) => { if (await confirmar({ titulo: 'Registrar incumplimiento', mensaje: `La acción no se ejecutó dentro de su plazo (${fecha(a.fecha_maxima)}). Se registra un hallazgo para su acción correctiva.`, textoConfirmar: 'Registrar', peligro: true })) accion(() => api.riesgos.accion(d.id, 'registrar_incumplimiento', { accion_id: a.id })) }
@@ -484,7 +498,7 @@ function DetalleRiesgo({ d, setD, recargar, cat, usuarios, procesos, contexto, c
 
       {d.historial.length > 0 && (
         <Seccion titulo="Historial">
-          {d.historial.slice().reverse().map((h, i) => <p key={i}>{(h.fecha || '').slice(0, 10)} · {h.usuario} · <strong>{h.accion}</strong>{h.de ? ` ${h.de} → ${h.a}` : ''}{h.eficacia ? ` (${h.eficacia})` : ''}{h.hallazgo ? ` · ${h.hallazgo}` : ''}{h.motivo || h.descripcion ? `: ${h.motivo || h.descripcion}` : ''}</p>)}
+          {d.historial.slice().reverse().map((h, i) => <p key={i}>{fecha(h.fecha)} · {h.usuario} · <strong>{h.accion}</strong>{h.de ? ` ${h.de} → ${h.a}` : ''}{h.eficacia ? ` (${h.eficacia})` : ''}{h.hallazgo ? ` · ${h.hallazgo}` : ''}{h.motivo || h.descripcion ? `: ${h.motivo || h.descripcion}` : ''}</p>)}
         </Seccion>
       )}
       {barra && <BarraEtapa titulo={barra.titulo} nota={barra.nota} bloqueo={barra.bloqueo} botones={barra.botones} />}
@@ -621,7 +635,7 @@ function Mejoras({ cat, usuarios, procesos, confirmar, setError, abrirPdf, puede
                 ) : <button className="btn-primary !py-1 text-xs" onClick={() => setForm({ tipo: 'ef', eficacia: '', fecha_verificacion: hoy(), evidencia: d.evidencia || '' })}>Evaluar eficacia</button>)}
               </Seccion>
             )}
-            {d.historial.length > 0 && <Seccion titulo="Historial">{d.historial.slice().reverse().map((h, i) => <p key={i}>{(h.fecha || '').slice(0, 10)} · {h.usuario} · <strong>{h.accion}</strong>{h.motivo ? `: ${h.motivo}` : ''}</p>)}</Seccion>}
+            {d.historial.length > 0 && <Seccion titulo="Historial">{d.historial.slice().reverse().map((h, i) => <p key={i}>{fecha(h.fecha)} · {h.usuario} · <strong>{h.accion}</strong>{h.motivo ? `: ${h.motivo}` : ''}</p>)}</Seccion>}
             {ident && <div className="flex justify-end"><button className="btn-secondary !py-1 text-xs text-red-500" onClick={async () => { if (await confirmar({ titulo: 'Anular', mensaje: `¿Anular ${d.codigo}? Solo si se registró por error.`, textoConfirmar: 'Anular', peligro: true })) { try { await api.mejoras.anular(d.id); setD(null); await cargar() } catch (e) { setErr(e.message) } } }}><Trash2 className="h-3.5 w-3.5" /> Anular</button></div>}
           </div>
         )}

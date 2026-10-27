@@ -167,7 +167,7 @@ def _medidas(W, acciones, titulo='MEDIDAS CORRECTIVAS'):
 def _firma_txt(f):
     if not f:
         return '', '', '', ''
-    return f.get('nombre', ''), f.get('cargo', ''), _solo_fecha((f.get('fecha') or '')[:10]), 'Firmado electrónicamente'
+    return f.get('nombre', ''), f.get('cargo', ''), _solo_fecha(f.get('fecha') or ''), 'Firmado electrónicamente'
 
 
 def _responsables(W, firmas, titulo='RESPONSABLE DEL REGISTRO Y DE LA INVESTIGACIÓN'):
@@ -348,8 +348,8 @@ def generar_informe_pdf(e) -> bytes:
     story.append(_tabla([[P('', TH), P('Elaborado por', TH), P('Revisado por', TH), P('V°B° Comité SST', TH)],
                          [P('Nombre / firma', THL), P(nf(fe)), P(nf(fr)), P('')],
                          [P('D.N.I.', THL), P(''), P(''), P('')],
-                         [P('Lugar y fecha', THL), P(f'Lima, {_solo_fecha((fe.get("fecha") or "")[:10])}' if fe else ''),
-                          P(f'Lima, {_solo_fecha((fr.get("fecha") or "")[:10])}' if fr else ''), P('')]],
+                         [P('Lugar y fecha', THL), P(f'Lima, {_solo_fecha(fe.get("fecha") or "")}' if fe else ''),
+                          P(f'Lima, {_solo_fecha(fr.get("fecha") or "")}' if fr else ''), P('')]],
                         [3, 4, 4, 4], W, cabeceras=[0], alturas=[None, 34, 14, 14]))
     doc.build(story)
     return buf.getvalue()

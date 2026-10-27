@@ -148,13 +148,18 @@ class ProgramaSerializer(serializers.ModelSerializer):
     indicadores = serializers.SerializerMethodField()
     reunion_aprobacion_codigo = serializers.CharField(source='reunion_aprobacion.codigo', read_only=True,
                                                       default=None)
+    acta_aprobacion_url = serializers.SerializerMethodField()
 
     class Meta:
         model = ProgramaSSOMA
         fields = ['id', 'anio', 'version', 'estado', 'estado_display', 'objetivo_general', 'recursos', 'fecha',
                   'fecha_actualizacion', 'elaborado', 'revisado', 'aprobado', 'reunion_aprobacion',
-                  'reunion_aprobacion_codigo', 'objetivos', 'actividades', 'indicadores', 'historial']
+                  'reunion_aprobacion_codigo', 'acta_aprobacion_url', 'objetivos', 'actividades', 'indicadores',
+                  'historial']
         read_only_fields = ['version', 'estado', 'elaborado', 'revisado', 'aprobado', 'historial']
+
+    def get_acta_aprobacion_url(self, obj):
+        return _url(obj.acta_aprobacion)
 
     def get_objetivos(self, obj):
         return [{'id': o.pk, 'codigo': o.codigo, 'descripcion': o.descripcion, 'orden': o.orden}
@@ -587,9 +592,21 @@ class ProgramaSSOMAViewSet(_Base, viewsets.ModelViewSet):
         return self._respuesta(p)
     ejecutar.operacion = 'editar'
 
+    @action(detail=False, methods=['get'])
+    def firmantes(self, request):
+        """Titulares del comité vigente y cómo firma cada uno (todos deben firmar la aprobación)."""
+        from .comite_firmas import titulares_para_firmar
+        c, titulares = titulares_para_firmar()
+        return Response({'comite': c.periodo if c else None, 'titulares': titulares, 'quorum': len(titulares)})
+    firmantes.operacion = 'leer'
+
     @action(detail=True, methods=['post'])
     def aprobar(self, request, pk=None):
-        """Aprueba el programa (o su reprogramación) con firma. Body: {password, reunion?}"""
+        """Aprueba el programa (o su reprogramación) con la firma de todos los titulares del Comité de SST. En
+        pantalla (JSON): {fecha, reunion?, firmas: [{miembro, clave | pin | pin_nuevo + pin_confirmacion}]}. En papel
+        (multipart): {fecha, firmantes, archivo, password}."""
+        from django.db import transaction
+        from .comite_firmas import firmas_del_comite
         p = self.get_object()
         if p.estado == 'aprobado':
             return self._error('El programa ya está aprobado.')
@@ -602,16 +619,24 @@ class ProgramaSSOMAViewSet(_Base, viewsets.ModelViewSet):
         sin_resp = [a for a in acts if not a.responsable_id]
         if sin_resp:
             return self._error(f'Indique el responsable de «{sin_resp[0].descripcion[:80]}».')
-        error = self._clave(request, 'el programa')
-        if error:
-            return error
-        if request.data.get('reunion'):
-            p.reunion_aprobacion = ReunionComite.objects.filter(pk=request.data['reunion'], is_active=True).first()
-        p.aprobado = list(p.aprobado or []) + [_firma(request)]
-        p.estado, p.fecha_actualizacion = 'aprobado', timezone.localdate()
-        _hist(p, request, f'Aprobación (versión {p.version})')
-        p.updated_by = request.user
-        p.save()
+        fecha = parse_date(str(request.data.get('fecha') or '')[:10]) or timezone.localdate()
+        with transaction.atomic():
+            datos, error = firmas_del_comite(request, fecha)
+            if error:
+                transaction.set_rollback(True)
+                return error
+            if datos['reunion']:
+                p.reunion_aprobacion = datos['reunion']
+            # Firmas del Comité de esta versión (las de versiones anteriores quedan en el historial).
+            p.aprobado = datos['firmas']
+            p.estado, p.fecha_actualizacion = 'aprobado', fecha
+            _hist(p, request, f'Aprobación del Comité de SST (versión {p.version})',
+                  firmantes=', '.join(f.get('nombre', '') for f in datos['firmas']),
+                  registro=_firma(request).get('nombre'))
+            if datos['papel']:
+                p.acta_aprobacion = request.FILES['archivo']
+            p.updated_by = request.user
+            p.save()
         return self._respuesta(p)
     aprobar.operacion = 'aprobar'
 
@@ -632,7 +657,7 @@ class ProgramaSSOMAViewSet(_Base, viewsets.ModelViewSet):
         p.updated_by = request.user
         p.save()
         return self._respuesta(p)
-    reprogramar.operacion = 'editar'
+    reprogramar.operacion = 'aprobar'
 
     @action(detail=True, methods=['get'])
     def pdf(self, request, pk=None):

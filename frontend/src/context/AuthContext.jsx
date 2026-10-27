@@ -11,9 +11,12 @@ export function AuthProvider({ children }) {
     if (!api.haySesion()) { setUsuario(null); setCargando(false); return }
     try {
       const me = await api.me()
+      await api.activarArchivos()
       setUsuario(me)
-    } catch {
-      api.logout()
+    } catch (e) {
+      // Solo una sesión rechazada (401) cierra la sesión; un error pasajero del servidor (p. ej. mientras se
+      // reinicia) no borra las credenciales: basta recargar.
+      if (e?.status === 401) api.logout()
       setUsuario(null)
     } finally {
       setCargando(false)

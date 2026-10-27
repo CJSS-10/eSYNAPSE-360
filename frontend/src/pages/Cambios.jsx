@@ -8,10 +8,11 @@ import { useCatalogoProcesos } from '../components/SelectorProceso.jsx'
 import { api } from '../lib/api.js'
 import { useAuth } from '../context/AuthContext.jsx'
 import { useConfirm } from '../context/ConfirmContext.jsx'
-import { fecha, fechaHora } from '../lib/fecha.js'
+import { fecha, fechaHora, hoy as hoyLocal } from '../lib/fecha.js'
 import TituloModulo from '../components/ui/TituloModulo.jsx'
 import { Vistas } from '../components/NavModulo.jsx'
 import BarraPasos from '../components/BarraPasos.jsx'
+import { useAbrirDesdeEnlace } from '../lib/enlaces.js'
 
 // Colores de estado (regla 10): gris inicial · ámbar evaluación/aprobación · azul planificación/implementación ·
 // violeta verificación · verde cerrado · rojo rechazado.
@@ -38,7 +39,7 @@ const CAMPOS_EVAL = ['factibilidad_tecnica', 'aspectos_operativos', 'aspectos_fi
 const CAMPOS_PLAN = ['fecha_planificacion', 'prevision', 'temporalidad', 'fecha_reversion', 'fuentes', 'fuente_otro',
   'responsable_implementacion', 'plazo_implementacion', 'equipo_implementacion']
 const CAMPOS_EFIC = ['se_implemento', 'fue_eficaz', 'criterios_eficacia', 'verificacion', 'reversion', 'detalle_reversion', 'fecha_reversion_real', 'sac_derivada']
-const hoy = () => new Date().toISOString().slice(0, 10)
+const hoy = () => hoyLocal()
 const siNo = (v) => (v == null ? '—' : v ? 'Sí' : 'No')
 const inp = 'input-esynapse'
 const lbl = 'mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300'
@@ -303,6 +304,8 @@ export default function Cambios() {
     cerrado: puedeAprobar && { titulo: 'Cambio cerrado', nota: 'Solo se reabre con motivo.', botones: [{ texto: 'Reabrir', accion: conMotivo('Reabrir el cambio', 'reabrir', 'Motivo de la reapertura'), secundario: true }] },
   }[d.estado]
 
+  useAbrirDesdeEnlace(abrir)   // enlace directo ?abrir=<id> (búsqueda, Mis tareas, campana)
+
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -508,7 +511,7 @@ export default function Cambios() {
                 {d.motivo_resolucion && <Dato etiqueta="Comentarios" valor={d.motivo_resolucion} />}
               </Seccion>
             )}
-            {d.historial.length > 1 && <p className="text-[11px] text-slate-500">Historial: {d.historial.map((h) => `${h.fecha.slice(0, 10)} ${h.accion}${h.motivo ? ` (${h.motivo})` : ''}`).join(' · ')}</p>}
+            {d.historial.length > 1 && <p className="text-[11px] text-slate-500">Historial: {d.historial.map((h) => `${fecha(h.fecha)} ${h.accion}${h.motivo ? ` (${h.motivo})` : ''}`).join(' · ')}</p>}
 
             {d.estado === 'en_planificacion' && puedeEditar ? (
               <Seccion titulo={`5. Planificación del cambio${d.requiere_planificacion ? ' (obligatoria: cambio mayor o técnico)' : ''}`} tono="azul">
@@ -642,7 +645,7 @@ export default function Cambios() {
                   {d.fin_temporal_fecha && <Dato etiqueta="Fin registrado" valor={`${fecha(d.fin_temporal_fecha)} · ${d.fin_temporal_por_nombre || ''}`} />}
                 </div>
                 {d.fin_temporal_detalle && <p><strong className="text-slate-700 dark:text-slate-200">Qué se restituyó:</strong> {d.fin_temporal_detalle}{d.fin_temporal_evidencia_url && <a href={d.fin_temporal_evidencia_url} target="_blank" rel="noreferrer" className="ml-1 underline">evidencia</a>}</p>}
-                {d.prorrogas.length > 0 && <div><p className="font-semibold">Prórrogas</p>{d.prorrogas.map((x, i) => <p key={i}>{x.fecha.slice(0, 10)} · {x.usuario}{x.sigla ? ` (${x.sigla})` : ''}: del {x.fecha_anterior} al {x.fecha_nueva} — {x.motivo}</p>)}</div>}
+                {d.prorrogas.length > 0 && <div><p className="font-semibold">Prórrogas</p>{d.prorrogas.map((x, i) => <p key={i}>{fecha(x.fecha)} · {x.usuario}{x.sigla ? ` (${x.sigla})` : ''}: del {x.fecha_anterior} al {x.fecha_nueva} — {x.motivo}</p>)}</div>}
                 {d.cambios_permanentes.length > 0 && <Dato etiqueta="Solicitud para volverlo permanente" valor={d.cambios_permanentes.map((x) => `${x.codigo} (${x.estado_display})`).join(', ')} />}
                 {ETAPAS_PRORROGA.includes(d.estado) && puedeAprobar && !prorF && <button className="btn-secondary !py-1 text-xs" onClick={() => setProrF({ fecha_nueva: '', motivo: '' })}>Prorrogar el fin previsto</button>}
                 {prorF && (
@@ -675,7 +678,7 @@ export default function Cambios() {
                 <div className="grid gap-x-4 md:grid-cols-2"><Dato etiqueta="Cerrado por" valor={d.cerrado_por_nombre} /><Dato etiqueta="Fecha" valor={fechaHora(d.fecha_cierre)} /></div>
               </Seccion>
             )}
-            {d.reaperturas.length > 0 && <p className="text-[11px] text-slate-500"><RotateCcw className="mr-1 inline h-3 w-3" />Reaperturas: {d.reaperturas.map((r) => `${r.fecha.slice(0, 10)} ${r.usuario}: ${r.motivo}${r.fin_temporal ? ` (fin temporal anulado: ${r.fin_temporal.fecha})` : ''}`).join(' · ')}</p>}
+            {d.reaperturas.length > 0 && <p className="text-[11px] text-slate-500"><RotateCcw className="mr-1 inline h-3 w-3" />Reaperturas: {d.reaperturas.map((r) => `${fecha(r.fecha)} ${r.usuario}: ${r.motivo}${r.fin_temporal ? ` (fin temporal anulado: ${r.fin_temporal.fecha})` : ''}`).join(' · ')}</p>}
 
             {barra && <BarraEtapa titulo={barra.titulo} nota={barra.nota} aviso={barra.aviso} bloqueo={barra.bloqueo} botones={barra.botones} />}
           </div>

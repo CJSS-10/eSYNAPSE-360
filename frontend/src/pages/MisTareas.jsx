@@ -5,6 +5,7 @@ import { api } from '../lib/api.js'
 import TituloModulo from '../components/ui/TituloModulo.jsx'
 import Badge, { TONO_ESTADO } from '../components/ui/Badge.jsx'
 import { SkeletonText } from '../components/ui/Skeleton.jsx'
+import { rutaRegistro } from '../lib/enlaces.js'
 
 // Mis tareas (ADR-0007): ordenadas por urgencia, no por módulo. El módulo va como etiqueta en
 // cada tarea; se puede filtrar por módulo cuando hay tareas de más de uno.
@@ -92,7 +93,7 @@ export default function MisTareas() {
             <ul className="divide-y divide-slate-100 dark:divide-slate-800">
               {porGrupo[k].map((t, i) => (
                 <li key={i}>
-                  <button onClick={() => navigate(t.ruta)} className="flex w-full items-center gap-4 px-4 py-3 text-left transition hover:bg-slate-50 dark:hover:bg-slate-800/40">
+                  <button onClick={() => navigate(rutaRegistro(t.ruta, t.id))} className="flex w-full items-center gap-4 px-4 py-3 text-left transition hover:bg-slate-50 dark:hover:bg-slate-800/40">
                     <span className="w-20 shrink-0">
                       {t.fecha ? (
                         <>

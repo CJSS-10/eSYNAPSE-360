@@ -8,7 +8,7 @@ import {
   BookCheck, RefreshCw, MessageSquareWarning, BookOpen, Lightbulb, GraduationCap,
   Gauge, FlaskConical, Crosshair, FileX, Leaf, HardHat, ShoppingCart, Building2,
   Boxes, Hammer, Handshake, Truck, FileBadge, UserCog, Briefcase, Landmark,
-  Megaphone, MonitorCog, SlidersHorizontal, Network,
+  Megaphone, MonitorCog, SlidersHorizontal, Network, School,
 } from 'lucide-react'
 
 // Grupos del menú lateral por área de trabajo (ADR-0007). Los módulos aún no construidos
@@ -32,7 +32,7 @@ export const GRUPOS_MODULOS = [
       { clave: 'auditorias', nombre: 'Auditorías', icono: ClipboardList, ruta: '/auditorias', fase: 0 },
       { clave: 'cambios', nombre: 'Cambios', icono: RefreshCw, ruta: '/cambios', fase: 0 },
       { clave: 'quejas', nombre: 'Quejas', icono: MessageSquareWarning, ruta: '/quejas', fase: 0 },
-      { clave: 'cumplimiento', nombre: 'Cumplimiento', icono: BookCheck, fase: 4 },
+      { clave: 'cumplimiento', nombre: 'Cumplimiento', icono: BookCheck, ruta: '/cumplimiento', fase: 0 },
       { clave: 'conocimiento', nombre: 'Conocimiento', icono: BookOpen, fase: 5 },
       { clave: 'innovacion', nombre: 'Innovación', icono: Lightbulb, fase: 5 },
     ],
@@ -44,7 +44,7 @@ export const GRUPOS_MODULOS = [
       { clave: 'riesgos', nombre: 'Riesgos y oportunidades', icono: AlertTriangle, ruta: '/riesgos', fase: 0 },
       { clave: 'planeamiento', nombre: 'Planeamiento', icono: Target, fase: 5 },
       { clave: 'indicadores', nombre: 'Indicadores', icono: BarChart3, fase: 5 },
-      { clave: 'revision_direccion', nombre: 'Revisión por la dirección', icono: ClipboardCheck, fase: 5 },
+      { clave: 'revision_direccion', nombre: 'Revisión por la dirección', icono: ClipboardCheck, ruta: '/revision-direccion', fase: 0 },
     ],
   },
   {
@@ -54,14 +54,14 @@ export const GRUPOS_MODULOS = [
       { clave: 'equipos', nombre: 'Equipos', icono: Gauge, ruta: '/equipos', fase: 0 },
       { clave: 'metodos', nombre: 'Métodos', icono: FlaskConical, fase: 2 },
       { clave: 'ensayos_aptitud', nombre: 'Ensayos de aptitud', icono: Crosshair, fase: 2 },
-      { clave: 'trabajo_no_conforme', nombre: 'Trabajo no conforme', icono: FileX, fase: 2 },
+      { clave: 'trabajo_no_conforme', nombre: 'Trabajo no conforme', icono: FileX, ruta: '/trabajo-no-conforme', fase: 0 },
     ],
   },
   {
     titulo: 'Seguridad, salud y ambiente',
     items: [
       { clave: 'sst', nombre: 'Seguridad y salud', icono: HardHat, ruta: '/sst', fase: 0 },
-      { clave: 'medio_ambiente', nombre: 'Medio ambiente', icono: Leaf, fase: 4 },
+      { clave: 'medio_ambiente', nombre: 'Medio ambiente', icono: Leaf, ruta: '/medio-ambiente', fase: 0 },
     ],
   },
   {
@@ -84,6 +84,7 @@ export const GRUPOS_MODULOS = [
   {
     titulo: 'Soporte',
     items: [
+      { clave: 'capacitacion', nombre: 'Capacitación e inducción', icono: School, ruta: '/capacitacion', fase: 0 },
       { clave: 'rrhh', nombre: 'Recursos humanos', icono: UserCog, fase: 5 },
       { clave: 'administracion', nombre: 'Administración', icono: Briefcase, fase: 5 },
       { clave: 'activos', nombre: 'Activos', icono: Landmark, fase: 5 },

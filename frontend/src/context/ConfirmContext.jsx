@@ -24,6 +24,8 @@ export function ConfirmProvider({ children }) {
 
   const confirmar = useCallback((opts = {}) => {
     return new Promise((resolve) => {
+      // Si quedaba otra confirmación abierta, se resuelve como cancelada (no queda esperando para siempre).
+      if (resolver.current) resolver.current(opts.entrada ? null : false)
       resolver.current = resolve
       setTexto(opts.entrada?.valorInicial || '')
       setEstado({
@@ -51,7 +53,9 @@ export function ConfirmProvider({ children }) {
     if (!estado) return undefined
     const onKey = (e) => {
       if (e.key === 'Escape') cancelar()
-      if (e.key === 'Enter' && !(conEntrada && estado.entrada.multilinea)) aceptar()
+      // Enter sobre un botón (p. ej. «Cancelar» o la X con el foco) ejecuta ese botón, no la confirmación.
+      if (e.target instanceof HTMLButtonElement) return
+      if (e.key === 'Enter' && !(conEntrada && estado.entrada.multilinea)) { e.preventDefault(); aceptar() }
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)

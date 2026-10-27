@@ -170,60 +170,32 @@ def generar_iperc_pdf(filas, area=None) -> bytes:
     return buf.getvalue()
 
 
-METODO_FIRMA = {'usuario': 'Firmado con su usuario', 'pin': 'Firmado con PIN', 'papel': 'Firma en el acta adjunta',
-                'carga': 'Firmado en el formato original'}
 
 
 def _pie_iperc(W, cfg, estado, ap):
     """Pie del formato: datos del empleador y "realizado y aprobado por" el Comité de SST, con firma y fecha.
     Si el área cambió después de aprobarse (o nunca se aprobó), imprime a los titulares vigentes con las
     casillas en blanco, para firmar."""
-    from django.utils import timezone
-
-    from .comite import ComiteSST
     from .pdf_eventos import _empleador
     th = ParagraphStyle('pth', fontName='Helvetica-Bold', fontSize=7, leading=8.5, alignment=TA_CENTER)
     thb = ParagraphStyle('ptb', parent=th, textColor=colors.white)
     td = ParagraphStyle('ptd', fontName='Helvetica', fontSize=7, leading=8.5, alignment=TA_CENTER)
-    fi = ParagraphStyle('pfi', parent=td, fontName='Helvetica-Oblique', fontSize=6.5, textColor=colors.HexColor('#1F4E79'))
     d = _empleador(cfg)
     emp = Table([[Paragraph(x, thb) for x in ('RAZÓN SOCIAL O DENOMINACIÓN SOCIAL:', 'RUC:', 'DOMICILIO (Dirección, '
                   'distrito, departamento, provincia)', 'ACTIVIDAD ECONÓMICA', 'N° TRABAJADORES EN EL CENTRO LABORAL')],
                  [Paragraph(esc_pdf(str(x)), td) for x in d]], colWidths=[W * x for x in (0.2, 0.1, 0.38, 0.2, 0.12)])
     emp.setStyle(TableStyle([('GRID', (0, 0), (-1, -1), 0.6, colors.black), ('BACKGROUND', (0, 0), (-1, 0), AZUL),
                              ('VALIGN', (0, 0), (-1, -1), 'MIDDLE')]))
-    if ap and estado == 'aprobada':
-        firmas = [(f.get('nombre', ''), f.get('cargo', ''), METODO_FIRMA.get(f.get('metodo'), ''),
-                   _solo_fecha((f.get('fecha') or str(ap.fecha))[:10])) for f in ap.firmas]
-        nota = None
-    else:
-        hoy = timezone.localdate()
-        c = ComiteSST.objects.filter(is_active=True, fecha_instalacion__lte=hoy, fecha_fin__gte=hoy).first()
-        firmas = [(m.trabajador.nombre_completo, {'presidente': 'Presidente del Comité de SST',
-                                                  'secretario': 'Secretario(a) del Comité de SST'}.get(
-                       m.cargo, 'Miembro titular del Comité de SST'), '', '')
-                  for m in (c.titulares().select_related('trabajador') if c else [])] or [('', '', '', '')] * 4
-        nota = ('PENDIENTE DE APROBACIÓN DEL COMITÉ DE SST: la matriz del área cambió después de su aprobación del '
-                f'{_solo_fecha(str(ap.fecha))}.' if ap else 'PENDIENTE DE APROBACIÓN DEL COMITÉ DE SST.')
-    n = len(firmas)
-    w0 = W * 0.12
-    wn, wf = (W - w0) / n * 0.6, (W - w0) / n * 0.4
-    fila1 = [Paragraph('REALIZADO Y APROBADO POR:', thb)]
-    fila2 = [Paragraph('FECHA', thb)]
-    for nom, cargo, metodo, fecha in firmas:
-        fila1 += [Paragraph(f'{esc_pdf(nom)}<br/>{esc_pdf(cargo)}', td), Paragraph(esc_pdf(metodo), fi)]
-        fila2 += [Paragraph(esc_pdf(fecha), td), '']
-    estilo = [('GRID', (0, 0), (-1, -1), 0.6, colors.black), ('BACKGROUND', (0, 0), (0, -1), AZUL),
-              ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'), ('ROWBACKGROUNDS', (1, 0), (-1, 0), [colors.white])]
-    estilo += [('SPAN', (1 + 2 * i, 1), (2 + 2 * i, 1)) for i in range(n)]
-    apr = Table([fila1, fila2], colWidths=[w0] + [wn, wf] * n, rowHeights=[30, 14])
-    apr.setStyle(TableStyle(estilo))
-    partes = [emp, Spacer(1, 3), apr]
-    if nota:
-        partes.append(Paragraph(nota, ParagraphStyle('pno', fontName='Helvetica-Bold', fontSize=7,
-                                                     textColor=colors.HexColor('#C00000'), spaceBefore=3)))
     from reportlab.platypus import KeepTogether
-    return KeepTogether(partes)
+
+    from .comite_pdf import bloque_firmas_comite
+    if ap and estado == 'aprobada':
+        bloque = bloque_firmas_comite(W, ap.firmas, fecha=ap.fecha)
+    else:
+        bloque = bloque_firmas_comite(W, nota=(
+            'PENDIENTE DE APROBACIÓN DEL COMITÉ DE SST: la matriz del área cambió después de su aprobación del '
+            f'{_solo_fecha(str(ap.fecha))}.' if ap else 'PENDIENTE DE APROBACIÓN DEL COMITÉ DE SST.'))
+    return KeepTogether([emp, Spacer(1, 3)] + bloque)
 
 
 # --- Análisis de Trabajo Seguro ---

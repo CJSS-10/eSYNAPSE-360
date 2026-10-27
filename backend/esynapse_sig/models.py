@@ -4,6 +4,7 @@ Control de versiones, flujo de aprobación y estados según
 SIGE_Flujos_Detallados.md sección M6.
 """
 from django.db import models
+from django.utils import timezone
 
 from core.models import AuditableModel
 
@@ -384,7 +385,7 @@ class Hallazgo(AuditableModel):
         if f:
             return f.year
         from django.utils import timezone
-        return timezone.now().year
+        return timezone.localdate().year
 
     def registro_abierto(self):
         """¿Se puede corregir el registro? No si ya pasó a una solicitud de
@@ -411,7 +412,7 @@ class Hallazgo(AuditableModel):
     def generar_codigo(tipo, anio=None):
         from django.utils import timezone
         prefijo = PREFIJOS_HALLAZGO.get(tipo, 'HAL')
-        anio = anio or timezone.now().year
+        anio = anio or timezone.localdate().year
         # Correlativo por prefijo y año, formato PREFIJO-NNN-YYYY
         nums = []
         for cod in Hallazgo.objects.filter(
@@ -460,6 +461,19 @@ ROLES_FIRMA = [
 ]
 
 
+class _SoloActivos(models.Manager):
+    """Manejador por omisión de los registros con baja lógica: las consultas y las relaciones (p. ej.
+    equipo.registros) ven solo los activos; `todos` incluye los dados de baja (regla 3: nunca se borra)."""
+    campo = 'is_active'
+
+    def get_queryset(self):
+        return super().get_queryset().filter(**{self.campo: True})
+
+
+class _SoloFirmasVigentes(_SoloActivos):
+    campo = 'vigente'
+
+
 class FirmaVersion(AuditableModel):
     """
     Firma electrónica de una versión de documento: quién, cuándo, desde qué IP
@@ -478,14 +492,29 @@ class FirmaVersion(AuditableModel):
     cargo = models.CharField('Cargo al firmar', max_length=100, blank=True)
     ip = models.GenericIPAddressField('IP', null=True, blank=True)
     hash_archivo = models.CharField('SHA-256 del archivo firmado', max_length=64)
+    # Una firma que deja de valer (se reemplazó el archivo o falló la publicación) no se borra: queda anulada.
+    vigente = models.BooleanField('Vigente', default=True)
+    anulada_en = models.DateTimeField('Anulada el', null=True, blank=True)
+    motivo_anulacion = models.CharField('Motivo de la anulación', max_length=200, blank=True)
+
+    objects = _SoloFirmasVigentes()
+    todos = models.Manager()
 
     class Meta:
         verbose_name = 'Firma electrónica'
         verbose_name_plural = 'Firmas electrónicas'
         constraints = [
-            models.UniqueConstraint(fields=['version', 'rol'], name='unique_firma_version_rol'),
+            models.UniqueConstraint(fields=['version', 'rol'], condition=models.Q(vigente=True),
+                                    name='unique_firma_vigente_version_rol'),
         ]
         ordering = ['id']
+
+    def anular(self, motivo, usuario=None):
+        from django.utils import timezone
+        self.vigente, self.anulada_en, self.motivo_anulacion = False, timezone.now(), motivo[:200]
+        if usuario is not None:
+            self.updated_by = usuario
+        self.save()
 
     def __str__(self):
         return f'{self.version} — {self.get_rol_display()} por {self.usuario}'
@@ -701,7 +730,7 @@ class SolicitudAC(AuditableModel):
     @staticmethod
     def generar_codigo():
         from django.utils import timezone
-        anio = timezone.now().year
+        anio = timezone.localdate().year
         # Correlativo por año, formato SAC-NN-AAAA (como en el procedimiento)
         nums = []
         for cod in SolicitudAC.objects.filter(
@@ -985,11 +1014,12 @@ class Auditoria(AuditableModel):
         pertenece la auditoría (una del Programa 2027 es AI-01-2027 aunque se
         registre en 2026); sin programa, el año en curso."""
         from django.utils import timezone
-        anio = anio or timezone.now().year
+        anio = anio or timezone.localdate().year
         sufijo = f'-{anio}'
-        ultimo = (Auditoria.objects.filter(codigo__endswith=sufijo)
-                  .order_by('-codigo').values_list('codigo', flat=True).first())
-        n = int(ultimo.split('-')[1]) + 1 if ultimo else 1
+        # Máximo numérico (no el orden del texto: «AI-99» quedaría después de «AI-100»).
+        nums = [int(c.split('-')[1]) for c in Auditoria.objects.filter(codigo__endswith=sufijo)
+                .values_list('codigo', flat=True) if len(c.split('-')) > 2 and c.split('-')[1].isdigit()]
+        n = max(nums) + 1 if nums else 1
         return f'AI-{n:02d}{sufijo}'
 
     # --- Etapas de la auditoría: una etapa cerrada es de solo lectura -------
@@ -1126,6 +1156,10 @@ class EquipoAuditoria(AuditableModel):
     nombre_externo = models.CharField('Nombre (externo)', max_length=150, blank=True)
     rol = models.CharField('Rol', max_length=12, choices=ROLES_EQUIPO)
     cargo = models.CharField('Cargo', max_length=120, blank=True)
+    is_active = models.BooleanField('Activo', default=True)
+
+    objects = _SoloActivos()
+    todos = models.Manager()
 
     class Meta:
         verbose_name = 'Integrante del equipo auditor'
@@ -1382,7 +1416,7 @@ class Equipo(AuditableModel):
         if not self.fecha_proxima_calibracion:
             return None
         from django.utils import timezone
-        return self.fecha_proxima_calibracion >= timezone.now().date()
+        return self.fecha_proxima_calibracion >= timezone.localdate()
 
     def actualizar_calibracion(self):
         """
@@ -1437,6 +1471,10 @@ class RegistroEquipo(AuditableModel):
     vb = models.CharField('V°B° (responsable)', max_length=150, blank=True)
     archivo = models.FileField('Documento adjunto', upload_to='equipos/registros/%Y/',
                                null=True, blank=True)
+    is_active = models.BooleanField('Activo', default=True)
+
+    objects = _SoloActivos()
+    todos = models.Manager()
 
     class Meta:
         verbose_name = 'Registro de hoja de vida'
@@ -1463,6 +1501,10 @@ class ActividadPrograma(AuditableModel):
     anio = models.PositiveIntegerField('Año')
     frecuencia = models.CharField('Frecuencia', max_length=60, blank=True)
     meses = models.JSONField('Meses programados', default=list, blank=True)  # [1..12]
+    is_active = models.BooleanField('Activo', default=True)
+
+    objects = _SoloActivos()
+    todos = models.Manager()
 
     class Meta:
         verbose_name = 'Actividad programada'
@@ -1561,7 +1603,7 @@ class InformeEquipo(AuditableModel):
         from django.utils import timezone
         prefijo = PREFIJO_INFORME.get(tipo, 'INF')
         mag = prefijo_de_magnitud(magnitud)
-        anio = timezone.now().year
+        anio = timezone.localdate().year
         base = f'{prefijo}-{mag}-'
         sufijo = f'-{anio}'
         nums = []
@@ -1736,6 +1778,10 @@ class ResultadoIntervalo(AuditableModel):
     resultado = models.FloatField('Resultado (desviación)', default=0)
     incertidumbre = models.FloatField('Incertidumbre', default=0)
     emp = models.FloatField('EMP (error máximo permitido)', default=0)
+    is_active = models.BooleanField('Activo', default=True)
+
+    objects = _SoloActivos()
+    todos = models.Manager()
 
     class Meta:
         verbose_name = 'Resultado de intervalo'
@@ -1907,7 +1953,7 @@ class Autorizacion(AuditableModel):
         prox = self.fecha_proximo_seguimiento
         if not prox or self.estado != 'vigente':
             return None
-        hoy = date.today()
+        hoy = timezone.localdate()
         if prox < hoy:
             return 'vencido'
         if prox <= hoy + timedelta(days=30):
@@ -2002,10 +2048,11 @@ def motivo_sin_entrenamiento(usuario, metodo, suspendida=None, exento=False):
     qs = ProcesoEntrenamiento.objects.filter(usuario=usuario, metodo=metodo, estado='completado', is_active=True)
     if suspendida is not None:
         qs = qs.filter(tipo='reentrenamiento')
-        if suspendida.suspendida_en:
+        desde = suspendida.suspendida_en or suspendida.updated_at
+        if desde:
             from django.utils import timezone
             # Fecha local de la suspensión (no la de UTC: de noche ya sería el día siguiente).
-            qs = qs.filter(created_at__date__gte=timezone.localtime(suspendida.suspendida_en).date())
+            qs = qs.filter(created_at__date__gte=timezone.localtime(desde).date())
         if not qs.exists():
             return ('La autorización está suspendida: para reautorizar, la persona debe superar un re-entrenamiento '
                     'con trabajo bajo supervisión de este método, registrado después de la suspensión.')

@@ -15,6 +15,12 @@ export function fecha(iso) {
   return `${yyyy}-${mm}-${dd}`
 }
 
+// Fecha local de hoy (AAAA-MM-DD). No usar toISOString(): da la fecha en UTC (en Lima, desde las 19:00 ya es mañana).
+export function hoy() {
+  const d = new Date()
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
 export function fechaHora(iso) {
   if (!iso) return ''
   const d = new Date(iso)

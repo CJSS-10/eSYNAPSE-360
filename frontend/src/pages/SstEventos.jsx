@@ -6,7 +6,7 @@ import CampoAmpliable from '../components/CampoAmpliable.jsx'
 import CampoSugerencias from '../components/CampoSugerencias.jsx'
 import BarraEtapa from '../components/BarraEtapa.jsx'
 import { api } from '../lib/api.js'
-import { fecha, fechaHora } from '../lib/fecha.js'
+import { fecha, fechaHora, hoy as hoyLocal } from '../lib/fecha.js'
 import { useUltimaRespuesta } from '../lib/useUltimaRespuesta.js'
 import BarraPasos from '../components/BarraPasos.jsx'
 
@@ -134,7 +134,7 @@ export function Eventos({ areasOrg, procesos, confirmar, setError, abrirPdf, pue
     if (desc !== null) subir('archivo', { descripcion: desc }, 'archivo', file)
   }
   const notificar = async (file) => {
-    const f = await confirmar({ titulo: 'Notificación al Ministerio de Trabajo', mensaje: 'Fecha en que se notificó (accidente mortal o incidente peligroso: dentro de las 24 horas).', textoConfirmar: 'Registrar', entrada: { etiqueta: 'Fecha (AAAA-MM-DD)', obligatorio: true, valorInicial: new Date().toISOString().slice(0, 10) } })
+    const f = await confirmar({ titulo: 'Notificación al Ministerio de Trabajo', mensaje: 'Fecha en que se notificó (accidente mortal o incidente peligroso: dentro de las 24 horas).', textoConfirmar: 'Registrar', entrada: { etiqueta: 'Fecha (AAAA-MM-DD)', obligatorio: true, valorInicial: hoyLocal() } })
     if (f !== null) subir('notificar_mtpe', { fecha: f }, 'constancia', file)
   }
   const iniciar = async () => {
@@ -346,7 +346,7 @@ export function Eventos({ areasOrg, procesos, confirmar, setError, abrirPdf, pue
 }
 
 /* ------------------------------------------------------------------------------- Enfermedades */
-const ENF_VACIA = { fecha: new Date().toISOString().slice(0, 10), nombre: '', trabajadores_afectados: 1, unidad: '', agente: 'fisico', agente_detalle: '', causas: '', trabajadores_expuestos: '', cancer_profesional: false }
+const ENF_VACIA = { fecha: hoyLocal(), nombre: '', trabajadores_afectados: 1, unidad: '', agente: 'fisico', agente_detalle: '', causas: '', trabajadores_expuestos: '', cancer_profesional: false }
 
 export function Enfermedades({ areasOrg, confirmar, setError, abrirPdf, puedeCrear, puedeEditar, puedeAprobar, puedeEliminar }) {
   const [items, setItems] = useState([])

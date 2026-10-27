@@ -13,7 +13,10 @@ import { api } from '../lib/api.js'
 import { useAuth } from '../context/AuthContext.jsx'
 import { useConfirm } from '../context/ConfirmContext.jsx'
 import { fecha, fechaHora } from '../lib/fecha.js'
-import TituloModulo from '../components/ui/TituloModulo.jsx'
+import EncabezadoModulo from '../components/ui/EncabezadoModulo.jsx'
+import Pestanas from '../components/ui/Pestanas.jsx'
+import { Vistas } from '../components/NavModulo.jsx'
+import { useAbrirDesdeEnlace } from '../lib/enlaces.js'
 
 const MAGNITUDES = [
   ['masa', 'Masa'], ['temperatura', 'Temperatura'], ['electricidad', 'Electricidad'],
@@ -34,15 +37,15 @@ const COLOR_ESTADO = {
 }
 const MOTIVOS = [['campo', 'Campo'], ['calibracion', 'Calibración'], ['reparacion', 'Reparación'], ['prestamo', 'Préstamo'], ['mantenimiento', 'Mantenimiento'], ['otros', 'Otros']]
 const FISICOS = [['bueno', 'Bueno'], ['regular', 'Regular'], ['malo', 'Malo']]
-const TIPOS_ACTIVIDAD = [['mantenimiento', 'Mantenimiento'], ['calibracion', 'Calibración'], ['comprobacion_intermedia', 'Comprobación Intermedia'], ['comprobacion_funcional', 'Comprobación Funcional'], ['caracterizacion', 'Caracterización']]
+const TIPOS_ACTIVIDAD = [['mantenimiento', 'Mantenimiento'], ['calibracion', 'Calibración'], ['comprobacion_intermedia', 'Comprobación intermedia'], ['comprobacion_funcional', 'Comprobación funcional'], ['caracterizacion', 'Caracterización']]
 
 // Pestañas de la Hoja de Vida
 const PESTANAS = [
-  ['ficha', 'Ficha Técnica'],
+  ['ficha', 'Ficha técnica'],
   ['mantenimiento', 'Mantenimientos'],
   ['calibracion', 'Calibraciones'],
   ['verificacion', 'Verificaciones'],
-  ['comprobacion_intermedia', 'Comprob. Intermedias'],
+  ['comprobacion_intermedia', 'Comprobaciones intermedias'],
   ['caracterizacion', 'Caracterizaciones'],
   ['suceso', 'Historial'],
 ]
@@ -108,12 +111,13 @@ export default function Equipos() {
   const { tienePermiso } = useAuth()
   const confirmar = useConfirm()
   const [items, setItems] = useState([])
+  const [verAnulados, setVerAnulados] = useState(false)
   const [buscar, setBuscar] = useState('')
   const [laboratorio, setLaboratorio] = useState('')
   const [labs, setLabs] = useState([])
   const [vista, setVista] = useState(() => localStorage.getItem('equipos_vista') || 'inventario')
   const [estado, setEstado] = useState('')
-  const [soloVencidos, setSoloVencidos] = useState(false)
+  const [calib, setCalib] = useState('todos')   // todos | vencida | por_vencer
   const [modalCrear, setModalCrear] = useState(false)
   const [detalle, setDetalle] = useState(null)
   const [tab, setTab] = useState('ficha')
@@ -149,10 +153,11 @@ export default function Equipos() {
     if (buscar) p.set('buscar', buscar)
     if (laboratorio) p.set('laboratorio', laboratorio)
     if (estado) p.set('estado', estado)
-    if (soloVencidos) p.set('vencidos', '1')
+    if (calib === 'vencida') p.set('vencidos', '1')
+    if (calib === 'por_vencer') p.set('por_vencer', '30')
     const d = await ultima(api.equipos.listar(`?${p}`))
     setItems(d.results ?? d)
-  }, [buscar, laboratorio, estado, soloVencidos])
+  }, [buscar, laboratorio, estado, calib])
   useEffect(() => { cargar().catch(() => {}) }, [cargar])
 
   const abrir = async (id) => {
@@ -239,9 +244,10 @@ export default function Equipos() {
   })
 
   const eliminarRegistro = async (rid) => {
-    if (!await confirmar({ titulo: 'Eliminar registro', mensaje: '¿Eliminar este registro de la bitácora?', textoConfirmar: 'Eliminar', peligro: true })) return
+    if (!await confirmar({ titulo: 'Dar de baja el registro', mensaje: 'El registro deja de mostrarse en la hoja de vida, pero se conserva: puede verlo con «Mostrar anulados» y restaurarlo.', textoConfirmar: 'Dar de baja', peligro: true })) return
     accion(() => api.equipos.eliminarRegistro(detalle.id, rid))
   }
+  const restaurar = (entidad, oid) => accion(() => api.equipos.restaurar(detalle.id, entidad, oid))
 
   const subirImagen = (file) => accion(async () => {
     const fd = new FormData(); fd.append('imagen', file)
@@ -283,7 +289,8 @@ export default function Equipos() {
       if (buscar) p.set('buscar', buscar)
       if (laboratorio) p.set('laboratorio', laboratorio)
       if (estado) p.set('estado', estado)
-      if (soloVencidos) p.set('vencidos', '1')
+      if (calib === 'vencida') p.set('vencidos', '1')
+      if (calib === 'por_vencer') p.set('por_vencer', '30')
       const blob = await api.equipos.inventarioPdf(`?${p}`)
       const url = URL.createObjectURL(blob)
       window.open(url, '_blank')
@@ -349,31 +356,33 @@ export default function Equipos() {
   const registros = (detalle?.registros || [])
   const porTipo = (t) => registros.filter((r) => r.tipo === t)
 
+  useAbrirDesdeEnlace(abrir)   // enlace directo ?abrir=<id> (búsqueda, Mis tareas, campana)
+
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <TituloModulo seccion="Laboratorio" titulo="Equipos e instrumentos" descripcion="Inventario y hoja de vida del equipamiento del laboratorio." />
-        </div>
-        <div className="flex items-center gap-2">
-          {puedeAprobar && (
-            <button onClick={() => { cargarPendientes(); setModalPend(true) }} className="btn-secondary" title="Revisar cambios pendientes de aprobación">
-              <ClipboardCheck className="h-4 w-4" /> Cambios pendientes
-              {pendientes.length > 0 && (
-                <span className="ml-1 inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-amber-500 px-1 text-xs font-semibold text-white">{pendientes.length}</span>
-              )}
+      <EncabezadoModulo
+        seccion="Laboratorio"
+        titulo="Equipos e instrumentos"
+        descripcion="Inventario y hoja de vida del equipamiento del laboratorio."
+        acciones={<>
+          {/* Bandejas de cambios: aparecen como aviso solo cuando hay algo que atender */}
+          {puedeAprobar && pendientes.length > 0 && (
+            <button onClick={() => { cargarPendientes(); setModalPend(true) }} title="Revisar cambios pendientes de aprobación"
+              className="mov-pulsar inline-flex h-9 items-center gap-2 rounded-full border border-amber-500/40 bg-amber-500/10 px-3.5 text-[13px] font-semibold text-amber-800 transition-colors hover:bg-amber-500/20 dark:text-amber-300">
+              <ClipboardCheck className="h-4 w-4" />
+              {pendientes.length} cambio{pendientes.length === 1 ? '' : 's'} por aprobar
             </button>
           )}
           {puedeEditar && (
-            <button onClick={() => { cargarMisSolicitudes(); setModalMis(true) }} className="btn-secondary" title="Ver el estado de mis cambios enviados">
-              <ClipboardCheck className="h-4 w-4" /> Mis solicitudes
-              {misDevueltas > 0 && (
-                <span className="ml-1 inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-violet-500 px-1 text-xs font-semibold text-white">{misDevueltas}</span>
-              )}
+            <button onClick={() => { cargarMisSolicitudes(); setModalMis(true) }} title="Ver el estado de mis cambios enviados"
+              className={`mov-pulsar inline-flex h-9 items-center gap-2 rounded-full px-3 text-[13px] transition-colors ${misDevueltas > 0
+                ? 'border border-violet-500/40 bg-violet-500/10 font-semibold text-violet-800 hover:bg-violet-500/20 dark:text-violet-300'
+                : 'font-medium text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800'}`}>
+              Mis solicitudes{misDevueltas > 0 && ` · ${misDevueltas} devuelta${misDevueltas === 1 ? '' : 's'}`}
             </button>
           )}
           {puedeEditar && (
-            <button onClick={() => setModalCat(true)} className="btn-secondary" title="Gestionar magnitudes y clasificaciones">
+            <button onClick={() => setModalCat(true)} className="btn-ghost" title="Gestionar magnitudes y clasificaciones">
               <SlidersHorizontal className="h-4 w-4" /> Catálogos
             </button>
           )}
@@ -382,15 +391,12 @@ export default function Equipos() {
               <Plus className="h-4 w-4" /> Nuevo equipo
             </button>
           )}
-        </div>
-      </div>
-
-      <div className="flex items-center gap-1 border-b border-slate-200 dark:border-slate-800">
-        <button onClick={() => setVista('inventario')} className={`-mb-px border-b-2 px-3 py-2 text-sm font-medium transition ${vista === 'inventario' ? 'border-esynapse-500 text-esynapse-600 dark:text-esynapse-300' : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400'}`}>Inventario</button>
-        <button onClick={() => setVista('programa')} className={`-mb-px border-b-2 px-3 py-2 text-sm font-medium transition ${vista === 'programa' ? 'border-esynapse-500 text-esynapse-600 dark:text-esynapse-300' : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400'}`}>Programa Anual</button>
-        <button onClick={() => setVista('intervalo')} className={`-mb-px border-b-2 px-3 py-2 text-sm font-medium transition ${vista === 'intervalo' ? 'border-esynapse-500 text-esynapse-600 dark:text-esynapse-300' : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400'}`}>Intervalo de Calibración</button>
-        <button onClick={() => setVista('trazabilidad')} className={`-mb-px border-b-2 px-3 py-2 text-sm font-medium transition ${vista === 'trazabilidad' ? 'border-esynapse-500 text-esynapse-600 dark:text-esynapse-300' : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400'}`}>Carta de Trazabilidad</button>
-      </div>
+        </>}
+      >
+        <Pestanas
+          opciones={[['inventario', 'Inventario'], ['programa', 'Programa anual'], ['intervalo', 'Intervalo de calibración'], ['trazabilidad', 'Carta de trazabilidad']]}
+          valor={vista} onChange={setVista} />
+      </EncabezadoModulo>
 
       {vista === 'programa' && <ProgramaAnual puedeEditar={puedeEditar} />}
 
@@ -412,10 +418,7 @@ export default function Equipos() {
           <option value="">Todos los estados</option>
           {ESTADOS.map(([v, n]) => <option key={v} value={v}>{n}</option>)}
         </select>
-        <label className="flex cursor-pointer items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
-          <input type="checkbox" checked={soloVencidos} onChange={(e) => setSoloVencidos(e.target.checked)} className="h-4 w-4 accent-esynapse-600" />
-          Solo calibración vencida
-        </label>
+        <Vistas opciones={[['todos', 'Todos'], ['vencida', 'Calibración vencida'], ['por_vencer', 'Vence en 30 días']]} valor={calib} onChange={setCalib} />
         <button onClick={imprimirInventario} className="btn-secondary ml-auto" title="Generar PDF del inventario (respeta los filtros)">
           <FileText className="h-4 w-4" /> Inventario PDF
         </button>
@@ -449,7 +452,7 @@ export default function Equipos() {
               const bc = badgeCalib(e)
               return (
                 <tr key={e.id} onClick={() => abrir(e.id)} className="cursor-pointer border-b border-slate-100 text-center align-middle transition last:border-0 hover:bg-slate-50 dark:border-slate-800/60 dark:hover:bg-slate-800/40">
-                  <td className="whitespace-nowrap px-3 py-2.5 font-mono text-xs font-semibold text-esynapse-600 dark:text-esynapse-300">{e.codigo}</td>
+                  <td className="whitespace-nowrap px-3 py-2.5 font-mono text-xs font-semibold">{e.codigo}</td>
                   <td className="min-w-[12rem] max-w-[18rem] whitespace-normal break-words px-3 py-2.5" title={e.nombre}>{e.nombre}</td>
                   <td className="px-3 py-2.5 text-xs text-slate-500 dark:text-slate-400 text-center">{e.clasificacion_display}</td>
                   <td className="px-3 py-2.5 text-slate-500 dark:text-slate-400">{e.marca || '—'}</td>
@@ -564,21 +567,27 @@ export default function Equipos() {
             {error && <p className="rounded bg-red-500/10 px-3 py-2 text-sm text-red-600 dark:text-red-400">{error}</p>}
 
             {/* Navegación por pestañas */}
-            <div className="flex flex-wrap gap-1 border-b border-slate-200 dark:border-slate-800">
+            <div role="tablist" className="flex flex-wrap gap-x-5 border-b border-slate-200 dark:border-slate-800">
               {PESTANAS.map(([v, n]) => (
-                <button key={v} onClick={() => { setTab(v); setRegForm(REG_VACIO); setRegFile(null) }}
-                  className={`-mb-px border-b-2 px-3 py-2 text-sm font-medium transition ${tab === v ? 'border-esynapse-500 text-esynapse-600 dark:text-esynapse-300' : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'}`}>
+                <button key={v} role="tab" aria-selected={tab === v} onClick={() => { setTab(v); setRegForm(REG_VACIO); setRegFile(null) }}
+                  className={`-mb-px border-b-2 px-0.5 pb-2 pt-1 text-sm transition-colors ${tab === v ? 'border-esynapse-500 font-semibold text-slate-900 dark:text-white' : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'}`}>
                   {n}
                 </button>
               ))}
+              {((detalle.registros_anulados || []).length + (detalle.actividades_anuladas || []).length) > 0 && (
+                <label className="ml-auto flex items-center gap-1.5 self-center px-2 text-xs text-slate-500" title="Registros dados de baja: se conservan y se pueden restaurar">
+                  <input type="checkbox" className="accent-esynapse-600" checked={verAnulados} onChange={(e) => setVerAnulados(e.target.checked)} />
+                  Mostrar anulados ({(detalle.registros_anulados || []).length + (detalle.actividades_anuladas || []).length})
+                </label>
+              )}
             </div>
 
             {/* FICHA TÉCNICA */}
             {tab === 'ficha' && (
               <div className="space-y-4">
-                {/* DATOS GENERALES */}
+                {/* Datos generales */}
                 <div className="overflow-hidden rounded-lg border border-slate-200 dark:border-slate-700">
-                  <div className="bg-[#1E3A5C] px-4 py-2 text-sm font-bold uppercase tracking-wide text-white">Datos Generales</div>
+                  <div className="border-b border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-800/50 dark:text-slate-200">Datos generales</div>
                   <div className="p-4">
                   <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
                     <Campo label="Nombre del equipo"><input className="input-esynapse" value={ficha.nombre || ''} onChange={(e) => setFicha({ ...ficha, nombre: e.target.value })} disabled={!puedeEditar} /></Campo>
@@ -601,9 +610,9 @@ export default function Equipos() {
                   </div>
                 </div>
 
-                {/* ESPECIFICACIONES TÉCNICAS */}
+                {/* Especificaciones técnicas */}
                 <div className="overflow-hidden rounded-lg border border-slate-200 dark:border-slate-700">
-                  <div className="bg-[#1E3A5C] px-4 py-2 text-sm font-bold uppercase tracking-wide text-white">Especificaciones Técnicas</div>
+                  <div className="border-b border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-800/50 dark:text-slate-200">Especificaciones técnicas</div>
                   <div className="p-4">
                   <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
                     <Campo label="Marca"><input className="input-esynapse" value={ficha.marca || ''} onChange={(e) => setFicha({ ...ficha, marca: e.target.value })} disabled={!puedeEditar} /></Campo>
@@ -665,13 +674,15 @@ export default function Equipos() {
                 onEliminar={eliminarRegistro}
                 onImprimir={imprimirBitacora}
                 puedeEditar={puedeEditar} puedeEliminar={puedeEliminar}
+                anulados={verAnulados ? (detalle.registros_anulados || []).filter((r) => r.tipo === tab) : []}
+                onRestaurar={puedeAprobar ? (rid) => restaurar('registro', rid) : null}
               />
             )}
 
             {/* MOVIMIENTOS (salida / entrada) */}
             {tab === 'movimiento' && (
               <div className="overflow-hidden rounded-lg border border-slate-200 dark:border-slate-700">
-                <div className="bg-[#1E3A5C] px-4 py-2 text-sm font-bold uppercase tracking-wide text-white">Movimientos</div>
+                <div className="border-b border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-800/50 dark:text-slate-200">Movimientos</div>
                 <div className="space-y-3 p-4">
                 <Tabla cabeceras={['Motivo', 'Destino', 'Salida', 'Estado', 'Retorno', '']}>
                   {detalle.movimientos.map((m) => (
@@ -709,7 +720,7 @@ export default function Equipos() {
             {/* PROGRAMA ANUAL */}
             {tab === 'programa' && (
               <div className="overflow-hidden rounded-lg border border-slate-200 dark:border-slate-700">
-                <div className="bg-[#1E3A5C] px-4 py-2 text-sm font-bold uppercase tracking-wide text-white">Programa</div>
+                <div className="border-b border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-800/50 dark:text-slate-200">Programa</div>
                 <div className="space-y-3 p-4">
                 <Tabla cabeceras={['Tipo', 'Año', 'Frecuencia', 'Meses']}>
                   {detalle.actividades.map((a) => (
@@ -718,6 +729,16 @@ export default function Equipos() {
                       <td className="px-3 py-2">{a.anio}</td>
                       <td className="px-3 py-2 text-slate-500 dark:text-slate-400">{a.frecuencia || '—'}</td>
                       <td className="px-3 py-2 text-xs">{(a.meses || []).join(', ') || '—'}</td>
+                    </tr>
+                  ))}
+                  {verAnulados && (detalle.actividades_anuladas || []).map((a) => (
+                    <tr key={`x${a.id}`} className="border-b border-slate-100 bg-red-500/5 text-slate-400 last:border-0 dark:border-slate-800/60">
+                      <td className="px-3 py-2 line-through">{a.tipo_display}</td>
+                      <td className="px-3 py-2 line-through">{a.anio}</td>
+                      <td className="px-3 py-2 line-through">{a.frecuencia || '—'}</td>
+                      <td className="px-3 py-2 text-xs"><span className="line-through">{(a.meses || []).join(', ') || '—'}</span>
+                        <span className="ml-2 no-underline">Anulada el {fecha(a.anulado_en)}{a.anulado_por ? ` por ${a.anulado_por}` : ''}</span>
+                        {puedeAprobar && <button onClick={() => restaurar('actividad', a.id)} className="ml-2 text-esynapse-600 underline">Restaurar</button>}</td>
                     </tr>
                   ))}
                 </Tabla>
@@ -836,7 +857,7 @@ function Tabla({ cabeceras, children }) {
 }
 
 // Bitácora de una pestaña de la Hoja de Vida (calibración, mantenimiento, etc.)
-function RegistroTab({ tipo, titulo, registros, regForm, setRegForm, regFile, setRegFile, onAgregar, onEliminar, onImprimir, puedeEditar, puedeEliminar }) {
+function RegistroTab({ tipo, titulo, registros, regForm, setRegForm, regFile, setRegFile, onAgregar, onEliminar, onImprimir, puedeEditar, puedeEliminar, anulados = [], onRestaurar }) {
   const esSuceso = tipo === 'suceso'
   const TERMINO_FECHA = { calibracion: 'calibración', mantenimiento: 'mantenimiento', verificacion: 'verificación', comprobacion_intermedia: 'comprobación', caracterizacion: 'caracterización' }
   const suf = TERMINO_FECHA[tipo]
@@ -848,7 +869,7 @@ function RegistroTab({ tipo, titulo, registros, regForm, setRegForm, regFile, se
 
   return (
     <div className="overflow-hidden rounded-lg border border-slate-200 dark:border-slate-700">
-      <div className="bg-[#1E3A5C] px-4 py-2 text-sm font-bold uppercase tracking-wide text-white">{titulo}</div>
+      <div className="border-b border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-800/50 dark:text-slate-200">{titulo}</div>
       <div className="space-y-3 p-4">
       <Tabla cabeceras={cabeceras}>
         {registros.map((r, i) => (
@@ -879,7 +900,19 @@ function RegistroTab({ tipo, titulo, registros, regForm, setRegForm, regFile, se
           </tr>
         ))}
         {registros.length === 0 && <tr><td colSpan={cabeceras.length} className="px-3 py-6 text-center text-xs text-slate-400">Sin registros todavía.</td></tr>}
+        {anulados.map((r) => (
+          <tr key={`x${r.id}`} className="border-b border-slate-100 bg-red-500/5 text-xs text-slate-400 last:border-0 dark:border-slate-800/60">
+            <td className="px-3 py-2">—</td>
+            <td colSpan={cabeceras.length - 2} className="px-3 py-2">
+              <span className="line-through">{[r.numero_documento, r.descripcion, r.fecha, r.observaciones].filter(Boolean).join(' · ') || 'Registro'}</span>
+              <span className="ml-2">Anulado el {fecha(r.anulado_en)}{r.anulado_por ? ` por ${r.anulado_por}` : ''}</span>
+              {r.archivo_url && <a href={r.archivo_url} target="_blank" rel="noreferrer" className="ml-2 text-esynapse-600 underline">adjunto</a>}
+            </td>
+            <td className="px-3 py-2 text-right">{onRestaurar && <button onClick={() => onRestaurar(r.id)} className="text-esynapse-600 underline">Restaurar</button>}</td>
+          </tr>
+        ))}
       </Tabla>
+      {!puedeEditar && onImprimir && <div className="flex justify-end"><button type="button" onClick={() => onImprimir(tipo, titulo)} className="btn-secondary"><FileText className="h-4 w-4" /> Generar PDF</button></div>}
 
       {puedeEditar && (
         <div className="rounded-lg border border-dashed border-slate-300 p-3 dark:border-slate-700">

@@ -28,7 +28,7 @@ def _nombre(u):
 def _firma(request):
     u = request.user
     return {'usuario_id': u.pk, 'nombre': _nombre(u), 'cargo': getattr(u, 'cargo', ''),
-            'sigla': getattr(u, 'sigla_cargo', ''), 'fecha': timezone.now().isoformat(timespec='seconds'),
+            'sigla': getattr(u, 'sigla_cargo', ''), 'fecha': timezone.localtime().isoformat(timespec='seconds'),
             'ip': get_client_ip(request)}
 
 
@@ -148,8 +148,9 @@ class EventoSerializer(EventoListaSerializer):
             'requiere_actualizar_iperc', 'firma_elaborado', 'firma_revisado', 'acciones', 'firma_cierre',
             'fecha_cierre', 'motivo_anulacion', 'historial', 'afectados', 'archivos', 'dias_perdidos',
             'etapas_abiertas']
+        # fecha_reporte la fija el sistema al registrar (plazo de 24 h): no se edita.
         read_only_fields = ['codigo', 'estado', 'notificacion_mtpe', 'firma_elaborado', 'firma_revisado',
-                            'firma_cierre', 'fecha_cierre', 'motivo_anulacion', 'historial']
+                            'firma_cierre', 'fecha_cierre', 'motivo_anulacion', 'historial', 'fecha_reporte']
 
     def get_afectados(self, obj):
         return AfectadoSerializer(obj.afectados.filter(is_active=True), many=True).data if obj.pk else []
@@ -791,7 +792,10 @@ class EstadisticasViewSet(_Base, viewsets.ViewSet):
         d = DatosMesSST.objects.filter(anio=anio, mes=mes).first()
         base = {'anio': anio, 'mes': mes, 'trabajadores': trabajadores_en_mes(anio, mes), 'dias_laborables': 22}
         base['horas_hombre'] = base['trabajadores'] * 22 * 8
-        datos = {**base, **{k: v for k, v in request.data.items() if k in DatosMesSerializer.Meta.fields}}
+        enviados = {k: v for k, v in request.data.items() if k in DatosMesSerializer.Meta.fields}
+        # La propuesta del sistema (trabajadores, horas-hombre) solo completa un mes nuevo: corregir un dato de un mes
+        # existente no pisa los valores ajustados.
+        datos = {**base, **enviados} if d is None else {**enviados, 'anio': anio, 'mes': mes}
         ser = DatosMesSerializer(d, data=datos, partial=bool(d))
         ser.is_valid(raise_exception=True)
         ser.save(propuesto=False, updated_by=request.user, **({} if d else {'created_by': request.user}))

@@ -6,8 +6,8 @@ import { api } from '../lib/api.js'
 const ACTIVIDADES = [
   ['calibracion', 'Calibración'],
   ['mantenimiento', 'Mantenimiento'],
-  ['comprobacion_intermedia', 'Comprobación Intermedia'],
-  ['comprobacion_funcional', 'Comprobación Funcional'],
+  ['comprobacion_intermedia', 'Comprobación intermedia'],
+  ['comprobacion_funcional', 'Comprobación funcional'],
   ['caracterizacion', 'Caracterización'],
 ]
 const MESES = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic']

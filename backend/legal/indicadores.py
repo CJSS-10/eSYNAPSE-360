@@ -24,7 +24,7 @@ def indicadores():
             r = en_curso.resumen()
             n = sum(r[k] for k in ('pendiente', 'cumple', 'no_cumple', 'no_aplica'))
             avance = round(100 * (n - r['pendiente']) / n, 1) if n else None
-        referencia = ultima.fecha_cierre.date() if ultima and ultima.fecha_cierre else None
+        referencia = timezone.localtime(ultima.fecha_cierre).date() if ultima and ultima.fecha_cierre else None
         vencida = bool(not en_curso and Obligacion.objects.filter(ambito=clave, is_active=True, estado='vigente')
                        .exists() and (referencia is None or (hoy - referencia).days > DIAS_EVALUACION))
         ambitos.append({

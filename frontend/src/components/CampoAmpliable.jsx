@@ -37,7 +37,7 @@ export default function CampoAmpliable({
         <Maximize2 className="h-3.5 w-3.5" />
       </button>
       {abierto && createPortal(
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4">
+        <div className="mov-fondo fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/45 p-4 backdrop-blur-[2px]">
           <div className="card-esynapse w-full max-w-3xl p-5" onClick={(e) => e.stopPropagation()}>
             <div className="mb-3 flex items-center justify-between">
               <h2 className="text-base font-semibold">{titulo || placeholder || 'Texto'}</h2>

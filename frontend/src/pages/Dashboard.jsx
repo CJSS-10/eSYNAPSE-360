@@ -5,6 +5,9 @@ import { useAuth } from '../context/AuthContext.jsx'
 import { SkeletonText } from '../components/ui/Skeleton.jsx'
 import { NormaBadge, EstadoBadge } from '../components/ui/Badge.jsx'
 import { SEVERIDAD } from '../lib/severidad.js'
+import Cifra from '../components/ui/Cifra.jsx'
+import { Regla, Senal } from '../components/ui/Decoracion.jsx'
+import { rutaRegistro } from '../lib/enlaces.js'
 
 // Tablero del SIG (ADR-0007): vencimientos de todos los módulos en una vista, el estado de cada
 // módulo y las tareas de la persona. Todo sale de los datos del sistema; un módulo sin permiso
@@ -126,26 +129,37 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
-      <header className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h1 className="text-[26px] font-semibold leading-tight tracking-tight">{saludo()}, {nombre}</h1>
-          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-            {new Date().toLocaleDateString('es-PE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).replace(/^./, (c) => c.toUpperCase())}
-          </p>
-        </div>
-        {!cargando && (
-          <div className="flex flex-wrap gap-2 text-[13px] font-semibold">
-            {vencidos > 0 && <span className="rounded-full bg-red-500/10 px-3 py-1 text-red-700 dark:text-red-300">{vencidos} vencido{vencidos > 1 ? 's' : ''}</span>}
-            {semana > 0 && <span className="rounded-full bg-amber-500/15 px-3 py-1 text-amber-700 dark:text-amber-300">{semana} vence{semana > 1 ? 'n' : ''} esta semana</span>}
-            <Link to="/mis-tareas" className="rounded-full border border-slate-200 bg-white px-3 py-1 text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800">
-              {d.tareas.length} tarea{d.tareas.length === 1 ? '' : 's'} asignada{d.tareas.length === 1 ? '' : 's'} a ti
+      {/* Franja de bienvenida (movimiento del 27-10-2026): regla graduada y señal de calibración */}
+      <header className="mov-entra relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#0d1e3b] via-[#17396f] to-esynapse-600 px-8 pb-7 pt-7 text-white shadow-[0_18px_40px_-28px_rgba(13,30,59,.8)] dark:to-esynapse-700">
+        <Regla className="absolute inset-x-0 top-0 opacity-[.14]" />
+        <Senal className="absolute -bottom-5 -right-48 opacity-[.28]" />
+        <div className="relative flex flex-wrap items-end justify-between gap-5">
+          <div>
+            <p className="mb-1.5 text-[13px] text-esynapse-200">
+              {new Date().toLocaleDateString('es-PE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).replace(/^./, (c) => c.toUpperCase())}
+            </p>
+            <h1 className="text-[32px] font-semibold leading-tight tracking-tight">{saludo()}, {nombre}</h1>
+            <p className="mt-1.5 text-[15px] text-esynapse-100">Esto es lo que necesita tu atención hoy.</p>
+          </div>
+          <div className="flex flex-wrap gap-2.5">
+            <a href="#vencimientos" className="mov-pulsar flex min-w-[120px] flex-col rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 transition-colors hover:bg-white/15">
+              <span className="text-[28px] font-semibold leading-tight text-[#ffb4ab]">{cargando ? '—' : <Cifra valor={vencidos} />}</span>
+              <span className="text-[13px] text-esynapse-100">vencido{vencidos === 1 ? '' : 's'}</span>
+            </a>
+            <a href="#vencimientos" className="mov-pulsar flex min-w-[120px] flex-col rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 transition-colors hover:bg-white/15">
+              <span className="text-[28px] font-semibold leading-tight text-[#fcd68a]">{cargando ? '—' : <Cifra valor={semana} />}</span>
+              <span className="text-[13px] text-esynapse-100">vence{semana === 1 ? '' : 'n'} esta semana</span>
+            </a>
+            <Link to="/mis-tareas" className="mov-pulsar flex min-w-[120px] flex-col rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 transition-colors hover:bg-white/15">
+              <span className="text-[28px] font-semibold leading-tight">{cargando ? '—' : <Cifra valor={d.tareas.length} />}</span>
+              <span className="text-[13px] text-esynapse-100">tarea{d.tareas.length === 1 ? '' : 's'} asignada{d.tareas.length === 1 ? '' : 's'}</span>
             </Link>
           </div>
-        )}
+        </div>
       </header>
 
       {/* Vencimientos */}
-      <section className="card-esynapse" aria-labelledby="t-venc">
+      <section id="vencimientos" className="card-esynapse mov-entra scroll-mt-20" style={{ animationDelay: '.08s' }} aria-labelledby="t-venc">
         <div className="flex flex-wrap items-baseline justify-between gap-3 px-5 pb-3 pt-4">
           <div>
             <h2 id="t-venc" className="text-[17px] font-semibold">Vencimientos</h2>
@@ -160,8 +174,8 @@ export default function Dashboard() {
               {COLUMNAS.map(([k, t]) => (
                 <div key={k} className={`border-b border-l border-slate-200 px-3 py-2.5 font-condensada font-semibold dark:border-slate-800 ${k === 'vencido' ? 'bg-red-500/[0.06] text-red-700 dark:text-red-300' : 'bg-slate-50 text-slate-500 dark:bg-slate-900/60 dark:text-slate-400'}`}>{t}</div>
               ))}
-              {conPlazos.map(([k, nombreFila, ruta]) => (
-                <Fila key={k} clave={k} nombre={nombreFila} ruta={ruta} celdas={d.celdas} />
+              {conPlazos.map(([k, nombreFila, ruta], i) => (
+                <Fila key={k} orden={i} clave={k} nombre={nombreFila} ruta={ruta} celdas={d.celdas} />
               ))}
             </div>
             {conPlazos.length === 0 && (
@@ -184,7 +198,7 @@ export default function Dashboard() {
         <section aria-label="Estado por módulo" className="grid min-w-0 flex-[999_1_560px] grid-cols-[repeat(auto-fill,minmax(250px,1fr))] gap-4">
           {cargando && [1, 2, 3].map((i) => <div key={i} className="card-esynapse p-4"><SkeletonText lines={3} /></div>)}
           {m.sac && (
-            <Tarjeta titulo="Acciones correctivas" norma="ISO 9001" ruta="/acciones-correctivas" numero={m.sac.abiertas} unidad={`abiertas de ${m.sac.total}`}>
+            <Tarjeta orden={0} titulo="Acciones correctivas" norma="ISO 9001" ruta="/acciones-correctivas" numero={m.sac.abiertas} unidad={`abiertas de ${m.sac.total}`}>
               <div className="flex gap-1" aria-label="Solicitudes por etapa">
                 {PASOS_SAC.map(([k, t, cls]) => (
                   <div key={k} className="flex-1 text-center">
@@ -196,21 +210,21 @@ export default function Dashboard() {
             </Tarjeta>
           )}
           {m.hallazgos && (
-            <Tarjeta titulo="Hallazgos" norma="NTP ISO/IEC 17025" ruta="/hallazgos" numero={m.hallazgos.abiertos} unidad="abiertos">
+            <Tarjeta orden={1} titulo="Hallazgos" norma="NTP ISO/IEC 17025" ruta="/hallazgos" numero={m.hallazgos.abiertos} unidad="abiertos">
               <p className="text-[13px] text-slate-500 dark:text-slate-400">
                 {m.hallazgos.por_estado?.registrado || 0} registrados, {m.hallazgos.por_estado?.en_tratamiento || 0} en tratamiento y {m.hallazgos.por_estado?.derivado || 0} derivados a riesgos y oportunidades.
               </p>
             </Tarjeta>
           )}
           {m.quejas && (
-            <Tarjeta titulo="Quejas" norma="NTP ISO/IEC 17025" ruta="/quejas" numero={m.quejas.abiertas} unidad="abiertas" alerta={m.quejas.vencidas > 0}>
+            <Tarjeta orden={2} titulo="Quejas" norma="NTP ISO/IEC 17025" ruta="/quejas" numero={m.quejas.abiertas} unidad="abiertas" alerta={m.quejas.vencidas > 0}>
               <p className="text-[13px] text-slate-500 dark:text-slate-400">
                 {m.quejas.vencidas > 0 ? `${m.quejas.vencidas} con un plazo vencido.` : 'Todas dentro de plazo.'}
               </p>
             </Tarjeta>
           )}
           {m.iperc && (
-            <Tarjeta titulo="Matriz IPERC" norma="ISO 45001 / Ley 29783" ruta="/sst" numero={m.iperc.total} unidad="filas vigentes">
+            <Tarjeta orden={3} titulo="Matriz IPERC" norma="ISO 45001 / Ley 29783" ruta="/sst" numero={m.iperc.total} unidad="filas vigentes">
               <div className="flex flex-wrap gap-1.5">
                 {NIVELES_IPERC.filter(([k]) => m.iperc.niveles[k]).map(([k, t, nivel]) => (
                   <span key={k} className={`whitespace-nowrap rounded px-1.5 py-0.5 text-[11px] font-semibold ${SEVERIDAD[nivel].chip}`}>{t} {m.iperc.niveles[k]}</span>
@@ -219,7 +233,7 @@ export default function Dashboard() {
             </Tarjeta>
           )}
           {m.equipos && (
-            <Tarjeta titulo="Equipos" norma="NTP ISO/IEC 17025" ruta="/equipos"
+            <Tarjeta orden={4} titulo="Equipos" norma="NTP ISO/IEC 17025" ruta="/equipos"
               numero={Object.values(m.equipos.por_estado || {}).reduce((a, b) => a + b, 0)} unidad="registrados" alerta={m.equipos.vencidos > 0}>
               <p className="text-[13px] text-slate-500 dark:text-slate-400">
                 {m.equipos.vencidos > 0 ? `${m.equipos.vencidos} con la calibración vencida. ` : ''}
@@ -228,19 +242,19 @@ export default function Dashboard() {
             </Tarjeta>
           )}
           {m.riesgos && (
-            <Tarjeta titulo="Riesgos y oportunidades" norma="ISO 9001" ruta="/riesgos" numero={m.riesgos.conVencidas} unidad="con acciones vencidas" alerta={m.riesgos.conVencidas > 0}>
+            <Tarjeta orden={5} titulo="Riesgos y oportunidades" norma="ISO 9001" ruta="/riesgos" numero={m.riesgos.conVencidas} unidad="con acciones vencidas" alerta={m.riesgos.conVencidas > 0}>
               <p className="text-[13px] text-slate-500 dark:text-slate-400">De {m.riesgos.total} registros en la matriz.</p>
             </Tarjeta>
           )}
           {m.documentos !== undefined && (
-            <Tarjeta titulo="Documentos" ruta="/documentos" numero={m.documentos} unidad="por revisar" alerta={m.documentos > 0}>
+            <Tarjeta orden={6} titulo="Documentos" ruta="/documentos" numero={m.documentos} unidad="por revisar" alerta={m.documentos > 0}>
               <p className="text-[13px] text-slate-500 dark:text-slate-400">Con la revisión próxima o vencida.</p>
             </Tarjeta>
           )}
         </section>
 
         {/* Mis pendientes */}
-        <section className="card-esynapse min-w-0 flex-[1_1_300px] lg:max-w-sm" aria-labelledby="t-pend">
+        <section className="card-esynapse mov-entra min-w-0 flex-[1_1_300px] lg:max-w-sm" style={{ animationDelay: '.14s' }} aria-labelledby="t-pend">
           <div className="px-5 pb-2 pt-4">
             <h2 id="t-pend" className="text-[17px] font-semibold">Tus pendientes</h2>
             <p className="text-[13px] text-slate-500 dark:text-slate-400">Lo que espera una acción tuya</p>
@@ -250,8 +264,8 @@ export default function Dashboard() {
           ) : (
             <ul className="px-2 pb-2">
               {d.tareas.slice(0, 6).map((t, i) => (
-                <li key={i}>
-                  <Link to={t.ruta || '/mis-tareas'} className="flex flex-col gap-1 rounded-lg px-3 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-800/60">
+                <li key={i} className="mov-entra" style={{ animationDelay: `${0.2 + i * 0.05}s` }}>
+                  <Link to={t.ruta ? rutaRegistro(t.ruta, t.id) : '/mis-tareas'} className="flex flex-col gap-1 rounded-lg px-3 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-800/60">
                     <span className="flex flex-wrap items-center gap-2">
                       <span className="text-sm font-semibold">{t.codigo}</span>
                       <EstadoBadge estado={t.estado} />
@@ -272,16 +286,17 @@ export default function Dashboard() {
   )
 }
 
-function Fila({ clave, nombre, ruta, celdas }) {
+function Fila({ orden = 0, clave, nombre, ruta, celdas }) {
+  const retraso = { animationDelay: `${0.16 + orden * 0.06}s` }
   return (
     <>
-      <div className="flex items-center border-b border-slate-100 px-4 py-2.5 font-semibold dark:border-slate-800/60">
+      <div className="mov-entra flex items-center border-b border-slate-100 px-4 py-2.5 font-semibold dark:border-slate-800/60" style={retraso}>
         <Link to={ruta} className="hover:underline">{nombre}</Link>
       </div>
       {COLUMNAS.map(([col]) => {
         const items = celdas[`${clave}|${col}`] || []
         return (
-          <div key={col} className={`flex flex-wrap content-center items-center gap-1.5 border-b border-l border-slate-100 px-3 py-2 dark:border-slate-800/60 ${col === 'vencido' && items.length ? 'bg-red-500/[0.06]' : ''}`}>
+          <div key={col} style={retraso} className={`mov-entra flex flex-wrap content-center items-center gap-1.5 border-b border-l border-slate-100 px-3 py-2 dark:border-slate-800/60 ${col === 'vencido' && items.length ? 'bg-red-500/[0.06]' : ''}`}>
             {items.length === 0 && <span className="text-slate-300 dark:text-slate-600" aria-label="Ninguno">—</span>}
             {items.slice(0, 3).map((it, i) => {
               const codigo = it.texto.includes(':') ? it.texto.split(':')[0] : it.texto
@@ -301,15 +316,24 @@ function Fila({ clave, nombre, ruta, celdas }) {
   )
 }
 
-function Tarjeta({ titulo, norma, ruta, numero, unidad, alerta = false, children }) {
+// Filete superior con el color de la norma, el mismo de su etiqueta (regla 9): se reconoce sin leerla
+const FILETE = {
+  'ISO 9001': 'border-t-esynapse-600',
+  'NTP ISO/IEC 17025': 'border-t-amber-500',
+  'ISO 45001 / Ley 29783': 'border-t-red-500',
+  'ISO 14001': 'border-t-emerald-600',
+}
+
+function Tarjeta({ orden = 0, titulo, norma, ruta, numero, unidad, alerta = false, children }) {
   return (
-    <Link to={ruta} className="card-esynapse card-hover flex flex-col gap-3 p-4">
+    <Link to={ruta} style={{ animationDelay: `${0.1 + orden * 0.06}s` }}
+      className={`card-esynapse mov-tarjeta mov-entra flex flex-col gap-3 border-t-[3px] p-4 hover:border-esynapse-200 dark:hover:border-slate-700 ${FILETE[norma] || 'border-t-slate-300 dark:border-t-slate-600'}`}>
       <span className="flex items-start justify-between gap-2">
         <span className="text-[15px] font-semibold">{titulo}</span>
         {norma && <NormaBadge nombre={norma} />}
       </span>
       <span className="flex items-baseline gap-2">
-        <span className={`text-3xl font-semibold leading-none ${alerta ? 'text-red-700 dark:text-red-300' : ''}`}>{numero ?? '—'}</span>
+        <span className={`text-3xl font-semibold leading-none ${alerta ? 'text-red-700 dark:text-red-300' : ''}`}>{numero == null ? '—' : <Cifra valor={numero} />}</span>
         <span className="text-[13px] text-slate-500 dark:text-slate-400">{unidad}</span>
       </span>
       {children}

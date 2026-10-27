@@ -125,12 +125,18 @@ export default function IntervaloCalibracion({ puedeEditar }) {
   const guardar = async () => {
     setError('')
     const lista = []
+    const incompletas = []
+    const vacio = (v) => v === '' || v === null || v === undefined
     puntos.forEach((p) => anios.forEach((a) => {
       const c = celdas[k(p.id, a)]
-      if (c && (c.resultado !== '' || c.incertidumbre !== '' || c.emp !== '')) {
-        lista.push({ punto: p.id, anio: a, resultado: Number(c.resultado || 0), incertidumbre: Number(c.incertidumbre || 0), emp: Number(c.emp || 0) })
-      }
+      if (!c) return
+      // Una celda cuenta solo con resultado e incertidumbre; el EMP solo (prellenado del año anterior) no es un
+      // resultado. Las vacías no se envían como 0 (alterarían el periodo de recalibración calculado).
+      if (vacio(c.resultado) && vacio(c.incertidumbre)) return
+      if (vacio(c.resultado) || vacio(c.incertidumbre)) { incompletas.push(`${p.valor_nominal ?? p.id} · ${a}`); return }
+      lista.push({ punto: p.id, anio: a, resultado: Number(c.resultado), incertidumbre: Number(c.incertidumbre), emp: vacio(c.emp) ? 0 : Number(c.emp) })
     }))
+    if (incompletas.length) { setError(`Complete resultado e incertidumbre (o deje ambos vacíos) en: ${incompletas.slice(0, 5).join(', ')}.`); return }
     try {
       const resp = await api.puntosIntervalo.guardarMatriz({ equipo: sel, celdas: lista })
       if (resp?.pendiente) {

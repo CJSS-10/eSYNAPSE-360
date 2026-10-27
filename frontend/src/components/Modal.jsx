@@ -9,14 +9,16 @@ import { X } from 'lucide-react'
  *   arriba y el contenido se desplaza debajo (la barra de etapas se fija bajo el título).
  * El clic fuera NO la cierra: evita perder formularios a medio llenar. Cerrar requiere la X o Cancelar.
  * Se dibuja directamente en <body>: dentro de la página animada, «fixed» quedaba encerrado.
+ * Entrada (movimiento, 27-10-2026): el fondo se atenúa y desenfoca; la ficha entra desde la derecha
+ * y la ventana aparece con una ligera ampliación.
  */
 export default function Modal({ abierto, titulo, onCerrar, children, ancho = 'max-w-lg', panel = false }) {
   if (!abierto) return null
   if (panel) {
     return createPortal(
-      <div className="fixed inset-0 z-50 flex justify-end bg-black/40">
+      <div className="mov-fondo fixed inset-0 z-50 flex justify-end bg-slate-950/40 backdrop-blur-[2px]">
         <section role="dialog" aria-modal="true" aria-label={titulo}
-          className="panel-entrada flex h-full w-full max-w-6xl flex-col border-l border-slate-200 bg-white shadow-pop dark:border-slate-800 dark:bg-slate-900"
+          className="mov-panel flex h-full w-full max-w-6xl flex-col border-l border-slate-200 bg-white shadow-pop dark:border-slate-800 dark:bg-slate-900"
           onClick={(e) => e.stopPropagation()}>
           <header className="flex shrink-0 items-start justify-between gap-4 border-b border-slate-200 px-6 py-4 dark:border-slate-800">
             <h2 className="text-lg font-semibold leading-snug">{titulo}</h2>
@@ -32,9 +34,9 @@ export default function Modal({ abierto, titulo, onCerrar, children, ancho = 'ma
     )
   }
   return createPortal(
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+    <div className="mov-fondo fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 p-4 backdrop-blur-[2px]">
       <div
-        className={`card-esynapse w-full ${ancho} max-h-[90vh] overflow-y-auto p-5`}
+        className={`card-esynapse mov-ventana w-full ${ancho} max-h-[90vh] overflow-y-auto p-5`}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-4 flex items-center justify-between">

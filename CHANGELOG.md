@@ -4,7 +4,380 @@ Cada entrega registra: versión, fecha, cambios en lenguaje de negocio, si exige
 
 ---
 
-## 0.8.20 — 2026-10-23 · Hallazgos: el responsable se toma de donde se designa
+## 0.14.4 — 2026-10-27 · Búsqueda global, enlaces directos a cada ficha y avisos de guardado
+
+**Migración:** no. Si el backend no se reinicia solo, cerrar su ventana e iniciar de nuevo; recargar la página (Ctrl + F5).
+
+### Nuevo
+- **Búsqueda global** en la barra superior, también con **Ctrl + K**:
+  - busca por código o texto, **con o sin tildes** («manometro» encuentra «Manómetro»), en hallazgos, acciones correctivas, quejas, cambios, auditorías, documentos, equipos, riesgos y oportunidades, trabajo no conforme y revisiones por la dirección; también encuentra los módulos por nombre;
+  - hasta 6 resultados por módulo, primero los de código exacto; solo muestra lo que el usuario puede leer y lo que no está dado de baja;
+  - con el teclado: ↑ ↓ para moverse, Enter para abrir, Esc para cerrar.
+- **Enlace directo a la ficha** (`/modulo?abrir=<id>`): elegir un resultado de la búsqueda, una tarea en Mis tareas, una notificación de la campana o un pendiente del Tablero **abre directamente la ficha del registro** (antes llevaba solo a la lista del módulo). Las tareas del buzón ahora incluyen el registro al que pertenecen.
+- **Avisos de guardado** en la esquina inferior derecha, iguales en todas las pantallas, según la acción: «Registrado», «Cambios guardados», «Aprobado», «Devuelto para corrección», «Rechazado», «Firma registrada», «Enviado», «Enviado a cierre», «Cerrado», «Dado de baja», «Restaurado», «Archivo adjuntado», «Evaluación registrada» o «Guardado». Duran 3 segundos y no se repiten si un formulario guarda en varios pasos. Los errores siguen mostrándose junto al formulario, como hasta ahora.
+
+### Técnico
+- Servicio `GET /api/buscar/?q=` (`esynapse_sig/panel.py`, `BuscarView`): respeta licencias y permisos de lectura por módulo.
+- `lib/enlaces.js` (`useAbrirDesdeEnlace`, `rutaRegistro`): la ficha se abre solo en la pantalla que queda tras la transición de página.
+- `lib/avisos.js` y `components/Avisos.jsx`: cada escritura exitosa de la API avisa sola; las de sesión, búsqueda y PDF no avisan.
+
+### Qué probar
+- Ctrl + K desde cualquier pantalla: «SAC-06», «FP-02», «manometro», «extintores», «equipos».
+- En Mis tareas y en la campana, al hacer clic en una tarea se abre su ficha.
+- Guardar, aprobar o dar de baja algo de prueba: el aviso en la esquina inferior derecha.
+
+---
+
+## 0.14.3 — 2026-10-27 · Interfaz: Equipos al estándar y microinteracciones en todo el sistema
+
+**Migración:** no. Recargar la página (Ctrl + F5). El filtro nuevo del PDF de inventario toma efecto al reiniciar el backend (o solo, si corre con recarga automática).
+
+### Equipos (sin cambiar las columnas del inventario, por decisión de César)
+- **Filtro de calibración** como control segmentado: *Todos · Calibración vencida · Vence en 30 días* (antes, una casilla «solo vencida» en otra fila). El PDF del inventario respeta los tres.
+- **Encabezado con una sola acción principal** («Nuevo equipo»). «Cambios por aprobar» aparece como aviso ámbar solo cuando hay alguno; «Mis solicitudes» se resalta solo si tienes alguna devuelta; «Catálogos» queda como botón discreto.
+- **Ficha**: las bandas azul marino en mayúsculas pasan a las secciones estándar del resto de fichas (el PDF de la hoja de vida no cambia).
+- Pestañas y actividades en tipo oración y sin abreviar: «Programa anual», «Intervalo de calibración», «Carta de trazabilidad», «Ficha técnica», «Comprobaciones intermedias», «Comprobación intermedia / funcional».
+- El código del equipo va en el color del texto, como en los demás módulos.
+
+### Microinteracciones (todo el sistema)
+- La **línea de la pestaña activa** se desliza hasta la elegida (pestañas de módulo y grupos de navegación).
+- El **fondo de la opción elegida** en los controles segmentados (Abiertas / Todas y similares) se desliza.
+- La **selección del menú lateral** se desliza entre opciones; los **contadores** rebotan cuando cambian.
+- **«Por construir»** se despliega con animación de altura.
+- **Fichas y ventanas**: el fondo se atenúa con un desenfoque leve; la ficha entra desde la derecha y la ventana aparece con una ligera ampliación.
+- **Barra de etapas**: al avanzar, el tramo hacia la nueva etapa se rellena de izquierda a derecha.
+- **Botones** que se hunden levemente al pulsarlos.
+
+### Corregido
+- Entre las 12:11 y las 13:40 del 27-10-2026 la pantalla de Equipos no cargaba: un cambio quedó aplicado a medias. Resuelto en esta versión.
+
+### Qué probar
+- Equipos: los tres filtros de calibración y el PDF; el aviso de cambios por aprobar (con un usuario aprobador y un cambio pendiente); la ficha con secciones claras.
+- Cambiar de pestaña en Riesgos, SST u Organización; Abiertas / Todas en Quejas o Acciones correctivas; navegar por el menú; abrir y cerrar «Por construir»; avanzar una etapa en una acción correctiva de prueba.
+
+---
+
+## 0.14.2 — 2026-10-27 · Interfaz: pantalla de ingreso y Tablero con movimiento
+
+**Migración:** no. Recargar la página (Ctrl + F5).
+
+### Cambiado (propuesta visual del 27-10-2026, aprobada por César para estas dos pantallas)
+- **Pantalla de ingreso**:
+  - panel de marca a la izquierda, en azul Metrindust, con un dial de calibración cuya aguja barre lentamente, una señal que se desplaza, las cuatro normas y la versión;
+  - el formulario a la derecha; en pantallas angostas el panel se oculta y queda solo el formulario;
+  - si el usuario o la contraseña no son correctos, el formulario se sacude una vez y el mensaje aparece junto a los campos.
+- **Tablero**:
+  - el saludo va en una franja azul con regla graduada y señal de calibración en movimiento lento; los vencidos, los que vencen en la semana y las tareas asignadas se muestran en grande y llevan a su sección;
+  - las cifras cuentan desde cero al cargar;
+  - las tarjetas de cada módulo entran escalonadas, llevan arriba un filete con el color de su norma (el mismo de su etiqueta) y se elevan al pasar el mouse;
+  - las filas de vencimientos y tus pendientes entran una tras otra.
+- **Reglas de movimiento** comunes en la hoja de estilos (`mov-*`): solo se animan posición y opacidad, con duraciones de 120 a 750 ms. Si Windows tiene activado «reducir animaciones», no se anima nada.
+
+### Qué probar
+- Cerrar sesión y volver a entrar: el panel de marca, y la sacudida con una contraseña incorrecta.
+- Tablero: la franja, el conteo de las cifras y las tarjetas al pasar el mouse; también en modo oscuro.
+
+---
+
+## 0.14.1 — 2026-10-27 · Cumplimiento: por sede y PDF de la matriz
+
+**Migración:** sí (`cumplimiento 0002–0003`: evaluación por sede y registro del formato impreso). Cerrar la ventana del backend → `Aplicar actualizacion.bat` → `Iniciar` → recargar (Ctrl + F5).
+
+### Decisiones de César (2026-10-27)
+- **SIG completo y por sede, con calificación individual**
+  - Cada requisito tiene su propia evaluación para el SIG completo y para cada sede (estado y cómo se cumple o evidencia en la sede, obligatorio).
+  - Las calificaciones **no se comparten ni se combinan**: una sede sin evaluar queda «sin evaluar» y su porcentaje solo considera lo evaluado en ella.
+  - Dónde se ve:
+    - el tablero muestra el cumplimiento por sede;
+    - la matriz tiene la vista «SIG completo / sede»;
+    - las cláusulas comunes se reflejan con su evaluación por sede;
+    - la brecha registrada como hallazgo puede indicar la sede (va como lugar de detección).
+- **PDF «Matriz de evaluación del cumplimiento de requisitos»** (formato nuevo, A4 horizontal):
+  - cabecera con caja de control (código «POR ASIGNAR» hasta registrarlo en la lista maestra y vincularlo en Configuración); sin pie de página;
+  - alcance, normas, fecha y emisor;
+  - resumen por norma y por sede;
+  - evidencia en alerta;
+  - una matriz por norma con estado del SIG y de cada sede coloreado, cómo se cumple, documentos, hallazgo y última evaluación.
+  - Se emite completo (botón «Matriz completa (PDF)») o por norma y sede (botón «PDF» en cada matriz).
+
+---
+
+## 0.14.0 — 2026-10-27 · M11 Cumplimiento
+
+**Migración:** sí (`cumplimiento 0001`: evaluaciones, otros requisitos y cortes). Cerrar la ventana del backend → `Aplicar actualizacion.bat` → `Iniciar` → recargar (Ctrl + F5).
+
+### Nuevo (diseño acordado con César el 2026-10-26) — ficha `docs/modulos/M11_cumplimiento.md`
+- **Matriz de cumplimiento por norma** (ISO 9001, 14001, 45001 por cláusula; NTP ISO/IEC 17025 por numeral, más los ítems de seguimiento del organismo de acreditación), con el catálogo de requisitos de Auditorías.
+- **Evaluación por requisito:**
+  - estado: cumple / parcial / no cumple / no aplica, este último con justificación obligatoria;
+  - proceso responsable (catálogo de Procesos), cómo se cumple, documentos de la lista maestra y evidencia;
+  - fecha, autor e historial.
+- **Correspondencia entre normas:** las cláusulas comunes de la estructura de alto nivel se evalúan una vez y se registran en las otras normas ISO (la 8.2 solo entre 14001 y 45001).
+- **Evidencia automática** desde 20 verificaciones de los módulos (programa de auditorías, revisión por la dirección, riesgos e imparcialidad, evaluación legal, IPERC, aspectos ambientales, Comité de SST, Programa SSOMA, capacitación, autorizaciones, calibración de equipos, lista maestra, fichas de proceso y conteos de acciones correctivas, quejas, trabajo no conforme, cambios, monitoreos y consumos).
+  - Un requisito que cumple o cumple en parte pasa a **en riesgo** si su evidencia está en alerta o si la evaluación tiene más de 12 meses.
+- **Brecha → hallazgo:** un requisito parcial o incumplido se registra como hallazgo (NC mayor, NC menor u observación) con un clic; su tratamiento sigue en Hallazgos y Acciones correctivas.
+- **Otros requisitos** (organismo de acreditación, entidad certificadora, clientes): se registran, se evalúan y se dan de baja con motivo.
+- **Tablero:**
+  - % de cumplimiento y cobertura por norma;
+  - requisitos que requieren atención;
+  - estado de la evidencia del sistema;
+  - cumplimiento por proceso;
+  - **cortes** para ver la evolución.
+- **Revisión por la dirección:** la entrada de desempeño muestra el grado de cumplimiento actual de cada norma.
+
+---
+
+## 0.13.2 — 2026-10-27 · Trabajo no conforme: Jefe de Laboratorio
+
+**Migración:** sí (`organizacion 0007`: crea el puesto «Jefe de Laboratorio»). Cerrar la ventana del backend → `Aplicar actualizacion.bat` → `Iniciar` → recargar (Ctrl + F5).
+
+### Cambio (César, 2026-10-27) — procedimiento ajustado
+- La reanudación de un trabajo **técnico** la autoriza el **Gerente Técnico o el Jefe de Laboratorio** (antes: Supervisor de Laboratorio). El administrativo sigue a cargo del Gerente SIG.
+- Nuevo puesto **«Jefe de Laboratorio»** en Organización (reporta al Gerente Técnico, área y proceso de laboratorio). «Supervisor de Laboratorio» y «Encargado de Laboratorio» se mantienen, pero ya no autorizan la reanudación.
+- Para que alguien autorice: en Organización › Trabajadores, asignarle el puesto «Jefe de Laboratorio» y vincularlo a su usuario.
+- La Tabla N° 2 de consulta (nivel Alto) dice «Reanudación solo con autorización del Gerente Técnico o Jefe de Laboratorio», como en el procedimiento ajustado.
+
+---
+
+## 0.13.1 — 2026-10-27 · Trabajo no conforme: tablas de consulta
+
+**Migración:** no. Basta recargar (Ctrl + F5).
+
+### Mejora (César, 2026-10-27)
+- **Tablas del procedimiento a la vista**: la Tabla N° 1 (responsabilidades y autoridades) y la Tabla N° 2 (niveles de riesgo y acciones) se consultan en una ventana sin salir del registro. Se abren con el botón «Tablas del procedimiento» del encabezado, «Tablas N° 1 y 2» en cada registro, «Ver Tabla N° 2» junto al nivel de riesgo (asignación y evaluación) y «Responsabilidades (Tabla N° 1)» en el tratamiento. Texto fiel al procedimiento versión 01.
+
+---
+
+## 0.13.0 — 2026-10-27 · M16 Trabajo no conforme
+
+**Migración:** sí (`tnc 0001–0002`: registros, OT y certificados revisados, evidencias; habilita el módulo y registra el formato impreso). Cerrar la ventana del backend → `Aplicar actualizacion.bat` → `Iniciar` → recargar (Ctrl + F5).
+
+### Nuevo (César, 2026-10-27) — replica el procedimiento de control de trabajos y salidas no conformes (versión 01) y su registro
+- **Registro** (TSNC-NNN-AAAA): tipo TNC o SNC, naturaleza técnica o administrativa, categoría del incidente, área o laboratorio, reportado por, fechas de detección y de reporte al Gerente SIG y Gerente Técnico, fuente de detección, OT y certificados, equipos involucrados y descripción. La fuente «Queja del cliente» exige la queja de origen y «No conformidad» el hallazgo de origen.
+- **Etapas** (lo de una etapa cerrada queda de solo lectura): registro → tratamiento → autorización → evaluación → cierre.
+  - El Gerente Técnico o el Gerente SIG asigna el **nivel de riesgo** (Tabla N° 2) y el responsable del tratamiento, con su contraseña.
+  - **Tratamiento:** acciones ¿aplica? / ¿ejecutada? (detención, repetición, retención, notificación al cliente, análisis de impacto retroactivo, equipo fuera de servicio), corrección y nota del cliente. Nivel **Alto** exige detención y análisis retroactivo (y equipo fuera de servicio si es un equipo). **Análisis de impacto retroactivo:** periodo, última condición conforme, OT y certificados (¿entregado?, ¿afectado?, acción), notificación, certificado anulado y de reemplazo, conclusión; un certificado entregado y afectado exige notificar al cliente. «Equipo fuera de servicio» ejecutado deja el equipo como inoperativo en Equipos.
+  - **Autorización de la reanudación** con contraseña: trabajo técnico → Gerente Técnico o Supervisor de Laboratorio; administrativo → Gerente SIG (el Gerente Comercial solo gestiona la devolución del monto cancelado, según el procedimiento ajustado el 2026-10-27). Si no se acepta, vuelve al tratamiento.
+  - **Evaluación de la importancia** (Área SIG): validez, requisitos del SIG, competencia, nivel confirmado; el sistema cuenta los **eventos similares** (misma área y categoría, 12 meses). La acción correctiva es obligatoria con nivel Alto o con 3 eventos similares.
+  - **Cierre:** vincula o crea la solicitud de acción correctiva desde el registro, evidencias (texto y archivos) y firma.
+- **PDF** del Registro en dos páginas con la disposición del formato.
+- **Mis tareas:** asignar nivel, tratar, autorizar, evaluar y cerrar, según el puesto y el permiso.
+- **Revisión por la dirección**, entrada p): trabajos y salidas no conformes del periodo por tipo, nivel, cerrados y con SAC.
+
+---
+
+## 0.12.0 — 2026-10-26 · M5 Revisión por la dirección
+
+**Migración:** sí (`revision 0001–0002`: programa anual, revisiones, entradas, salidas, asistentes y acuerdos; habilita el módulo y registra sus tres formatos impresos). Cerrar la ventana del backend → `Aplicar actualizacion.bat` → `Iniciar` → recargar (Ctrl + F5).
+
+### Nuevo (César, 2026-10-26) — replica el procedimiento versión 01 y sus formatos r01, r02 y r03
+- **Programa anual**: las 23 entradas y las 10 salidas de la agenda con su responsable (puesto), los meses programados (P) y ejecutados (E) y observaciones. Un mes futuro no se marca ejecutado. PDF con el formato del Programa.
+- **Revisión** (N° IRD-NN-AAAA, ordinaria o extraordinaria con motivo) en tres etapas; lo de una etapa cerrada queda de solo lectura:
+  - **Preparación**: fecha, lugar, periodo evaluado y responsables de recopilar y verificar la información. El botón «Generar datos del sistema» trae, para el periodo, los datos de cada entrada desde los módulos construidos (contexto y riesgos, objetivos SSOMA, documentos, acuerdos anteriores, auditorías, acciones correctivas, quejas, mejoras, capacitación, requisitos legales, medio ambiente, SST, IPERC, Comité, simulacros y monitoreos). Las entradas sin fuente aún (volumen de trabajo, retroalimentación, recursos, validez de resultados, proveedores) se informan en el análisis. Para convocar, todas las entradas deben tener análisis o marcarse «sin actividad en el periodo».
+  - **Reunión**: asistentes con firma de asistencia (contraseña de su usuario o PIN), salidas a) a j), acuerdos con elemento de origen, responsable, plazo y **costo estimado**, conclusiones, observaciones y comunicación de resultados a los trabajadores y al Comité de SST.
+  - **Cerrar** exige conclusiones, las salidas a) a i), todos los asistentes firmados, entre ellos el Gerente SIG y el Gerente General, y la contraseña de quien cierra (permiso de aprobar).
+  - PDF del Informe con encabezado en cada página y pie de documento confidencial.
+- **Plan de acción**: todos los acuerdos con filtro de pendientes. Tras el cierre de la revisión solo se registran la evidencia (texto y archivo), el seguimiento del 1.er y 2.º semestre y el estado; el **V°B° de cumplimiento** exige evidencia y contraseña. PDF del Plan de Acción por revisión. Los acuerdos abiertos alimentan la entrada d) de la siguiente revisión.
+- **Mis tareas**: el responsable de un acuerdo lo ve hasta cerrarlo (vencido si pasó la fecha).
+- Una revisión registrada por error se **anula con motivo** en preparación o en reunión; cerrada ya no se anula.
+
+### Ajustes tras la validación en pantalla (2026-10-26)
+- Programa anual: las celdas de los meses se ven como casillas (antes no se notaba dónde hacer clic).
+- Los datos del sistema de cada entrada se alinean como tabla de ficha (concepto a la izquierda, cifra a la derecha).
+- Los mensajes de error de la ficha se desplazan a la vista; textos de los bloqueos de etapa más claros.
+- Entrada b): la descripción de cada objetivo del Programa SSOMA se muestra completa (antes se cortaba).
+
+---
+
+## 0.11.0 — 2026-10-24 · Sedes: catálogo único y Medio ambiente por sede
+
+**Migración:** sí (`organizacion 0004–0006`: sedes, niveles y suministros; convierte la sede y el piso que las áreas tenían como texto; ubigeo de la sede. `core 0017–0018`: catálogo de ubigeos del Perú. `ambiente 0003–0004`: consumo por suministro y sede en pesajes, disposiciones y aspectos). Cerrar la ventana del backend → `Iniciar` → recargar (Ctrl + F5).
+
+### Nuevo (César, 2026-10-24)
+- **Organización y personal › Sedes**: cada sede con nombre, código corto, dirección y distrito, **instalaciones propias o alquiladas**, sede principal y puesto responsable; sus **niveles / pisos**; y sus **suministros** de energía eléctrica y agua (de toda la sede o de un piso), con número de medidor, empresa prestadora, cómo se obtiene el consumo (lectura del medidor o recibo) y responsable del registro. Las áreas eligen sede y piso del catálogo (antes texto libre). Nada se borra: sedes, niveles y suministros se desactivan si no tienen dependientes activos.
+- **Energía y agua por suministro**: se registra la **lectura del medidor** y el sistema calcula el consumo con la lectura anterior (la primera vez o si se cambió el medidor, se indica la lectura inicial con motivo). No acepta una lectura menor que la anterior ni mayor que la del mes siguiente; corregir o anular un mes recalcula el siguiente. También por recibo, dato del arrendador o estimado (marcado). Foto del medidor o recibo como evidencia. Aviso si el consumo supera en 50 % el promedio de los meses anteriores o si faltan meses.
+- **Indicadores** por sede o de toda la organización: consumo mensual, registrados/esperados, por trabajador de la sede, frente al año anterior; detalle por suministro (clic para corregir, «+» para registrar el mes) y total por sede.
+- **Mis tareas**: el responsable de cada suministro ve el registro del mes anterior pendiente (plazo: día 5).
+- **Residuos y aspectos**: pesajes y disposiciones indican su sede (obligatoria cuando hay sedes) y se filtran por sede, igual que el resumen anual; un aspecto puede limitarse a una sede.
+- **Ubigeos del Perú** (César): catálogo completo con codificación INEI — 25 departamentos, 196 provincias y 1 893 distritos, incluidos los de creación reciente. La dirección de la sede se elige con departamento → provincia → distrito encadenados (componente reutilizable para clientes y proveedores).
+- **Configuración ordenada por pestañas** (César): Empresa (datos de la empresa y del empleador, lado a lado), Producto (solo el propietario), Formatos impresos (con filtro por módulo, búsqueda y cuántos están vinculados a la lista maestra) y Módulos.
+
+### Datos
+- El consumo de prueba de septiembre 2026 (1 250 kWh) queda como registro sin suministro: se suma al total y puede anularse.
+
+---
+
+## 0.10.2 — 2026-10-24 · Encabezados de tabla centrados y un solo bloque de firmas del Comité en los PDF
+
+**Migración:** no. Recargar la página (Ctrl + F5); el backend toma los cambios de los PDF al reiniciarse solo.
+
+### Cambiado (César, 2026-10-24)
+- Los **encabezados de columna** de todas las tablas se muestran centrados horizontal y verticalmente. Los datos de cada columna conservan su alineación según el tipo de dato (texto a la izquierda, estados al centro, fechas y cantidades a la derecha).
+- **Todo lo que firma el Comité de SST lleva el mismo bloque en el PDF**: «REALIZADO Y APROBADO POR» con nombre y cargo de cada titular, cómo firmó (usuario, PIN, acta en papel o formato original) y debajo la fecha de cada firma. Se aplica a la matriz IPERC, el programa anual de capacitación, la **matriz de aspectos ambientales** (antes una línea de texto) y el **Programa SSOMA** (antes una columna «Aprobado por»). Si está pendiente de aprobación, imprime a los titulares vigentes con las casillas en blanco y el aviso en rojo. La fila crece con el texto para que no se corten nombres largos.
+
+### Validado en pantalla
+- Programa SSOMA 2026: reprogramado (versión 2) y aprobado por los 4 titulares; con una firma faltante se rechaza nombrando al titular.
+- Aprobación de la matriz IPERC y del programa de capacitación: piden los 4 titulares.
+
+---
+
+## 0.10.1 — 2026-10-24 · Todo lo que aprueba el Comité de SST lo firman sus cuatro titulares
+
+**Migración:** sí (`sst 0019`: acta en papel de la aprobación del Programa SSOMA). Cerrar la ventana del backend → `Iniciar` → recargar (Ctrl + F5).
+
+### Cambiado (César, 2026-10-24)
+- **Una sola regla para el Comité:** la matriz IPERC, el programa anual de capacitación, la matriz de aspectos ambientales y el **Programa SSOMA** se aprueban con la firma de **todos** los titulares (contraseña de su usuario o PIN), o con el acta en papel firmada por todos. Antes IPERC y capacitación pedían la mitad más uno.
+- **Programa SSOMA:** ya no lo aprueba solo quien lo registra; usa la firma del Comité (en pantalla o acta en papel). Reprogramarlo exige el permiso de aprobar.
+- Las aprobaciones ya registradas no cambian. El quórum de las **reuniones** del comité sigue siendo la mitad más uno de los titulares (es asistencia, no aprobación).
+- Componente común de firma del Comité en pantalla.
+
+### Datos de prueba (desarrollo)
+- Comité 2025-2027: dados de baja los dos miembros de prueba; registrados como titulares César Soto Soria (presidente), Erika Vega Rondo (secretaria), Mauricio López Falcón y Miryam Canaza Choquehuanca, con su trabajador y usuario de prueba para validar las firmas (puestos y DNI de prueba).
+
+---
+
+## 0.10.0 — 2026-10-24 · M22 Medio ambiente (nuevo módulo)
+
+**Migración:** sí (`ambiente 0001` y `0002`: módulo nuevo, formatos impresos y carga de la matriz de aspectos). Cerrar la ventana del backend → `Iniciar` → recargar (Ctrl + F5). El rol que lo use necesita el permiso del módulo «Medio Ambiente».
+
+### Nuevo
+- **Medio ambiente** (menú Seguridad, salud y ambiente), según los procedimientos de aspectos e impactos, uso eficiente de energía y agua, y gestión de residuos sólidos:
+  - **Aspectos e impactos:** lugar (área, laboratorios, oficinas, toda la empresa u otro), proceso del catálogo, situación N/A/E, generación, clase, ciclo de vida, controles, evaluación A–E con la tabla de valoración, control operacional, registro asociado, responsable (puesto) y plazo. **Significativo si suma ≥ 10 o hay incumplimiento legal** (regla del procedimiento); los positivos no se evalúan. El criterio A se propone desde la evaluación de cumplimiento de la obligación legal vinculada. PDF con el formato.
+  - **Aprobación de la matriz por todos los titulares del Comité de SST** (usuario o PIN, o acta en papel); un cambio posterior la deja pendiente.
+  - **Residuos sólidos:** pesajes con el formato (no peligrosos por tacho, peligrosos líquidos y sólidos, RAEE), cierre firmado, PDF; disposición con operadora, manifiesto y certificado (los peligrosos solo a una EO-RS); resumen anual en kg y toneladas para la declaración.
+  - **Energía y agua:** consumo mensual del recibo (kWh, m³, monto, archivo) e indicadores: por trabajador y frente al mismo mes del año anterior.
+- Carga: la matriz en Excel (330 filas en 12 hojas) consolidada en **176 aspectos, 5 significativos** (incendio y 4 por incumplimiento legal). Lista de cambios para revisar: `docs/modulos/M22_carga_matriz.md`.
+
+### Cambiado
+- La firma del Comité de SST admite exigir a **todos** los titulares (además de la mitad más uno).
+
+### Qué probar
+- Medio ambiente › Aspectos e impactos: filtros por lugar, «Significativos», editar un aspecto (el resultado y la significancia se recalculan), PDF.
+- Aprobación del Comité: con los titulares reales registrados.
+- Residuos: un pesaje con varias líneas → firmar y cerrar → PDF; una disposición; resumen anual.
+- Energía y agua: registrar un mes y ver los indicadores.
+
+---
+
+## 0.9.4 — 2026-10-24 · «Mostrar anulados» y PDF de la ficha técnica
+
+**Migración:** no. Recargar la página (Ctrl + F5).
+
+### Nuevo
+- **Mostrar anulados** (César, 2026-10-24): en la hoja de vida y el programa de un equipo (interruptor junto a las pestañas), en el equipo auditor y en las firmas de cada versión de un documento se ven los registros dados de baja, tachados, con quién y cuándo. En Equipos los **restaura** quien aprueba en Equipos; en Auditorías, mientras el plan esté abierto. Las firmas anuladas no se restauran: se vuelve a firmar.
+
+### Cambiado
+- **Equipos › Ficha Técnica › Generar PDF** imprime solo la ficha técnica (antes incluía todas las bitácoras); cada pestaña imprime la suya. La hoja de vida completa queda disponible por el sistema (`?completa=1`).
+- Quien solo lee la hoja de vida también puede generar el PDF de cada bitácora.
+- Dar de baja una fila de la hoja de vida explica que se conserva y se puede restaurar.
+
+### Validado en pantalla
+- Dar de baja y restaurar una fila de la hoja de vida (PRUEBA-01); Enter sobre «Cancelar» no confirma; ficha técnica en 1 página (antes 7); archivos sin sesión bloqueados; listados completos (21 usuarios, 21 hallazgos); calendario; programa de inspecciones.
+
+---
+
+## 0.9.3 — 2026-10-24 · Nunca se borra: baja lógica en lo que aún se eliminaba
+
+**Migración:** sí (`esynapse_sig 0072`). Cerrar la ventana del backend → `Iniciar` → recargar (Ctrl + F5).
+
+### Cambiado (regla 3, decisión de César 2026-10-24)
+- **Documentos:** las firmas de una versión cuyo archivo se reemplaza, o cuya publicación falla, quedan **anuladas** con fecha y motivo (antes se borraban). Se puede volver a firmar.
+- **Equipos:** quitar una fila de la hoja de vida, retirar una actividad del programa anual o vaciar una celda del intervalo de calibración la **da de baja**; la celda se reactiva si vuelve a llenarse (un solo registro por punto y año).
+- **Auditorías:** quitar un integrante del equipo auditor lo da de baja (queda quién lo integró).
+- Las pantallas y PDF muestran solo lo vigente; lo dado de baja se conserva en la base y en el log de auditoría.
+- Quedan con borrado (con registro completo en el log), por ser configuración o casillas vacías: requisitos de un perfil de la matriz de EPP, permisos de un rol al reemplazar su matriz y casillas pendientes vacías de una evaluación legal en curso.
+
+---
+
+## 0.9.2 — 2026-10-24 · Revisión integral: seguridad, integridad de registros y fechas
+
+**Migración:** no. Cerrar la ventana del backend → `Iniciar` → recargar (Ctrl + F5) y **volver a iniciar sesión** (cambió la clave secreta del sistema).
+
+### Seguridad
+- La clave secreta salió del código (estaba publicada en GitHub): se lee de `backend/.env` (se crea solo; no va a Git ni a la carpeta limpia). Los certificados internos de firma siguen abriéndose.
+- El rol de Administrador del Sistema solo lo asigna o retira el propietario, por cualquier vía; las rutas sueltas de permisos y asignaciones quedan de consulta (sin borrado físico).
+- `is_active` de un usuario no cambia por edición directa; reactivar un usuario funciona; la cuenta del propietario solo la modifica él.
+- La matriz de permisos de un rol se guarda todo o nada; contraseñas débiles rechazadas (validadores de Django).
+- Organización: vincular un usuario a un trabajador o desactivarlo al registrar el cese exige el permiso de editar usuarios.
+- Una escritura sin operación declarada ya no se evalúa como lectura (por omisión exige editar).
+- Firmas de terceros con contraseña: 5 intentos fallidos bloquean 15 minutos (antes sin límite); el bloqueo del PIN ya no se elude con intentos simultáneos.
+- La IP del log y de las firmas no se toma de una cabecera que el cliente puede inventar.
+- Log de auditoría ampliado a Quejas, Procesos, Cambios, Riesgos, Legal, SST y Capacitación (antes solo núcleo, SIG y Organización); el PIN nunca se registra; un error del log no tumba la operación.
+- Calendario: cada bloque se muestra solo a quien puede leer ese módulo.
+- **Archivos subidos solo para usuarios del sistema** (César, 2026-10-24): `/media` exige una cookie firmada que se entrega al iniciar sesión y se renueva con el token; sin sesión, o con el usuario desactivado, responde «solo para usuarios del sistema». Excepción: los logos de la pantalla de ingreso. Fotos y logos se piden por el mismo origen de la pantalla.
+- SST: en el programa de inspecciones, una inspección cuenta como realizada solo cuando está firmada (César, 2026-10-24).
+
+### Integridad de registros
+- Inducción: al guardar una parte, el cliente solo marca temas, documentos y calificaciones; textos y puntos son los guardados (la nota ya no se puede inflar); enlaces validados; una inducción anulada no avanza.
+- Equipos: registrar calibración directa, quitar filas de la hoja de vida y devolver un equipo al servicio requieren aprobación; los resultados de intervalo solo cambian con «guardar matriz».
+- Competencia: una autorización suspendida no se reautoriza sin re-entrenamiento por ningún camino; corregir un seguimiento antiguo no vuelve a aplicar su decisión.
+- Documentos: la edición directa solo cambia el código; quien elaboró no revisa ni aprueba.
+- Acciones correctivas: una solicitud solo se desactiva en registro y libera su No Conformidad.
+- SST: corregir un dato del mes no pisa las horas-hombre ajustadas; la fecha de reporte de un evento no se edita; quórum con titulares en funciones en la fecha (sin bajas ni cesados); un ATS validado no se anula y anular exige eliminar; reprogramar el Programa SSOMA exige aprobar; vigilancia médica muestra «Sin próximo examen» en vez de «vigente».
+- Riesgos: con la aceptación firmada no cambia la valoración; mover el plazo de una acción de la matriz pide motivo y queda en el historial.
+- Quejas y Cambios: un registro anulado no avanza; una queja reabierta no se anula.
+- Legal: no se borran resultados ya registrados al anular una obligación; catálogo de temas sin duplicados.
+- Procesos: no se registran resultados de periodos futuros (también al editar).
+- Capacitación: avance «a la fecha» con la fecha vigente; no se cierra una sesión con fecha futura; acta de aprobación anterior al último cambio rechazada; año no numérico sin error.
+- Auditorías: correlativo numérico (AI-100 después de AI-99).
+
+### Fechas (hora de Lima)
+- Fechas «de hoy», vencimientos y correlativos con la fecha local (antes UTC: desde las 19:00 salía el día siguiente). Firmas e historiales se guardan con hora local; los PDF y pantallas convierten también los registros antiguos.
+
+### Pantallas
+- Los listados traen todos los registros (antes se cortaban en 25 sin avisar).
+- Enter sobre «Cancelar» ya no confirma acciones destructivas.
+- Un error pasajero del servidor ya no cierra la sesión; doble clic ya no duplica registros.
+- Intervalo de calibración: celdas vacías no se guardan como 0.
+- Calendario: «siguiente mes» ya no salta meses; PDF con el motivo del error; configuración pública sin depender del token.
+
+---
+
+## 0.9.1 — 2026-10-23 · Capacitación: duración automática y contenido de la inducción configurable
+
+**Migración:** sí (`capacitacion 0004`: versión e historial del contenido de la inducción; `0005`: revierte la versión 2 que creó por error la validación en pantalla al reenviar el contenido sin cambios —corregido: ya no cuenta como cambio lo que solo difiere en forma—). Cerrar la ventana del backend → `Iniciar` → recargar la página (Ctrl + F5).
+
+### Cambiado
+- **Lista de asistencia:** la duración se calcula sola con «Desde» y «Hasta» (el servidor aplica la misma regla); «Hasta» anterior a «Desde» se rechaza. Sin horas, la duración se sigue indicando a mano.
+- **Contenido de la inducción** (pestaña del mismo nombre) como configuración controlada:
+  - lista de verificación de temas, documentos y preguntas: agregar, corregir, quitar y **reordenar**;
+  - **enlaces** por tema (material) y por documento; enlace de la evaluación en línea;
+  - documentos **vinculados a la lista maestra**: toman nombre, código y versión vigente, con enlace al archivo;
+  - cada cambio exige **motivo**, sube la **versión** y queda en el **historial** (quién, cuándo, qué cambió);
+  - las inducciones ya registradas conservan el contenido con que se hicieron.
+- La inducción muestra los enlaces del material y de los documentos entregados.
+
+### Qué probar
+- Nueva lista de asistencia: Desde 10:50, Hasta 12:20 → duración 1,5 (bloqueada, «calculada»).
+- Contenido de la inducción › Editar: agregar un tema con enlace, vincular un documento de la lista maestra, mover una pregunta, guardar con motivo → versión 2 e historial.
+
+---
+
+## 0.9.0 — 2026-10-23 · Capacitación e inducción (nuevo módulo)
+
+**Migración:** sí (`core 0016`, `capacitacion 0001` a `0003`, `sst 0018`: módulo nuevo, programas 2026 y 2025, contenido de la inducción y secretaria actual del Comité). Cerrar la ventana del backend → `Iniciar` → recargar la página (Ctrl + F5). El rol que lo use necesita el permiso del módulo «Capacitación e Inducción».
+
+### Nuevo
+- **Capacitación e inducción** (menú Soporte), según el procedimiento de gestión del personal:
+  - **Programa anual de capacitación** con indicadores (avance del año y a la fecha, capacitaciones de SST frente al mínimo legal de 4), reprogramación con motivo (RP), cancelación y **aprobación del Comité de SST** (firma de los titulares con usuario o PIN, o acta en papel); si se agregan o corrigen capacitaciones queda pendiente de aprobar. PDF con el formato (grilla P/R/RP y pie del Comité).
+  - **Listas de asistencia** (inducción, capacitación, entrenamiento, simulacro, charla…): asistentes que firman con su usuario o PIN (o la lista en papel), notas con certificado de aprobación (≥ 14) o participación, material y constancias, cierre firmado que marca realizada la capacitación del programa, y **evaluación de la eficacia** con alerta a los 6 meses. PDF con el formato.
+  - **Inducción** en sus tres partes (organizacional, del SIG y específica del cargo) con temas, documentos y evaluación del formato; cada parte se aprueba con 14 y, si se desaprueba, se repite sola. PDF con el formato.
+  - **Por trabajador:** inducción y capacitaciones que le corresponden en el año, si asistió y horas.
+  - **Contenido de la inducción** editable por el Área SIG.
+- Cargados: programa 2026 (36 capacitaciones, 27 realizadas —incluye el Reglamento Interno de Trabajo reprogramado y realizado el 2026-05-14—, aprobado por el Comité el 2026-05-11) y 2025 como histórico.
+- SST › Inicio muestra los indicadores de capacitación y enlaza al módulo.
+
+### Cambiado
+- Comité de SST: la secretaria actual es Erika Vega Rondo.
+- La firma del Comité (IPERC y programa de capacitación) usa un solo mecanismo común.
+
+### Qué probar
+- Capacitación e inducción › Programa anual 2026: indicadores, PDF y «Registrar asistencia» en una capacitación pendiente → asistentes, firmas, cierre → la capacitación queda «Realizado».
+- Inducción: nueva inducción de un trabajador → completar y firmar las tres partes.
+
+---
+
+## 0.8.21 — 2026-10-23 · Hallazgos: el responsable se toma de donde se designa
 
 **Migración:** no. Recargar la página (Ctrl + F5).
 

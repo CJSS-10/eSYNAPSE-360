@@ -216,7 +216,7 @@ class FichaViewSet(viewsets.ModelViewSet):
         u = request.user
         ficha.firmas = [x for x in (ficha.firmas or []) if x.get('rol') != rol] + [{
             'rol': rol, 'usuario_id': u.pk, 'nombre': u.get_full_name() or u.username, 'cargo': u.cargo,
-            'sigla': u.sigla_cargo, 'fecha': timezone.now().isoformat(timespec='seconds'),
+            'sigla': u.sigla_cargo, 'fecha': timezone.localtime().isoformat(timespec='seconds'),
             'ip': get_client_ip(request), 'hash': ficha.calcular_hash()}]
         return None
 
@@ -279,7 +279,7 @@ class FichaViewSet(viewsets.ModelViewSet):
         if not comentarios:
             return _error('Indique las observaciones para devolver la ficha.')
         f.devoluciones = list(f.devoluciones or []) + [{
-            'fecha': timezone.now().isoformat(timespec='minutes'), 'etapa': f.get_estado_display(),
+            'fecha': timezone.localtime().isoformat(timespec='minutes'), 'etapa': f.get_estado_display(),
             'usuario': request.user.get_full_name() or request.user.username, 'comentarios': comentarios}]
         f.firmas = []
         f.elaborado_por = f.revisado_por = None
@@ -301,7 +301,7 @@ class FichaViewSet(viewsets.ModelViewSet):
         err = self._firmar(request, f, 'aprobado')
         if err:
             return err
-        ahora = timezone.now()
+        ahora = timezone.localtime()
         with transaction.atomic():
             Ficha.objects.filter(proceso=f.proceso, estado='vigente').update(estado='obsoleta', updated_by=request.user)
             f.aprobado_por = request.user
@@ -424,7 +424,7 @@ class ResultadoViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         periodo = serializer.validated_data['periodo']
-        if periodo > date.today().replace(day=1):
+        if periodo > timezone.localdate().replace(day=1):
             from rest_framework.exceptions import ValidationError
             raise ValidationError({'periodo': ['No se registran resultados de periodos futuros.']})
         serializer.save(created_by=self.request.user, updated_by=self.request.user)

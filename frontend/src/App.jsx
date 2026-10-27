@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from 'react-router-dom'
 import Layout from './components/Layout.jsx'
 import { useAuth } from './context/AuthContext.jsx'
 import Auditoria from './pages/Auditoria.jsx'
+import Cumplimiento from './pages/Cumplimiento.jsx'
 import Dashboard from './pages/Dashboard.jsx'
 import Documentos from './pages/Documentos.jsx'
 import Hallazgos from './pages/Hallazgos.jsx'
@@ -19,6 +20,10 @@ import Calendario from './pages/Calendario.jsx'
 import Configuracion from './pages/Configuracion.jsx'
 import Equipos from './pages/Equipos.jsx'
 import Competencia from './pages/Competencia.jsx'
+import Capacitacion from './pages/Capacitacion.jsx'
+import Ambiente from './pages/Ambiente.jsx'
+import RevisionDireccion from './pages/RevisionDireccion.jsx'
+import TrabajoNoConforme from './pages/TrabajoNoConforme.jsx'
 import Login from './pages/Login.jsx'
 import Roles from './pages/Roles.jsx'
 import Usuarios from './pages/Usuarios.jsx'
@@ -62,6 +67,11 @@ export default function App() {
         <Route path="/configuracion" element={<Configuracion />} />
         <Route path="/equipos" element={<Equipos />} />
         <Route path="/competencia" element={<Competencia />} />
+        <Route path="/capacitacion" element={<Capacitacion />} />
+        <Route path="/medio-ambiente" element={<Ambiente />} />
+        <Route path="/revision-direccion" element={<RevisionDireccion />} />
+        <Route path="/trabajo-no-conforme" element={<TrabajoNoConforme />} />
+        <Route path="/cumplimiento" element={<Cumplimiento />} />
         <Route path="/usuarios" element={<Usuarios />} />
         <Route path="/roles" element={<Roles />} />
         <Route path="/auditoria" element={<Auditoria />} />

@@ -54,19 +54,21 @@ class PermisoModular(BasePermission):
         if user.is_superuser:
             return True
 
-        operacion = self._resolver_operacion(view)
+        operacion = self._resolver_operacion(view, request.method)
         return user.tiene_permiso(modulo, operacion)
 
     @staticmethod
-    def _resolver_operacion(view) -> str:
+    def _resolver_operacion(view, metodo='GET') -> str:
         accion = getattr(view, 'action', None)
+        # Sin operación declarada, una escritura nunca se evalúa como lectura (por omisión: editar).
+        por_defecto = 'leer' if metodo in ('GET', 'HEAD', 'OPTIONS') else 'editar'
         # @action personalizada puede declarar su operación:
         #   @action(detail=True, methods=['post'])
         #   def aprobar(self, ...):   → ver atributo 'operacion' en el handler
         if accion and accion not in ACCION_OPERACION:
             handler = getattr(view, accion, None)
-            return getattr(handler, 'operacion', 'leer')
-        return ACCION_OPERACION.get(accion, 'leer')
+            return getattr(handler, 'operacion', por_defecto)
+        return ACCION_OPERACION.get(accion, por_defecto)
 
 
 class SoloAdministradores(BasePermission):

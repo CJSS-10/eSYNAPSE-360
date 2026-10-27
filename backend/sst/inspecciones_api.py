@@ -827,7 +827,8 @@ class InspeccionViewSet(_Base, viewsets.ModelViewSet):
         for pl in PlantillaInspeccion.objects.filter(is_active=True):
             paso = MESES_FRECUENCIA.get(pl.frecuencia)
             hechas = {}
-            for i in pl.inspecciones.filter(is_active=True, fecha__year=anio).exclude(estado__in=['anulada']):
+            # Cuenta como realizada solo la inspección firmada (César, 2026-10-24): «en registro» aún no.
+            for i in pl.inspecciones.filter(is_active=True, fecha__year=anio).exclude(estado__in=['anulada', 'en_registro']):
                 hechas.setdefault(i.fecha.month, []).append({'id': i.pk, 'codigo': i.codigo, 'estado': i.estado})
             actual = (hoy.year, hoy.month)
             # Antes de usar la plantilla en el sistema, las inspecciones se registraban en papel: no se alertan.

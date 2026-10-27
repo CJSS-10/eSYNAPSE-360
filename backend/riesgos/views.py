@@ -39,7 +39,7 @@ def _nombre(u):
 def _firma(request):
     u = request.user
     return {'usuario_id': u.pk, 'nombre': _nombre(u), 'cargo': getattr(u, 'cargo', ''),
-            'sigla': getattr(u, 'sigla_cargo', ''), 'fecha': timezone.now().isoformat(timespec='seconds'),
+            'sigla': getattr(u, 'sigla_cargo', ''), 'fecha': timezone.localtime().isoformat(timespec='seconds'),
             'ip': get_client_ip(request)}
 
 
@@ -160,7 +160,7 @@ class RiesgoViewSet(_Base, viewsets.ModelViewSet):
 
     def _historial(self, r, request, accion, **datos):
         r.historial = list(r.historial or []) + [{
-            'fecha': timezone.now().isoformat(timespec='minutes'), 'usuario': _nombre(request.user),
+            'fecha': timezone.localtime().isoformat(timespec='minutes'), 'usuario': _nombre(request.user),
             'accion': accion, **datos}]
 
     def perform_create(self, serializer):
@@ -182,8 +182,9 @@ class RiesgoViewSet(_Base, viewsets.ModelViewSet):
                 return self._error(f'El tratamiento de {r.codigo} ya se verificó: «{nombre}» no se modifica. '
                                    f'Si no fue eficaz, inicie un nuevo tratamiento.')
         if r.firma_aceptacion:
-            for campo in ('estrategia', 'justificacion_aceptacion'):
-                if campo in request.data and (request.data.get(campo) or '') != getattr(r, campo):
+            # La valoración (P × I) es parte de lo que el Gerente General aceptó: tampoco cambia con la firma vigente.
+            for campo in ('estrategia', 'justificacion_aceptacion', 'probabilidad', 'impacto'):
+                if campo in request.data and str(request.data.get(campo) or '') != str(getattr(r, campo) or ''):
                     return self._error('La aceptación ya está firmada por el Gerente General: la estrategia y su '
                                        'decisión no se modifican. Para cambiarlas, revalore el riesgo (con motivo); '
                                        'la firma se anula y se vuelve a firmar.')
@@ -353,10 +354,23 @@ class RiesgoViewSet(_Base, viewsets.ModelViewSet):
             return self._error(error)
         if 'actividad' in datos and not datos['actividad']:
             return self._error('Describa la acción.')
+        cambio_plazo = r.estado != 'borrador' and 'fecha_maxima' in datos and datos['fecha_maxima'] != a.fecha_maxima
+        if cambio_plazo:
+            # Mover el plazo de una acción de la matriz (p. ej. para que deje de estar vencida) exige motivo y queda
+            # en el historial.
+            motivo = (request.data.get('motivo') or '').strip()
+            if not motivo:
+                return self._error('Indique el motivo del cambio del plazo máximo.')
+            anterior = a.fecha_maxima
         for k, v in datos.items():
             setattr(a, k, v)
         a.updated_by = request.user
         a.save()
+        if cambio_plazo:
+            self._historial(r, request, 'Cambio de plazo de una acción', actividad=a.actividad[:100],
+                            de=anterior.isoformat() if anterior else '',
+                            a=a.fecha_maxima.isoformat() if a.fecha_maxima else '', motivo=motivo)
+            r.save(update_fields=['historial'])
         return self._respuesta(r)
     editar_accion.operacion = 'editar'
 
@@ -651,7 +665,7 @@ class OportunidadMejoraViewSet(_Base, viewsets.ModelViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     def _hist(self, o, request, accion, **datos):
-        o.historial = list(o.historial or []) + [{'fecha': timezone.now().isoformat(timespec='minutes'),
+        o.historial = list(o.historial or []) + [{'fecha': timezone.localtime().isoformat(timespec='minutes'),
                                                   'usuario': _nombre(request.user), 'accion': accion, **datos}]
 
     @action(detail=True, methods=['post'])

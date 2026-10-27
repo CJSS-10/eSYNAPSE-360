@@ -4,6 +4,7 @@ eSYNAPSE 360 — Rutas del API de la app core.
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
+from .ubigeo import UbigeoView
 from .configuracion import (
     ConfigPublicaView, ConfigSistemaView, ModuloToggleView, ModulosView,
 )
@@ -36,5 +37,6 @@ urlpatterns = [
     path('configuracion/sistema/', ConfigSistemaView.as_view(), name='config-sistema'),
     path('configuracion/modulos/', ModulosView.as_view(), name='config-modulos'),
     path('configuracion/modulos/<str:clave>/toggle/', ModuloToggleView.as_view(), name='config-modulo-toggle'),
+    path('ubigeos/', UbigeoView.as_view(), name='ubigeos'),
     path('', include(router.urls)),
 ]

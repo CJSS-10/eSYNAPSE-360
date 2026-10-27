@@ -138,16 +138,23 @@ class PinTrabajador(models.Model):
         self.intentos_fallidos, self.bloqueado, self.creado = 0, False, timezone.now()
 
     def verificar(self, pin):
-        """True si el PIN es correcto; cuenta los intentos fallidos y bloquea al quinto."""
-        if self.bloqueado:
-            return False
-        if check_password(pin, self.pin):
-            self.intentos_fallidos = 0
-            self.save(update_fields=['intentos_fallidos'])
-            return True
-        self.intentos_fallidos += 1
-        self.bloqueado = self.intentos_fallidos >= INTENTOS_PIN
-        self.save(update_fields=['intentos_fallidos', 'bloqueado'])
+        """True si el PIN es correcto; cuenta los intentos fallidos y bloquea al quinto. Lee y escribe el registro
+        bloqueado en la base, para que intentos simultáneos no esquiven el contador."""
+        from django.db import transaction
+        with transaction.atomic():
+            reg = PinTrabajador.objects.select_for_update().get(pk=self.pk)
+            if reg.bloqueado:
+                self.bloqueado, self.intentos_fallidos = True, reg.intentos_fallidos
+                return False
+            if check_password(pin, reg.pin):
+                reg.intentos_fallidos = 0
+                reg.save(update_fields=['intentos_fallidos'])
+                self.intentos_fallidos, self.bloqueado = 0, False
+                return True
+            reg.intentos_fallidos += 1
+            reg.bloqueado = reg.intentos_fallidos >= INTENTOS_PIN
+            reg.save(update_fields=['intentos_fallidos', 'bloqueado'])
+            self.intentos_fallidos, self.bloqueado = reg.intentos_fallidos, reg.bloqueado
         return False
 
 

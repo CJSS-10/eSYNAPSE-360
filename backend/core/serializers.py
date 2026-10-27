@@ -13,8 +13,8 @@ def _foto_url(obj, context):
     foto = getattr(obj, 'foto', None)
     if not foto:
         return None
-    request = context.get('request') if context else None
-    return request.build_absolute_uri(foto.url) if request else foto.url
+    # Ruta relativa: así la pide el navegador por el mismo origen de la pantalla, con la cookie de acceso a archivos.
+    return foto.url
 
 
 class PermisoSerializer(serializers.ModelSerializer):
@@ -56,21 +56,34 @@ class RolSerializer(serializers.ModelSerializer):
             return self.instance.es_admin_sistema if self.instance else False
         return value
 
+    def validate_permisos(self, value):
+        vistos = set()
+        for p in value or []:
+            clave = (p.get('modulo'), p.get('operacion'))
+            if clave in vistos:
+                raise serializers.ValidationError(f'Permiso repetido: {clave[0]} · {clave[1]}.')
+            vistos.add(clave)
+        return value
+
     def create(self, validated_data):
+        from django.db import transaction
         permisos = validated_data.pop('permisos', [])
-        rol = Rol.objects.create(**validated_data)
-        for p in permisos:
-            Permiso.objects.create(rol=rol, **p)
+        with transaction.atomic():
+            rol = Rol.objects.create(**validated_data)
+            for p in permisos:
+                Permiso.objects.create(rol=rol, **p)
         return rol
 
     def update(self, instance, validated_data):
+        from django.db import transaction
         permisos = validated_data.pop('permisos', None)
-        instance = super().update(instance, validated_data)
-        if permisos is not None:
-            # Reemplaza la matriz de permisos del rol (queda auditado vía señales)
-            instance.permisos.all().delete()
-            for p in permisos:
-                Permiso.objects.create(rol=instance, **p)
+        with transaction.atomic():
+            instance = super().update(instance, validated_data)
+            if permisos is not None:
+                # Reemplaza la matriz de permisos del rol, todo o nada (queda auditado vía señales)
+                instance.permisos.all().delete()
+                for p in permisos:
+                    Permiso.objects.create(rol=instance, **p)
         return instance
 
 
@@ -125,7 +138,13 @@ class UsuarioSerializer(serializers.ModelSerializer):
                   'area', 'laboratorio', 'cargo', 'sigla_cargo', 'telefono', 'foto', 'foto_url',
                   'is_active', 'is_superuser', 'roles', 'last_login', 'created_at', 'updated_at', 'trabajador',
                   'trabajador_info']
-        read_only_fields = ['is_superuser', 'last_login', 'created_at', 'updated_at']
+        # is_active solo cambia con desactivar (DELETE) o reactivar: así se respetan sus protecciones.
+        read_only_fields = ['is_superuser', 'is_active', 'last_login', 'created_at', 'updated_at']
+
+    def validate_email(self, value):
+        if value and Usuario.objects.filter(email__iexact=value).exclude(pk=getattr(self.instance, 'pk', None)).exists():
+            raise serializers.ValidationError('Email ya registrado')
+        return value
 
     def get_trabajador_info(self, obj):
         return _trabajador_info(obj)
@@ -193,6 +212,22 @@ class UsuarioCreateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('Email ya registrado')
         return value
 
+    def validate_roles(self, value):
+        request = self.context.get('request')
+        if any(r.es_admin_sistema for r in value) and not (request and request.user.is_superuser):
+            raise serializers.ValidationError('Solo el propietario del sistema asigna el rol de Administrador del '
+                                              'Sistema.')
+        return value
+
+    def validate_password(self, value):
+        if value:
+            from django.contrib.auth.password_validation import validate_password
+            try:
+                validate_password(value)
+            except Exception as e:  # ValidationError de Django → mensajes legibles
+                raise serializers.ValidationError(list(getattr(e, 'messages', [str(e)])))
+        return value
+
     def create(self, validated_data):
         roles = validated_data.pop('roles', [])
         trabajador = validated_data.pop('trabajador', None)
@@ -227,6 +262,14 @@ class CambiarPasswordSerializer(serializers.Serializer):
         user = self.context['request'].user
         if not user.check_password(value):
             raise serializers.ValidationError('La contraseña actual es incorrecta')
+        return value
+
+    def validate_password_nueva(self, value):
+        from django.contrib.auth.password_validation import validate_password
+        try:
+            validate_password(value, self.context['request'].user)
+        except Exception as e:
+            raise serializers.ValidationError(list(getattr(e, 'messages', [str(e)])))
         return value
 
 
@@ -277,7 +320,7 @@ class MeSerializer(serializers.ModelSerializer):
             rol__usuarios_asignados__is_active=True,
             rol__is_active=True,
             permitido=True,
-        ).values_list('modulo', 'operacion').distinct()
+        ).values_list('modulo', 'operacion').order_by().distinct()
         for modulo, operacion in qs:
             permisos.setdefault(modulo, []).append(operacion)
         return permisos

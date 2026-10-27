@@ -12,6 +12,7 @@ import { useConfirm } from '../context/ConfirmContext.jsx'
 import { fecha, fechaHora } from '../lib/fecha.js'
 import TituloModulo from '../components/ui/TituloModulo.jsx'
 import { Vistas } from '../components/NavModulo.jsx'
+import { useAbrirDesdeEnlace } from '../lib/enlaces.js'
 
 // Colores de estado (regla 10): gris inicial · ámbar evaluación · azul tratamiento · violeta cierre · verde cerrada.
 const COLOR_ESTADO = {
@@ -266,6 +267,8 @@ export default function Quejas() {
       accion: cerrarQueja,
     },
   }[d.estado] || null
+  useAbrirDesdeEnlace(abrirDetalle)   // enlace directo ?abrir=<id> (búsqueda, Mis tareas, campana)
+
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -561,7 +564,7 @@ export default function Quejas() {
               </Seccion>
             )}
             {(d.reaperturas || []).map((r, i) => (
-              <p key={i} className="text-[11px] text-violet-600 dark:text-violet-400">Reabierta el {(r.fecha || '').slice(0, 10)} por {r.usuario}: {r.motivo}</p>
+              <p key={i} className="text-[11px] text-violet-600 dark:text-violet-400">Reabierta el {fecha(r.fecha)} por {r.usuario}: {r.motivo}</p>
             ))}
 
             {/* Comunicaciones al reclamante */}

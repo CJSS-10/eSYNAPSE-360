@@ -4,7 +4,7 @@ import Modal from '../components/Modal.jsx'
 import { Vistas as Sub } from '../components/NavModulo.jsx'
 import CampoAmpliable from '../components/CampoAmpliable.jsx'
 import { api } from '../lib/api.js'
-import { fecha, fechaHora } from '../lib/fecha.js'
+import { fecha, fechaHora, hoy as hoyLocal } from '../lib/fecha.js'
 import { useUltimaRespuesta } from '../lib/useUltimaRespuesta.js'
 
 const inp = 'input-esynapse'
@@ -24,6 +24,7 @@ const SIT = {
   falta: ['Falta entregar', 'bg-red-500/15 text-red-600 dark:text-red-400'],
   segun_tarea: ['Según la tarea', 'bg-slate-500/15 text-slate-500'],
   sin_examen: ['Sin examen', 'bg-red-500/15 text-red-600 dark:text-red-400'],
+  sin_proximo: ['Sin próximo examen', 'bg-amber-500/15 text-amber-600 dark:text-amber-400'],
 }
 const APT = {
   apto: ['Apto', 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'],
@@ -78,7 +79,7 @@ export function Epp(props) {
   )
 }
 
-const NUEVA = { trabajador: '', fecha: new Date().toISOString().slice(0, 10), tipo: 'dotacion', motivo: '', observaciones: '', items: [] }
+const NUEVA = { trabajador: '', fecha: hoyLocal(), tipo: 'dotacion', motivo: '', observaciones: '', items: [] }
 
 function Entregas({ confirmar, setError, abrirPdf, puedeCrear, puedeEditar, puedeEliminar, alCambiar, verTrabajador }) {
   const [items, setItems] = useState([])
@@ -93,7 +94,7 @@ function Entregas({ confirmar, setError, abrirPdf, puedeCrear, puedeEditar, pued
   const cargar = useCallback(async () => { const p = new URLSearchParams(Object.entries(filtro).filter(([, v]) => v)); setItems(await ultima(api.sst.entregasEpp(`?${p}`))) }, [filtro])
   useEffect(() => { cargar().catch((e) => setError(e.message)) }, [cargar, setError])
   useEffect(() => { api.sst.catalogosEpp().then(setCat).catch(() => {}); api.sst.eppCatalogo().then(setCatalogo).catch(() => {}) }, [])
-  const editable = !form?.id || form.estado === 'en_registro'
+  const editable = (!form?.id && puedeCrear) || (form?.estado === 'en_registro' && puedeEditar)
 
   const sugerir = async (campo = false) => {
     if (!form.trabajador) { setErr('Elija primero al trabajador.'); return }
@@ -391,7 +392,7 @@ export function VigilanciaMedica(props) {
   )
 }
 
-const hoy = () => new Date().toISOString().slice(0, 10)
+const hoy = () => hoyLocal()
 
 function Anexo4({ setError, puedeEditar }) {
   const [d, setD] = useState(null)
@@ -438,7 +439,7 @@ function Vigilancia({ setError, puedeEditar }) {
   return (
     <div className="space-y-2">
       <Anexo4 setError={setError} puedeEditar={puedeEditar} />
-      <div className="flex flex-wrap gap-2 text-[11px]">{['sin_examen', 'vencido', 'por_vencer'].map((k) => cuenta(k) > 0 && <Chip key={k} par={SIT[k]} extra={`: ${cuenta(k)}`} />)}<span className="text-slate-500">Próximo examen: anual para el personal operativo y cada dos años para el administrativo.</span></div>
+      <div className="flex flex-wrap gap-2 text-[11px]">{['sin_examen', 'sin_proximo', 'vencido', 'por_vencer'].map((k) => cuenta(k) > 0 && <Chip key={k} par={SIT[k]} extra={`: ${cuenta(k)}`} />)}<span className="text-slate-500">Próximo examen: anual para el personal operativo y cada dos años para el administrativo.</span></div>
       <div className="card-esynapse overflow-x-auto">
         <table className="tabla-sig w-full text-xs">
           <thead><tr className="border-b border-slate-200 text-slate-500 dark:border-slate-800"><th className="px-2 py-2">Trabajador</th><th className="px-2">Puesto / área</th><th className="px-2">Personal</th><th className="px-2 text-right">Último examen</th><th className="px-2 text-center">Aptitud</th><th className="px-2">Restricciones</th><th className="px-2 text-right">Próximo examen</th><th className="px-2 text-center">Situación</th></tr></thead>
@@ -455,7 +456,7 @@ function Vigilancia({ setError, puedeEditar }) {
   )
 }
 
-const EMO_VACIA = { tipo: 'periodico', fecha: new Date().toISOString().slice(0, 10), centro_medico: '', medico: '', cmp: '', observaciones: '', medidas: [], trabajadores: [] }
+const EMO_VACIA = { tipo: 'periodico', fecha: hoyLocal(), centro_medico: '', medico: '', cmp: '', observaciones: '', medidas: [], trabajadores: [] }
 
 function Evaluaciones({ confirmar, setError, abrirPdf, puedeCrear, puedeEditar, puedeEliminar }) {
   const [items, setItems] = useState([])
@@ -466,7 +467,7 @@ function Evaluaciones({ confirmar, setError, abrirPdf, puedeCrear, puedeEditar, 
   const [err, setErr] = useState('')
   const cargar = useCallback(() => api.sst.emos().then(setItems).catch((e) => setError(e.message)), [setError])
   useEffect(() => { cargar(); api.sst.catalogosEpp().then(setCat).catch(() => {}) }, [cargar])
-  const editable = !form?.id || form.estado === 'en_registro'
+  const editable = (!form?.id && puedeCrear) || (form?.estado === 'en_registro' && puedeEditar)
   const mostrar = (r) => setForm({ ...EMO_VACIA, ...r })
   const guardar = async () => {
     setErr('')

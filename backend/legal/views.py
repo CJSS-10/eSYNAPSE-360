@@ -37,7 +37,7 @@ class _Base:
 
 
 def _hist(obj, request, accion, **datos):
-    obj.historial = list(obj.historial or []) + [{'fecha': timezone.now().isoformat(timespec='minutes'),
+    obj.historial = list(obj.historial or []) + [{'fecha': timezone.localtime().isoformat(timespec='minutes'),
                                                   'usuario': _nombre(request.user), 'accion': accion, **datos}]
 
 
@@ -106,11 +106,11 @@ class RequisitoViewSet(_Base, viewsets.ModelViewSet):
     def catalogos(self, request):
         temas = {}
         for amb, tema in Requisito.objects.filter(is_active=True).exclude(tema='') \
-                .values_list('ambito', 'tema').distinct():
+                .values_list('ambito', 'tema').order_by().distinct():
             temas.setdefault(amb, []).append(tema)
         temas_obl = {}
         for amb, tema in Obligacion.objects.filter(is_active=True).exclude(tema='') \
-                .values_list('ambito', 'tema').distinct():
+                .values_list('ambito', 'tema').order_by().distinct():
             temas_obl.setdefault(amb, []).append(tema)
         return Response({'ambitos': AMBITOS, 'resultados': RESULTADOS, 'medios': MEDIOS,
                          'temas': temas, 'temas_obligaciones': temas_obl})
@@ -262,10 +262,15 @@ class ObligacionViewSet(_Base, viewsets.ModelViewSet):
         o = self.get_object()
         if o.resultados.filter(evaluacion__estado='cerrada').exists():
             return self._error('La obligación ya se evaluó: si dejó de aplicar, désela de baja con motivo.')
+        if o.resultados.filter(evaluacion__estado='en_curso').exclude(resultado='pendiente').exists() or \
+                o.resultados.filter(evaluacion__estado='en_curso').exclude(observaciones='').exists():
+            return self._error('La obligación ya tiene un resultado registrado en la evaluación en curso: désela de '
+                               'baja con motivo.')
         o.is_active = False
         o.updated_by = request.user
         o.save(update_fields=['is_active', 'updated_by', 'updated_at'])
-        o.resultados.filter(evaluacion__estado='en_curso').delete()
+        # Solo quedan casillas pendientes y vacías de la evaluación en curso: se retiran (quedan en el log).
+        o.resultados.filter(evaluacion__estado='en_curso', resultado='pendiente', observaciones='').delete()
         ActualizacionAmbito.tocar(o.ambito, matriz=True)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -401,7 +406,7 @@ class EvaluacionViewSet(_Base, viewsets.ModelViewSet):
             return self._error('Confirme con su contraseña para firmar el cierre.')
         if not request.user.check_password(password):
             return self._error('Contraseña incorrecta. La evaluación no se cerró.')
-        u, ahora = request.user, timezone.now()
+        u, ahora = request.user, timezone.localtime()
         for r in e.resultados.filter(resultado='no_cumple', hallazgo=None).select_related('obligacion'):
             o = r.obligacion
             proceso = o.procesos.first()

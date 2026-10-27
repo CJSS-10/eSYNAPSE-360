@@ -23,6 +23,15 @@ def _pdf(nombre='acta.pdf'):
     return SimpleUploadedFile(nombre, b'%PDF-1.4', 'application/pdf')
 
 
+def texto_pdf(respuesta):
+    """Texto de un PDF devuelto por la API (para revisar el bloque de firmas del Comité)."""
+    import io
+
+    from pypdf import PdfReader
+    contenido = b''.join(respuesta.streaming_content) if getattr(respuesta, 'streaming', False) else respuesta.content
+    return ' '.join(' '.join((pg.extract_text() or '').split()) for pg in PdfReader(io.BytesIO(contenido)).pages)
+
+
 class BaseComite(CasoBase):
 
     def setUp(self):
@@ -122,10 +131,23 @@ class PruebasPrograma(BaseComite):
         r = self.client.post(f'/api/sst-programa-ssoma/{p.pk}/actividad/', {'id': act['id'], 'meses': [12]},
                              format='json')
         self.assertEqual(r.status_code, 200)
-        r = self.client.post(f'/api/sst-programa-ssoma/{p.pk}/aprobar/', {'password': CLAVE}, format='json')
-        self.assertEqual(r.data['estado'], 'aprobado')
-        self.assertEqual(len(r.data['aprobado']), 5)
-        self.assertEqual(self.client.get(f'/api/sst-programa-ssoma/{p.pk}/pdf/').status_code, 200)
+        texto = texto_pdf(self.client.get(f'/api/sst-programa-ssoma/{p.pk}/pdf/'))
+        self.assertIn('PENDIENTE DE APROBACIÓN DEL COMITÉ DE SST', texto, 'en reprogramación no muestra las firmas viejas')
+        # La aprobación la firman todos los titulares del Comité (César, 2026-10-24); con uno menos no se aprueba.
+        ms = [self._miembro(t, 'trabajadores').data for t in self.t[:2]]
+        ids = [next(m['id'] for m in ms[-1]['miembros'] if m['trabajador'] == t.pk) for t in self.t[:2]]
+        firmas = [{'miembro': ids[0], 'pin_nuevo': '1111', 'pin_confirmacion': '1111'}]
+        r = self.client.post(f'/api/sst-programa-ssoma/{p.pk}/aprobar/', {'firmas': firmas}, format='json')
+        self.assertIn('todos los titulares', r.data['detail'])
+        firmas.append({'miembro': ids[1], 'pin_nuevo': '2222', 'pin_confirmacion': '2222'})
+        r = self.client.post(f'/api/sst-programa-ssoma/{p.pk}/aprobar/', {'firmas': firmas}, format='json')
+        self.assertEqual(r.data['estado'], 'aprobado', r.data)
+        self.assertEqual(len(r.data['aprobado']), 2, 'firmas del Comité de esta versión')
+        # Bloque común de todo lo que aprueba el Comité: «REALIZADO Y APROBADO POR», cada titular, cómo firmó y fecha.
+        texto = texto_pdf(self.client.get(f'/api/sst-programa-ssoma/{p.pk}/pdf/'))
+        for esperado in ('REALIZADO Y APROBADO POR', 'T0 Comité', 'T1 Comité', 'Firmado con PIN', 'FECHA'):
+            self.assertIn(esperado, texto)
+        self.assertNotIn('PENDIENTE DE APROBACIÓN', texto)
 
 
 class PruebasCargoEMO(BaseComite):

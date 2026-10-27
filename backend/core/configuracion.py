@@ -19,8 +19,7 @@ from .permissions import SoloAdministradores, SoloPropietario
 
 
 def _abs(url, request):
-    if url and request is not None:
-        return request.build_absolute_uri(url)
+    # Ruta relativa (/media/...): pasa por el mismo origen que la pantalla, donde viaja la cookie de acceso a archivos.
     return url
 
 

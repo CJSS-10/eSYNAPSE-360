@@ -8,8 +8,9 @@ import BarraEtapa from '../components/BarraEtapa.jsx'
 import SelectorProceso from '../components/SelectorProceso.jsx'
 import { api } from '../lib/api.js'
 import { useAuth } from '../context/AuthContext.jsx'
-import { fecha } from '../lib/fecha.js'
+import { fecha, hoy as hoyLocal } from '../lib/fecha.js'
 import TituloModulo from '../components/ui/TituloModulo.jsx'
+import { useAbrirDesdeEnlace } from '../lib/enlaces.js'
 
 const ES_NC = (t) => t === 'nc_mayor' || t === 'nc_menor'
 
@@ -47,7 +48,7 @@ const COLOR_ESTADO = {
 
 const FORM_VACIO = {
   tipo: 'nc_menor', fuente: 'auditoria_interna', proceso: '', descripcion: '',
-  requisito: '', lugar: '', fecha_deteccion: new Date().toISOString().slice(0, 10),
+  requisito: '', lugar: '', fecha_deteccion: hoyLocal(),
 }
 
 export default function Hallazgos() {
@@ -146,6 +147,8 @@ export default function Hallazgos() {
       </select>
     </div>
   )
+
+  useAbrirDesdeEnlace(abrirDetalle)   // enlace directo ?abrir=<id> (búsqueda, Mis tareas, campana)
 
   return (
     <div className="space-y-4">
@@ -292,7 +295,7 @@ export default function Hallazgos() {
               <p><strong className="text-slate-700 dark:text-slate-200">Detección:</strong> {fecha(detalle.fecha_deteccion)}{detalle.lugar ? ` — ${detalle.lugar}` : ''}</p>
               {detalle.auditoria_codigo && <p><strong className="text-slate-700 dark:text-slate-200">Auditoría:</strong> {detalle.auditoria_codigo}</p>}
               {detalle.requisito && <p><strong className="text-slate-700 dark:text-slate-200">Requisito:</strong> {detalle.requisito}</p>}
-              <p><strong className="text-slate-700 dark:text-slate-200">Responsable:</strong> {detalle.responsable_nombre || 'Por designar (al evaluar la solicitud de acción correctiva)'}</p>
+              <p><strong className="text-slate-700 dark:text-slate-200">Responsable:</strong> {detalle.responsable_nombre || (detalle.tratamiento === 'riesgos_oportunidades' ? 'Por designar (en Riesgos y oportunidades)' : 'Por designar (al evaluar la solicitud de acción correctiva)')}</p>
               <p><strong className="text-slate-700 dark:text-slate-200">Registró:</strong> {detalle.registrado_por || '—'}</p>
             </div>
 
@@ -343,7 +346,7 @@ export default function Hallazgos() {
                 <p className="mb-1 font-semibold text-violet-600 dark:text-violet-400">Reclasificaciones</p>
                 {detalle.reclasificaciones.map((r, i) => (
                   <p key={i} className="text-slate-600 dark:text-slate-300">
-                    {r.fecha?.slice(0, 10)} · {r.de} → {r.a} ({r.codigo_anterior}) · {r.usuario}: {r.motivo}
+                    {fecha(r.fecha)} · {r.de} → {r.a} ({r.codigo_anterior}) · {r.usuario}: {r.motivo}
                   </p>
                 ))}
               </div>

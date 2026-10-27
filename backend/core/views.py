@@ -29,6 +29,16 @@ from .serializers import (
 )
 
 
+def _toca_admin(request, roles):
+    """Asignar o quitar el rol de Administrador del Sistema solo lo hace el propietario (superusuario)."""
+    if request.user.is_superuser:
+        return None
+    if any(r.es_admin_sistema for r in roles):
+        return Response({'detail': 'Solo el propietario del sistema asigna o retira el rol de Administrador del '
+                                   'Sistema.'}, status=status.HTTP_403_FORBIDDEN)
+    return None
+
+
 def invalidar_sesiones(usuario):
     """
     Invalida todas las sesiones JWT activas del usuario (flujo 0.1:
@@ -55,8 +65,9 @@ class UsuarioViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         qs = super().get_queryset()
-        # Por defecto solo activos; ?incluir_inactivos=1 muestra todos
-        if self.request.query_params.get('incluir_inactivos') != '1':
+        # Por defecto el listado muestra solo activos (?incluir_inactivos=1 muestra todos); el detalle y las acciones
+        # (p. ej. reactivar) encuentran también a los inactivos.
+        if self.action == 'list' and self.request.query_params.get('incluir_inactivos') != '1':
             qs = qs.filter(is_active=True)
         area = self.request.query_params.get('area')
         laboratorio = self.request.query_params.get('laboratorio')
@@ -73,6 +84,13 @@ class UsuarioViewSet(viewsets.ModelViewSet):
                 Q(cargo__icontains=buscar)
             )
         return qs
+
+    def update(self, request, *args, **kwargs):
+        usuario = self.get_object()
+        if usuario.is_superuser and not request.user.is_superuser:
+            return Response({'detail': 'Solo el propietario del sistema modifica su propia cuenta.'},
+                            status=status.HTTP_403_FORBIDDEN)
+        return super().update(request, *args, **kwargs)
 
     def destroy(self, request, *args, **kwargs):
         """Soft delete: desactiva el usuario e invalida sus sesiones."""
@@ -96,9 +114,11 @@ class UsuarioViewSet(viewsets.ModelViewSet):
     def activar(self, request, pk=None):
         """Reactiva un usuario desactivado."""
         usuario = self.get_object()
+        if usuario.is_active:
+            return Response(UsuarioSerializer(usuario, context={'request': request}).data)
         usuario.is_active = True
         usuario.save()
-        return Response(UsuarioSerializer(usuario).data)
+        return Response(UsuarioSerializer(usuario, context={'request': request}).data)
     activar.operacion = 'editar'
 
     @action(detail=True, methods=['post'])
@@ -115,8 +135,17 @@ class UsuarioViewSet(viewsets.ModelViewSet):
                 {'detail': 'Uno o más roles no existen o están inactivos.'},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        actuales = {ru.rol_id: ru for ru in usuario.roles_asignados.all()}
+        actuales = {ru.rol_id: ru for ru in usuario.roles_asignados.select_related('rol')}
         deseados = {rol.id for rol in roles}
+        if usuario.is_superuser and not request.user.is_superuser:
+            return Response({'detail': 'Solo el propietario del sistema modifica su propia cuenta.'},
+                            status=status.HTTP_403_FORBIDDEN)
+        # Roles que se agregan o se quitan: si alguno es el de administrador, solo el propietario.
+        cambian = [r for r in roles if r.id not in actuales or not actuales[r.id].is_active] + \
+                  [ru.rol for rid, ru in actuales.items() if ru.is_active and rid not in deseados]
+        bloqueo = _toca_admin(request, cambian)
+        if bloqueo:
+            return bloqueo
         for rol_id, ru in actuales.items():
             nuevo_estado = rol_id in deseados
             if ru.is_active != nuevo_estado:
@@ -173,8 +202,9 @@ class RolViewSet(viewsets.ModelViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class PermisoViewSet(viewsets.ModelViewSet):
-    """Gestión directa de permisos individuales (alternativa al anidado en Rol)."""
+class PermisoViewSet(viewsets.ReadOnlyModelViewSet):
+    """Consulta de permisos individuales. Se modifican solo desde el rol (matriz anidada), donde se protege el rol de
+    administrador y no hay borrado físico."""
     queryset = Permiso.objects.all().select_related('rol')
     serializer_class = PermisoSerializer
     permission_classes = [PermisoModular]
@@ -188,8 +218,9 @@ class PermisoViewSet(viewsets.ModelViewSet):
         return qs
 
 
-class RolUsuarioViewSet(viewsets.ModelViewSet):
-    """Asignaciones individuales de rol a usuario."""
+class RolUsuarioViewSet(viewsets.ReadOnlyModelViewSet):
+    """Consulta de asignaciones de rol. Se asignan con «asignar_roles» del usuario (protege el rol de administrador y
+    no borra físicamente)."""
     queryset = RolUsuario.objects.all().select_related('usuario', 'rol')
     serializer_class = RolUsuarioSerializer
     permission_classes = [PermisoModular]

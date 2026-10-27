@@ -1,0 +1,1534 @@
+{
+ "programa_2026": [
+  {
+   "tema": "PARTE 4: ME-003 Procedimiento para la Calibración de Manómetros, Vacuómetros y Manovacuómetros",
+   "responsable": "David Lara",
+   "alcance": "areas",
+   "areas": [
+    "LABS"
+   ],
+   "dirigido_texto": "Metrología",
+   "fecha_programada": "2026-01-17",
+   "fecha_realizada": "2026-01-17",
+   "horas": 1.5,
+   "tipo": "metrologia",
+   "vb": "GSIG",
+   "reprogramaciones": []
+  },
+  {
+   "tema": "Lucha contra incendios",
+   "responsable": "Ana Aguilar",
+   "alcance": "todos",
+   "areas": [],
+   "dirigido_texto": "",
+   "fecha_programada": "2026-01-24",
+   "fecha_realizada": "2026-01-24",
+   "horas": 1.5,
+   "tipo": "sst",
+   "vb": "GSIG",
+   "reprogramaciones": []
+  },
+  {
+   "tema": "Taller de Manejo de extintores - Sede AG",
+   "responsable": "Ana Aguilar",
+   "alcance": "todos",
+   "areas": [],
+   "dirigido_texto": "",
+   "fecha_programada": "2026-01-31",
+   "fecha_realizada": "2026-01-31",
+   "horas": 1.0,
+   "tipo": "sst",
+   "vb": "GSIG",
+   "reprogramaciones": []
+  },
+  {
+   "tema": "Taller de Manejo de extintores - Sede SC",
+   "responsable": "Miryam Canaza",
+   "alcance": "todos",
+   "areas": [],
+   "dirigido_texto": "",
+   "fecha_programada": "2026-02-07",
+   "fecha_realizada": "2026-02-07",
+   "horas": 1.0,
+   "tipo": "sst",
+   "vb": "GSIG",
+   "reprogramaciones": []
+  },
+  {
+   "tema": "Aseguramiento de la Validez de Resultados",
+   "responsable": "Guillermo Bardales",
+   "alcance": "areas",
+   "areas": [
+    "LABS"
+   ],
+   "dirigido_texto": "Metrología",
+   "fecha_programada": "2026-02-07",
+   "fecha_realizada": "2026-02-07",
+   "horas": 1.5,
+   "tipo": "metrologia",
+   "vb": "GSIG",
+   "reprogramaciones": []
+  },
+  {
+   "tema": "5. Puntos a considerar en calibración de autoclaves",
+   "responsable": "Jose Serrano",
+   "alcance": "areas",
+   "areas": [
+    "Gerencia Comercial y Marketing"
+   ],
+   "dirigido_texto": "Comercial",
+   "fecha_programada": "2026-02-10",
+   "fecha_realizada": "2026-02-10",
+   "horas": 1.0,
+   "tipo": "metrologia",
+   "vb": "GSIG",
+   "reprogramaciones": []
+  },
+  {
+   "tema": "SIG-PRO-01 Gestión de Documentos Ver. 00",
+   "responsable": "Cesar Soto",
+   "alcance": "otros",
+   "areas": [],
+   "dirigido_texto": "Coordinadores de área",
+   "fecha_programada": "2026-02-12",
+   "fecha_realizada": "2026-02-12",
+   "horas": 2.0,
+   "tipo": "sig",
+   "vb": "GSIG",
+   "reprogramaciones": []
+  },
+  {
+   "tema": "Reglamento Interno de seguridad y salud en el trabajo",
+   "responsable": "Ana Aguilar",
+   "alcance": "todos",
+   "areas": [],
+   "dirigido_texto": "",
+   "fecha_programada": "2026-02-21",
+   "fecha_realizada": "2026-02-21",
+   "horas": 1.5,
+   "tipo": "sst",
+   "vb": "GSIG",
+   "reprogramaciones": []
+  },
+  {
+   "tema": "Reglamento Interno de Trabajo",
+   "responsable": "Kimberly Alba",
+   "alcance": "todos",
+   "areas": [],
+   "dirigido_texto": "",
+   "fecha_programada": "2026-02-14",
+   "fecha_realizada": "2026-05-14",
+   "horas": 1.5,
+   "tipo": "rrhh",
+   "vb": "GSIG",
+   "reprogramaciones": [
+    {
+     "de": "2026-02-14",
+     "a": "2026-05-14",
+     "motivo": "Reprogramada en el programa (registro en Excel)"
+    }
+   ]
+  },
+  {
+   "tema": "Politicas de la Empresa",
+   "responsable": "Rocio Sullca",
+   "alcance": "todos",
+   "areas": [],
+   "dirigido_texto": "",
+   "fecha_programada": "2026-02-21",
+   "fecha_realizada": null,
+   "horas": 1.5,
+   "tipo": "rrhh",
+   "vb": "GSIG",
+   "reprogramaciones": [
+    {
+     "de": "2026-02-21",
+     "a": null,
+     "motivo": "Reprogramada sin nueva fecha (registro en Excel)"
+    }
+   ]
+  },
+  {
+   "tema": "Diferencias y Criterios para la Emisión de Certificados de Calibración, Operatividad y Verificación",
+   "responsable": "Guillermo Bardales",
+   "alcance": "todos",
+   "areas": [],
+   "dirigido_texto": "",
+   "fecha_programada": "2026-02-28",
+   "fecha_realizada": "2026-02-28",
+   "horas": 1.0,
+   "tipo": "metrologia",
+   "vb": "",
+   "reprogramaciones": []
+  },
+  {
+   "tema": "Atencion a Primeros auxilios",
+   "responsable": "Externo",
+   "alcance": "todos",
+   "areas": [],
+   "dirigido_texto": "",
+   "fecha_programada": "2026-03-14",
+   "fecha_realizada": "2026-03-14",
+   "horas": 3.0,
+   "tipo": "sst",
+   "vb": "GSIG",
+   "reprogramaciones": []
+  },
+  {
+   "tema": "EURAMET CG-15 Guidelines on the Calibration of Digital Multimeters Version 3.0 2015",
+   "responsable": "Miguel Chacca",
+   "alcance": "todos",
+   "areas": [],
+   "dirigido_texto": "",
+   "fecha_programada": "2026-03-21",
+   "fecha_realizada": "2026-03-21",
+   "horas": 2.0,
+   "tipo": "metrologia",
+   "vb": "GSIG",
+   "reprogramaciones": []
+  },
+  {
+   "tema": "Ética, Imparcialidad y Conflictos de Interés",
+   "responsable": "Guillermo Bardales",
+   "alcance": "todos",
+   "areas": [],
+   "dirigido_texto": "",
+   "fecha_programada": "2026-04-11",
+   "fecha_realizada": "2026-04-11",
+   "horas": 2.0,
+   "tipo": "calidad",
+   "vb": "GSIG",
+   "reprogramaciones": []
+  },
+  {
+   "tema": "SIG-P-05 Política de Antisoborno y Anticorrupción Ver. 00",
+   "responsable": "Miryam Canaza",
+   "alcance": "todos",
+   "areas": [],
+   "dirigido_texto": "",
+   "fecha_programada": "2026-04-18",
+   "fecha_realizada": "2026-04-18",
+   "horas": 1.0,
+   "tipo": "calidad",
+   "vb": "",
+   "reprogramaciones": []
+  },
+  {
+   "tema": "Uso racional del Agua y la Energia",
+   "responsable": "Miryam Canaza",
+   "alcance": "todos",
+   "areas": [],
+   "dirigido_texto": "",
+   "fecha_programada": "2026-04-25",
+   "fecha_realizada": "2026-04-25",
+   "horas": 1.5,
+   "tipo": "ambiental",
+   "vb": "GSIG",
+   "reprogramaciones": []
+  },
+  {
+   "tema": "Herramientas de maniobra para tornillos y tuercas. Herramientas dinamométricas manuales. Parte 2: Requisitos para la calibración y determinación de la incertidumbre de medida\". Noviembre 2019",
+   "responsable": "Emanuel Solorzano",
+   "alcance": "todos",
+   "areas": [],
+   "dirigido_texto": "",
+   "fecha_programada": "2026-05-09",
+   "fecha_realizada": "2026-05-09",
+   "horas": 1.5,
+   "tipo": "metrologia",
+   "vb": "GSIG",
+   "reprogramaciones": []
+  },
+  {
+   "tema": "PC-017 Procedimiento para la Calibración de Termómetros digitales. Segunda Edición - Diciembre 2012. SNM-INDECOPI.",
+   "responsable": "Jose Serrano",
+   "alcance": "todos",
+   "areas": [],
+   "dirigido_texto": "",
+   "fecha_programada": "2026-05-23",
+   "fecha_realizada": "2026-06-27",
+   "horas": 2.0,
+   "tipo": "metrologia",
+   "vb": "GSIG",
+   "reprogramaciones": [
+    {
+     "de": "2026-05-23",
+     "a": "2026-06-27",
+     "motivo": "Reprogramada en el programa (registro en Excel)"
+    }
+   ]
+  },
+  {
+   "tema": "Identificación de Peligros, Evaluación de Riesgos y Controles",
+   "responsable": "Miryam Canaza",
+   "alcance": "todos",
+   "areas": [],
+   "dirigido_texto": "",
+   "fecha_programada": "2026-06-20",
+   "fecha_realizada": "2026-06-20",
+   "horas": 1.5,
+   "tipo": "sst",
+   "vb": "GSIG",
+   "reprogramaciones": []
+  },
+  {
+   "tema": "Aspectos e Impactos Ambientales",
+   "responsable": "Miryam Canaza",
+   "alcance": "todos",
+   "areas": [],
+   "dirigido_texto": "",
+   "fecha_programada": "2026-07-18",
+   "fecha_realizada": "2026-07-18",
+   "horas": 1.0,
+   "tipo": "ambiental",
+   "vb": "GSIG",
+   "reprogramaciones": []
+  },
+  {
+   "tema": "PC-025 Procedimiento para la Calibración de Pinzas Amperimétricas - 1° Ed. Enero 2019 INACAL-DM",
+   "responsable": "Sebastian Gordillo",
+   "alcance": "todos",
+   "areas": [],
+   "dirigido_texto": "",
+   "fecha_programada": "2026-07-30",
+   "fecha_realizada": "2026-07-30",
+   "horas": 1.5,
+   "tipo": "metrologia",
+   "vb": "GSIG",
+   "reprogramaciones": []
+  },
+  {
+   "tema": "Prevención y Sancion al Hostigamiendo Sexual e igualdad de Genero (Creación de Entornos de Trabajo Seguros)",
+   "responsable": "Kimberly Alba",
+   "alcance": "todos",
+   "areas": [],
+   "dirigido_texto": "",
+   "fecha_programada": "2026-07-31",
+   "fecha_realizada": "2026-07-31",
+   "horas": 1.0,
+   "tipo": "sst",
+   "vb": "GSIG",
+   "reprogramaciones": []
+  },
+  {
+   "tema": "Uso de Equipos de Protección Personal",
+   "responsable": "Miryam Canaza",
+   "alcance": "todos",
+   "areas": [],
+   "dirigido_texto": "",
+   "fecha_programada": "2026-08-22",
+   "fecha_realizada": "2026-08-22",
+   "horas": 2.0,
+   "tipo": "sst",
+   "vb": "GSIG",
+   "reprogramaciones": []
+  },
+  {
+   "tema": "Importancia del ajuste correcto para asegurar la validez de las mediciones",
+   "responsable": "Daniel Ramos.",
+   "alcance": "todos",
+   "areas": [],
+   "dirigido_texto": "",
+   "fecha_programada": "2026-08-28",
+   "fecha_realizada": "2026-08-28",
+   "horas": 2.0,
+   "tipo": "metrologia",
+   "vb": "GSIG",
+   "reprogramaciones": []
+  },
+  {
+   "tema": "Manejo y segregacion de Residuos Sólidos",
+   "responsable": "Miryam Canaza",
+   "alcance": "todos",
+   "areas": [],
+   "dirigido_texto": "",
+   "fecha_programada": "2026-09-12",
+   "fecha_realizada": "2026-09-19",
+   "horas": 1.0,
+   "tipo": "ambiental",
+   "vb": "GSIG",
+   "reprogramaciones": []
+  },
+  {
+   "tema": "PC-017 Procedimiento para la calibración de termómetros digitales",
+   "responsable": "Aldo Pari",
+   "alcance": "todos",
+   "areas": [],
+   "dirigido_texto": "",
+   "fecha_programada": "2026-09-12",
+   "fecha_realizada": "2026-09-12",
+   "horas": 1.0,
+   "tipo": "metrologia",
+   "vb": "GSIG",
+   "reprogramaciones": []
+  },
+  {
+   "tema": "PC-026 Procedimiento para la calibración de higrómetros y termómetros ambientales - 1° Ed. Diciembre 2019 INACAL-DM",
+   "responsable": "Aldo Pari",
+   "alcance": "todos",
+   "areas": [],
+   "dirigido_texto": "",
+   "fecha_programada": "2026-09-12",
+   "fecha_realizada": "2026-09-12",
+   "horas": 1.0,
+   "tipo": "metrologia",
+   "vb": "GSIG",
+   "reprogramaciones": []
+  },
+  {
+   "tema": "ASME.B40.200 Procedimiento para la calibración de termómetros analógicos",
+   "responsable": "Aldo Pari",
+   "alcance": "todos",
+   "areas": [],
+   "dirigido_texto": "",
+   "fecha_programada": "2026-09-12",
+   "fecha_realizada": "2026-09-12",
+   "horas": 1.0,
+   "tipo": "metrologia",
+   "vb": "GSIG",
+   "reprogramaciones": []
+  },
+  {
+   "tema": "Manipulación Segura de Sustancias Químicas",
+   "responsable": "Miryam Canaza",
+   "alcance": "areas",
+   "areas": [
+    "LABS"
+   ],
+   "dirigido_texto": "Metrología",
+   "fecha_programada": "2026-09-26",
+   "fecha_realizada": null,
+   "horas": 2.0,
+   "tipo": "sst",
+   "vb": "GSIG",
+   "reprogramaciones": [
+    {
+     "de": "2026-09-26",
+     "a": "2026-10-24",
+     "motivo": "Reprogramada en el programa (registro en Excel)"
+    }
+   ]
+  },
+  {
+   "tema": "PC-012 Procedimiento para la Calibración de Pie de Rey - 5° Ed. Agosto 2012 SNM-INDECOPI",
+   "responsable": "Leonardo Champoñan",
+   "alcance": "todos",
+   "areas": [],
+   "dirigido_texto": "",
+   "fecha_programada": "2026-10-31",
+   "fecha_realizada": null,
+   "horas": 1.5,
+   "tipo": "metrologia",
+   "vb": "GSIG",
+   "reprogramaciones": []
+  },
+  {
+   "tema": "Prevención del Hostigamiento Sexual Laboral",
+   "responsable": "Kimberly Alba",
+   "alcance": "todos",
+   "areas": [],
+   "dirigido_texto": "",
+   "fecha_programada": "2026-10-24",
+   "fecha_realizada": null,
+   "horas": 1.5,
+   "tipo": "rrhh",
+   "vb": "GSIG",
+   "reprogramaciones": []
+  },
+  {
+   "tema": "Riesgos disergonómicos y psicosociales",
+   "responsable": "Externo",
+   "alcance": "todos",
+   "areas": [],
+   "dirigido_texto": "",
+   "fecha_programada": "2026-11-26",
+   "fecha_realizada": null,
+   "horas": 1.0,
+   "tipo": "sst",
+   "vb": "GSIG",
+   "reprogramaciones": []
+  },
+  {
+   "tema": "MT-014 \"Procedimiento interno para la calibración de termómetros infrarrojos.\" Primera edición, 2024. METRINDUST S.A.C.",
+   "responsable": "Jose Serrano",
+   "alcance": "todos",
+   "areas": [],
+   "dirigido_texto": "",
+   "fecha_programada": "2026-11-12",
+   "fecha_realizada": null,
+   "horas": 1.5,
+   "tipo": "metrologia",
+   "vb": "GSIG",
+   "reprogramaciones": []
+  },
+  {
+   "tema": "Disposición de Residuos calificados como RAEE",
+   "responsable": "Miryam Canaza",
+   "alcance": "todos",
+   "areas": [],
+   "dirigido_texto": "",
+   "fecha_programada": "2026-11-19",
+   "fecha_realizada": null,
+   "horas": 1.5,
+   "tipo": "ambiental",
+   "vb": "GSIG",
+   "reprogramaciones": []
+  },
+  {
+   "tema": "Pausas Activas como Prevención de Lesiones Laborales",
+   "responsable": "Kimberly Alba",
+   "alcance": "todos",
+   "areas": [],
+   "dirigido_texto": "",
+   "fecha_programada": "2026-12-14",
+   "fecha_realizada": null,
+   "horas": 1.0,
+   "tipo": "sst",
+   "vb": "GSIG",
+   "reprogramaciones": []
+  },
+  {
+   "tema": "Hojas de seguridad + Rombo NFPA",
+   "responsable": "Externo",
+   "alcance": "todos",
+   "areas": [],
+   "dirigido_texto": "",
+   "fecha_programada": "2026-12-14",
+   "fecha_realizada": null,
+   "horas": 1.0,
+   "tipo": "sst",
+   "vb": "GSIG",
+   "reprogramaciones": []
+  }
+ ],
+ "programa_2025": [
+  {
+   "tema": "Electrónica básica",
+   "responsable": "Giordano Ibarra",
+   "alcance": "todos",
+   "areas": [],
+   "dirigido_texto": "",
+   "fecha_programada": "2025-02-14",
+   "fecha_realizada": "2025-02-14",
+   "horas": 0.5,
+   "tipo": "metrologia",
+   "vb": "GC",
+   "reprogramaciones": []
+  },
+  {
+   "tema": "Trabajo No conformes, No conformidades y Acciones correctiva",
+   "responsable": "Frank Alfaro",
+   "alcance": "todos",
+   "areas": [],
+   "dirigido_texto": "",
+   "fecha_programada": "2025-02-22",
+   "fecha_realizada": "2025-02-22",
+   "horas": 1.5,
+   "tipo": "calidad",
+   "vb": "GC",
+   "reprogramaciones": []
+  },
+  {
+   "tema": "Comunicación asertiva, canales y dirección de la comunicación",
+   "responsable": "David Lara",
+   "alcance": "todos",
+   "areas": [],
+   "dirigido_texto": "",
+   "fecha_programada": "2025-03-06",
+   "fecha_realizada": "2025-03-06",
+   "horas": 1.0,
+   "tipo": "calidad",
+   "vb": "GC",
+   "reprogramaciones": []
+  },
+  {
+   "tema": "Aspectos generales en procesos de auditoria en base a la Norma ISO 19011:2018",
+   "responsable": "Saul Garcia",
+   "alcance": "todos",
+   "areas": [],
+   "dirigido_texto": "",
+   "fecha_programada": "2025-03-15",
+   "fecha_realizada": "2025-03-15",
+   "horas": 2.0,
+   "tipo": "calidad",
+   "vb": "GC",
+   "reprogramaciones": []
+  },
+  {
+   "tema": "PC-018 Procedimiento para la calibración de Medios Isotérmicos",
+   "responsable": "Yajaira Avalos",
+   "alcance": "areas",
+   "areas": [
+    "Gerencia Comercial y Marketing",
+    "LABS"
+   ],
+   "dirigido_texto": "Comercial y Metrología",
+   "fecha_programada": "2025-04-12",
+   "fecha_realizada": "2025-04-12",
+   "horas": 0.75,
+   "tipo": "metrologia",
+   "vb": "GC",
+   "reprogramaciones": []
+  },
+  {
+   "tema": "Cursos de Intereptación del SIG 9001, 14001 y 45001",
+   "responsable": "Ernesto Bautista",
+   "alcance": "todos",
+   "areas": [],
+   "dirigido_texto": "",
+   "fecha_programada": "2025-04-26",
+   "fecha_realizada": "2025-04-25",
+   "horas": 4.0,
+   "tipo": "sig",
+   "vb": "GC",
+   "reprogramaciones": []
+  },
+  {
+   "tema": "PC-020 Procedimiento para la calibración de Medidores de PH",
+   "responsable": "Mauricio Lopez",
+   "alcance": "areas",
+   "areas": [
+    "Gerencia Comercial y Marketing",
+    "LABS"
+   ],
+   "dirigido_texto": "Comercial y Metrología",
+   "fecha_programada": "2025-05-10",
+   "fecha_realizada": "2025-05-10",
+   "horas": 1.0,
+   "tipo": "metrologia",
+   "vb": "GC",
+   "reprogramaciones": []
+  },
+  {
+   "tema": "Objetivos de calidad, Política de Calidad, Misión, Visión y Servicios Acreditados.",
+   "responsable": "Ana Aguilar",
+   "alcance": "todos",
+   "areas": [],
+   "dirigido_texto": "",
+   "fecha_programada": "2025-05-17",
+   "fecha_realizada": "2025-05-17",
+   "horas": 0.4,
+   "tipo": "calidad",
+   "vb": "GC",
+   "reprogramaciones": []
+  },
+  {
+   "tema": "PGC-22 Confidencialidad e Imparcialidad",
+   "responsable": "Ana Aguilar",
+   "alcance": "todos",
+   "areas": [],
+   "dirigido_texto": "",
+   "fecha_programada": "2025-05-17",
+   "fecha_realizada": "2025-05-17",
+   "horas": 0.5,
+   "tipo": "calidad",
+   "vb": "GC",
+   "reprogramaciones": []
+  },
+  {
+   "tema": "Funciones y elección del comité de SST",
+   "responsable": "Miguel Valencia",
+   "alcance": "todos",
+   "areas": [],
+   "dirigido_texto": "",
+   "fecha_programada": "2025-05-21",
+   "fecha_realizada": "2025-05-21",
+   "horas": 2.0,
+   "tipo": "sst",
+   "vb": "GC",
+   "reprogramaciones": []
+  },
+  {
+   "tema": "PGC-16 Elaboración y emisión de certificados.",
+   "responsable": "Zait Ramos",
+   "alcance": "todos",
+   "areas": [],
+   "dirigido_texto": "",
+   "fecha_programada": "2025-05-28",
+   "fecha_realizada": "2025-05-28",
+   "horas": 0.5,
+   "tipo": "metrologia",
+   "vb": "GC",
+   "reprogramaciones": []
+  },
+  {
+   "tema": "Identificación de Peligros y Evaluación de Riesgos y Determinación de Controles - IPERC",
+   "responsable": "Miguel Valencia",
+   "alcance": "todos",
+   "areas": [],
+   "dirigido_texto": "",
+   "fecha_programada": "2025-05-31",
+   "fecha_realizada": "2025-05-31",
+   "horas": 1.5,
+   "tipo": "sst",
+   "vb": "GC",
+   "reprogramaciones": []
+  },
+  {
+   "tema": "Identificación de Aspectos y Evaluación de Impactos ambientales - Matriz de Aspectos Ambientales",
+   "responsable": "Miguel Valencia",
+   "alcance": "todos",
+   "areas": [],
+   "dirigido_texto": "",
+   "fecha_programada": "2025-05-31",
+   "fecha_realizada": "2025-05-31",
+   "horas": 1.5,
+   "tipo": "ambiental",
+   "vb": "GC",
+   "reprogramaciones": []
+  },
+  {
+   "tema": "Metrología eléctrica: Telurómetros, Megómetros, Multimetros, Pinzas.",
+   "responsable": "Guillermo Bardales",
+   "alcance": "areas",
+   "areas": [
+    "Laboratorio de Electricidad y Potencia"
+   ],
+   "dirigido_texto": "Lab. Electricidad y Potencia",
+   "fecha_programada": "2025-06-03",
+   "fecha_realizada": "2025-06-03",
+   "horas": 2.0,
+   "tipo": "metrologia",
+   "vb": "GC",
+   "reprogramaciones": []
+  },
+  {
+   "tema": "EURAMET-021 Calibration Guideline No. 21 version 3.0-2024 y Guia técnica CENAM",
+   "responsable": "Jorge Gutierrez",
+   "alcance": "areas",
+   "areas": [
+    "LABS"
+   ],
+   "dirigido_texto": "Metrología",
+   "fecha_programada": "2025-06-09",
+   "fecha_realizada": "2025-06-09",
+   "horas": 10.0,
+   "tipo": "metrologia",
+   "vb": "GC",
+   "reprogramaciones": []
+  },
+  {
+   "tema": "No Conformidades y Acciones correctivas en el SIG 9001, 14001 y 45001",
+   "responsable": "Ernesto Bautista",
+   "alcance": "todos",
+   "areas": [],
+   "dirigido_texto": "",
+   "fecha_programada": "2025-06-21",
+   "fecha_realizada": "2025-06-21",
+   "horas": 1.0,
+   "tipo": "sig",
+   "vb": "GC",
+   "reprogramaciones": []
+  },
+  {
+   "tema": "Identificación y Tratamiento de Servicios o salidas no conformes",
+   "responsable": "Ernesto Bautista",
+   "alcance": "todos",
+   "areas": [],
+   "dirigido_texto": "",
+   "fecha_programada": "2025-06-21",
+   "fecha_realizada": "2025-06-21",
+   "horas": 1.0,
+   "tipo": "sig",
+   "vb": "GC",
+   "reprogramaciones": []
+  },
+  {
+   "tema": "Tratamiento de Quejas y reclamos",
+   "responsable": "Ernesto Bautista",
+   "alcance": "areas",
+   "areas": [
+    "Gerencia Comercial y Marketing",
+    "Logística"
+   ],
+   "dirigido_texto": "Comercial y Logística",
+   "fecha_programada": "2025-06-21",
+   "fecha_realizada": "2025-06-21",
+   "horas": 0.5,
+   "tipo": "calidad",
+   "vb": "GC",
+   "reprogramaciones": []
+  },
+  {
+   "tema": "Inspecciones de SST",
+   "responsable": "Miguel Valencia",
+   "alcance": "otros",
+   "areas": [],
+   "dirigido_texto": "Personal del Comité de SST",
+   "fecha_programada": "2025-06-25",
+   "fecha_realizada": "2025-06-25",
+   "horas": 1.0,
+   "tipo": "sst",
+   "vb": "GC",
+   "reprogramaciones": []
+  },
+  {
+   "tema": "PC-001 Procedimiento para la Calibración de Instrumentos de Pesaje de Funcionamiento No Automático Clase III y IIII de la NMP 003-2009 - 2° Ed. Marzo 2025 INACAL-DM",
+   "responsable": "Edher Dávila",
+   "alcance": "todos",
+   "areas": [],
+   "dirigido_texto": "",
+   "fecha_programada": "2025-06-28",
+   "fecha_realizada": "2025-06-28",
+   "horas": 2.5,
+   "tipo": "metrologia",
+   "vb": "GC",
+   "reprogramaciones": []
+  },
+  {
+   "tema": "PC-012 Procedimiento para la Calibración de Pie de Rey - 5° Ed. Agosto 2012 SNM-INDECOPI",
+   "responsable": "Juan Gonzales",
+   "alcance": "areas",
+   "areas": [
+    "LABS"
+   ],
+   "dirigido_texto": "Metrología",
+   "fecha_programada": "2025-06-28",
+   "fecha_realizada": "2025-06-28",
+   "horas": 1.5,
+   "tipo": "metrologia",
+   "vb": "GC",
+   "reprogramaciones": []
+  },
+  {
+   "tema": "Segregación de Residuos (Peligrosos y no peligrosos)",
+   "responsable": "Miguel Valencia",
+   "alcance": "todos",
+   "areas": [],
+   "dirigido_texto": "",
+   "fecha_programada": "2025-06-26",
+   "fecha_realizada": "2025-06-26",
+   "horas": 1.0,
+   "tipo": "ambiental",
+   "vb": "GC",
+   "reprogramaciones": []
+  },
+  {
+   "tema": "Uso responsable de recursos (Agua, Luz y papel)",
+   "responsable": "Gianella Schaus",
+   "alcance": "todos",
+   "areas": [],
+   "dirigido_texto": "",
+   "fecha_programada": "2025-07-12",
+   "fecha_realizada": "2025-07-12",
+   "horas": 1.0,
+   "tipo": "ambiental",
+   "vb": "GC",
+   "reprogramaciones": []
+  },
+  {
+   "tema": "Estimación de la incertidumbre en la Metrología Dimensional.",
+   "responsable": "Jannet Carrasco",
+   "alcance": "areas",
+   "areas": [
+    "LABS"
+   ],
+   "dirigido_texto": "Metrología",
+   "fecha_programada": "2025-07-11",
+   "fecha_realizada": "2025-07-12",
+   "horas": 1.5,
+   "tipo": "metrologia",
+   "vb": "GC",
+   "reprogramaciones": []
+  },
+  {
+   "tema": "Hostigamiento Sexual",
+   "responsable": "Gianella Schaus",
+   "alcance": "todos",
+   "areas": [],
+   "dirigido_texto": "",
+   "fecha_programada": "2025-07-12",
+   "fecha_realizada": "2025-07-12",
+   "horas": 1.5,
+   "tipo": "sst",
+   "vb": "GC",
+   "reprogramaciones": []
+  },
+  {
+   "tema": "Incertidumbre en Metrología - Parte I",
+   "responsable": "Guillermo Bardales",
+   "alcance": "areas",
+   "areas": [
+    "LABS"
+   ],
+   "dirigido_texto": "Metrología",
+   "fecha_programada": "2025-07-26",
+   "fecha_realizada": "2025-07-26",
+   "horas": 1.5,
+   "tipo": "metrologia",
+   "vb": "GC",
+   "reprogramaciones": []
+  },
+  {
+   "tema": "Preparación y respuesta ante emergencias",
+   "responsable": "Miguel Valencia",
+   "alcance": "todos",
+   "areas": [],
+   "dirigido_texto": "",
+   "fecha_programada": "2025-08-09",
+   "fecha_realizada": "2025-08-09",
+   "horas": 2.5,
+   "tipo": "sst",
+   "vb": "GC",
+   "reprogramaciones": []
+  },
+  {
+   "tema": "Incertidumbre en Metrología - Parte II",
+   "responsable": "Guillermo Bardales",
+   "alcance": "areas",
+   "areas": [
+    "LABS"
+   ],
+   "dirigido_texto": "Metrología",
+   "fecha_programada": "2025-08-09",
+   "fecha_realizada": "2025-08-09",
+   "horas": 1.5,
+   "tipo": "metrologia",
+   "vb": "GC",
+   "reprogramaciones": []
+  },
+  {
+   "tema": "Ley 29783, DS 005-2012 y sus modificatorias",
+   "responsable": "Miguel Valencia",
+   "alcance": "todos",
+   "areas": [],
+   "dirigido_texto": "",
+   "fecha_programada": "2025-08-16",
+   "fecha_realizada": "2025-08-09",
+   "horas": 1.6,
+   "tipo": "sst",
+   "vb": "GC",
+   "reprogramaciones": []
+  },
+  {
+   "tema": "No conformidades técnicas en laboratorios",
+   "responsable": "Zenaida Enciso",
+   "alcance": "todos",
+   "areas": [],
+   "dirigido_texto": "",
+   "fecha_programada": "2025-08-23",
+   "fecha_realizada": "2025-08-23",
+   "horas": 2.0,
+   "tipo": "metrologia",
+   "vb": "GC",
+   "reprogramaciones": []
+  },
+  {
+   "tema": "Formación de auditores internos en Sistemas Integrados de Gestión en base a las normas 9001:2015, 14001:2015 e ISO 45001:2018",
+   "responsable": "Ernesto Bautista",
+   "alcance": "otros",
+   "areas": [],
+   "dirigido_texto": "Dueños de procesos",
+   "fecha_programada": "2025-09-02",
+   "fecha_realizada": "2025-09-02",
+   "horas": 12.0,
+   "tipo": "sig",
+   "vb": "GC",
+   "reprogramaciones": []
+  },
+  {
+   "tema": "Incertidumbre en Metrología - Parte III",
+   "responsable": "Guillermo Bardales",
+   "alcance": "areas",
+   "areas": [
+    "LABS"
+   ],
+   "dirigido_texto": "Metrología",
+   "fecha_programada": "2025-09-06",
+   "fecha_realizada": "2025-09-06",
+   "horas": 1.5,
+   "tipo": "metrologia",
+   "vb": "GC",
+   "reprogramaciones": []
+  },
+  {
+   "tema": "Brigadas de emergencias",
+   "responsable": "Ana Aguilar",
+   "alcance": "todos",
+   "areas": [],
+   "dirigido_texto": "",
+   "fecha_programada": "2025-09-13",
+   "fecha_realizada": "2025-09-13",
+   "horas": 0.5,
+   "tipo": "sst",
+   "vb": "",
+   "reprogramaciones": []
+  },
+  {
+   "tema": "Manejo y uso de extintores",
+   "responsable": "Externo",
+   "alcance": "todos",
+   "areas": [],
+   "dirigido_texto": "",
+   "fecha_programada": "2025-09-13",
+   "fecha_realizada": "2025-09-13",
+   "horas": 1.0,
+   "tipo": "sst",
+   "vb": "",
+   "reprogramaciones": []
+  },
+  {
+   "tema": "Ergonomia en el trabajo",
+   "responsable": "Miguel Valencia",
+   "alcance": "todos",
+   "areas": [],
+   "dirigido_texto": "",
+   "fecha_programada": "2025-09-20",
+   "fecha_realizada": "2025-09-20",
+   "horas": 1.5,
+   "tipo": "sst",
+   "vb": "GC",
+   "reprogramaciones": []
+  },
+  {
+   "tema": "Incertidumbre en Metrología - Parte IV",
+   "responsable": "Guillermo Bardales",
+   "alcance": "areas",
+   "areas": [
+    "LABS"
+   ],
+   "dirigido_texto": "Metrología",
+   "fecha_programada": "2025-10-18",
+   "fecha_realizada": "2025-10-18",
+   "horas": 1.5,
+   "tipo": "metrologia",
+   "vb": "GC",
+   "reprogramaciones": []
+  },
+  {
+   "tema": "Fundamentos de la Metrología: Magnitud de presión",
+   "responsable": "David Lara",
+   "alcance": "areas",
+   "areas": [
+    "LABS"
+   ],
+   "dirigido_texto": "Metrología",
+   "fecha_programada": "2025-10-25",
+   "fecha_realizada": "2025-10-25",
+   "horas": 1.5,
+   "tipo": "metrologia",
+   "vb": "GC",
+   "reprogramaciones": []
+  },
+  {
+   "tema": "ME-003 Procedimiento para la Calibración de Manómetros, Vacuómetros y Manovacuómetros - Parte I",
+   "responsable": "David Lara",
+   "alcance": "areas",
+   "areas": [
+    "LABS"
+   ],
+   "dirigido_texto": "Metrología",
+   "fecha_programada": "2025-11-08",
+   "fecha_realizada": "2025-11-08",
+   "horas": 1.5,
+   "tipo": "metrologia",
+   "vb": "GC",
+   "reprogramaciones": []
+  },
+  {
+   "tema": "Gestión de Residuos Sólidos",
+   "responsable": "Ana Aguilar",
+   "alcance": "todos",
+   "areas": [],
+   "dirigido_texto": "",
+   "fecha_programada": "2025-11-15",
+   "fecha_realizada": "2025-11-15",
+   "horas": 1.5,
+   "tipo": "ambiental",
+   "vb": "GC",
+   "reprogramaciones": []
+  },
+  {
+   "tema": "Hojas de seguridad + Rombo NFPA",
+   "responsable": "Ana Aguilar",
+   "alcance": "todos",
+   "areas": [],
+   "dirigido_texto": "",
+   "fecha_programada": "2025-11-22",
+   "fecha_realizada": "2025-11-22",
+   "horas": 1.5,
+   "tipo": "sst",
+   "vb": "GC",
+   "reprogramaciones": []
+  },
+  {
+   "tema": "Reforzamiento: Uso responsable de agua, luz y papel",
+   "responsable": "Ana Aguilar",
+   "alcance": "todos",
+   "areas": [],
+   "dirigido_texto": "",
+   "fecha_programada": "2025-11-29",
+   "fecha_realizada": "2025-11-29",
+   "horas": 1.0,
+   "tipo": "ambiental",
+   "vb": "GC",
+   "reprogramaciones": []
+  },
+  {
+   "tema": "ME-003 Procedimiento para la Calibración de Manómetros, Vacuómetros y Manovacuómetros - Parte II",
+   "responsable": "David Lara",
+   "alcance": "areas",
+   "areas": [
+    "LABS"
+   ],
+   "dirigido_texto": "Metrología",
+   "fecha_programada": "2025-12-06",
+   "fecha_realizada": "2025-12-06",
+   "horas": 1.0,
+   "tipo": "metrologia",
+   "vb": "GC",
+   "reprogramaciones": []
+  }
+ ],
+ "plantillas": {
+  "organizacional": {
+   "temas": [
+    {
+     "grupo": "",
+     "tema": "Estructura organizacional",
+     "descripcion": "Presentación del organigrama, áreas, jerarquías y dependencias funcionales",
+     "codigo": ""
+    },
+    {
+     "grupo": "",
+     "tema": "Misión, Visión y Valores",
+     "descripcion": "Propósito institucional, visión de largo plazo y valores corporativos",
+     "codigo": ""
+    },
+    {
+     "grupo": "",
+     "tema": "Reglamento Interno de Trabajo",
+     "descripcion": "Derechos, obligaciones, horarios, faltas y sanciones",
+     "codigo": ""
+    },
+    {
+     "grupo": "",
+     "tema": "Condiciones laborales",
+     "descripcion": "Horarios de trabajo, descansos, beneficios, escalas salariales y modalidad de pago",
+     "codigo": ""
+    },
+    {
+     "grupo": "",
+     "tema": "Canales de comunicación internos",
+     "descripcion": "Correo corporativo, grupos de trabajo, reportes, reuniones y reuniones de área",
+     "codigo": ""
+    },
+    {
+     "grupo": "",
+     "tema": "Instalaciones y recursos",
+     "descripcion": "Recorrido por instalaciones: oficinas, laboratorios, almacenes, servicios y zonas restringidas",
+     "codigo": ""
+    },
+    {
+     "grupo": "",
+     "tema": "Gestión de Solicitud de Permisos ",
+     "descripcion": "Lineamientos para la solicitud, evaluación y aprobación de permisos fuera de la jornada laboral",
+     "codigo": "TH-PRO-02"
+    },
+    {
+     "grupo": "",
+     "tema": "Prevención y Sanción de Hostigamiento Sexual ",
+     "descripcion": "Lineamientos para prevenir, identificar, atender, investigar y sancionar los casos de hostigamiento sexual",
+     "codigo": "TH-PRO-03"
+    },
+    {
+     "grupo": "",
+     "tema": "Compensación de Horas Extras con Tiempo de Descanso ",
+     "descripcion": "Lineamientos para la compensación de horas extras laboradas",
+     "codigo": "TH-PRO-04 "
+    }
+   ],
+   "documentos": [
+    {
+     "documento": "Reglamento Interno de Trabajo (RIT)",
+     "codigo": "TH-RIT-01"
+    },
+    {
+     "documento": "Perfil de Puesto",
+     "codigo": "TH-MOF-01-r01"
+    },
+    {
+     "documento": "Contrato/convenio",
+     "codigo": ""
+    }
+   ],
+   "preguntas": [
+    {
+     "pregunta": "1. ¿Cuál es la misión y visión de METRINDUST S.A.C.?",
+     "puntos": 4
+    },
+    {
+     "pregunta": "2. Describa la estructura organizacional: ¿a qué área pertenece y quién es su jefe directo?",
+     "puntos": 3
+    },
+    {
+     "pregunta": "3. Mencione al menos tres valores o principios corporativos de la empresa.",
+     "puntos": 3
+    },
+    {
+     "pregunta": "4. ¿Cuáles son sus obligaciones y derechos según el Reglamento Interno de Trabajo?",
+     "puntos": 4
+    },
+    {
+     "pregunta": "5. ¿A quién debe reportar una situacion de acoso u hostigamiento sexual?",
+     "puntos": 3
+    },
+    {
+     "pregunta": "6. Mencione dos canales de comunicación interna que utilizará en su día a día.",
+     "puntos": 3
+    }
+   ],
+   "evaluacion_url": ""
+  },
+  "sig": {
+   "temas": [
+    {
+     "grupo": "GENERALIDADES DEL SIG",
+     "tema": "Manual del Sistema Integrado de Gestión",
+     "descripcion": "",
+     "codigo": "SIG-M-01"
+    },
+    {
+     "grupo": "GENERALIDADES DEL SIG",
+     "tema": "Política del SIG (Calidad, SST y Ambiental)",
+     "descripcion": "",
+     "codigo": "SIG-P-01"
+    },
+    {
+     "grupo": "GENERALIDADES DEL SIG",
+     "tema": "Objetivos del SIG y su seguimiento",
+     "descripcion": "",
+     "codigo": "SIG-OD-01"
+    },
+    {
+     "grupo": "GENERALIDADES DEL SIG",
+     "tema": "Mapa de procesos e interacción entre procesos",
+     "descripcion": "",
+     "codigo": "SIG-M-01"
+    },
+    {
+     "grupo": "GENERALIDADES DEL SIG",
+     "tema": "Gestión de Riesgos y Oportunidades",
+     "descripcion": "",
+     "codigo": "SIG-PRO-01"
+    },
+    {
+     "grupo": "CALIDAD — ISO 9001:2015 / NTP-ISO/IEC 17025:2017",
+     "tema": "Gestion de Documentos",
+     "descripcion": "",
+     "codigo": "SIG-PRO-01"
+    },
+    {
+     "grupo": "CALIDAD — ISO 9001:2015 / NTP-ISO/IEC 17025:2017",
+     "tema": "Gestion de quejas",
+     "descripcion": "",
+     "codigo": "SIG-PRO-04"
+    },
+    {
+     "grupo": "CALIDAD — ISO 9001:2015 / NTP-ISO/IEC 17025:2017",
+     "tema": "Control de trabajos y Salidas no conformes",
+     "descripcion": "",
+     "codigo": "SIG-PRO-05"
+    },
+    {
+     "grupo": "CALIDAD — ISO 9001:2015 / NTP-ISO/IEC 17025:2017",
+     "tema": "Imparcialidad y confidencialidad del personal",
+     "descripcion": "",
+     "codigo": "SIG-PRO-20"
+    },
+    {
+     "grupo": "CALIDAD — ISO 9001:2015 / NTP-ISO/IEC 17025:2017",
+     "tema": "Acreditación: alcance, métodos y servicios acreditados",
+     "descripcion": "",
+     "codigo": "LC-051"
+    },
+    {
+     "grupo": "SEGURIDAD Y SALUD EN EL TRABAJO — ISO 45001:2018",
+     "tema": "Identificación de peligros y evaluación de riesgos (IPERC)",
+     "descripcion": "",
+     "codigo": "SIG-PRO-08"
+    },
+    {
+     "grupo": "SEGURIDAD Y SALUD EN EL TRABAJO — ISO 45001:2018",
+     "tema": "Gestion de equipos de proteccion personal",
+     "descripcion": "",
+     "codigo": "SIG-PRO-27"
+    },
+    {
+     "grupo": "SEGURIDAD Y SALUD EN EL TRABAJO — ISO 45001:2018",
+     "tema": "Investigación de incidentes y accidentes",
+     "descripcion": "",
+     "codigo": "SIG-PRO-10"
+    },
+    {
+     "grupo": "SEGURIDAD Y SALUD EN EL TRABAJO — ISO 45001:2018",
+     "tema": "Plan de acción y respuesta ante emergencias",
+     "descripcion": "",
+     "codigo": "SIG-PL-02"
+    },
+    {
+     "grupo": "MEDIO AMBIENTE — ISO 14001:2015",
+     "tema": "Identificacion de aspectos e impactos ambientales significativos",
+     "descripcion": "",
+     "codigo": "SIG-PRO-14"
+    },
+    {
+     "grupo": "MEDIO AMBIENTE — ISO 14001:2015",
+     "tema": "Gestión integral de residuos sólidos",
+     "descripcion": "",
+     "codigo": "SIG-PRO-19"
+    },
+    {
+     "grupo": "MEDIO AMBIENTE — ISO 14001:2015",
+     "tema": "Consumo eficiente del agua",
+     "descripcion": "",
+     "codigo": "SIG-PRO-18"
+    },
+    {
+     "grupo": "MEDIO AMBIENTE — ISO 14001:2015",
+     "tema": "Consumo eficiente de la energia",
+     "descripcion": "",
+     "codigo": "SIG-PRO-17"
+    }
+   ],
+   "documentos": [
+    {
+     "documento": "Declaración Jurada de Confidencialidad e Imparcialidad (TH-PRO-01-r01)",
+     "codigo": ""
+    },
+    {
+     "documento": "Código de Ética (TH-PRO-01-r05)",
+     "codigo": ""
+    },
+    {
+     "documento": "Reglamento Interno de Seguridad y Salud en el Trabajo (TH-PRO-01-r01)",
+     "codigo": ""
+    }
+   ],
+   "preguntas": [],
+   "evaluacion_url": "https://forms.office.com/r/yBhJVhbuaF?origin=lprLink"
+  },
+  "especifica": {
+   "temas": [
+    {
+     "grupo": "FUNCIONES Y RESPONSABILIDADES DEL CARGO",
+     "tema": "Comunicación de responsabilidades y actividades especificas",
+     "descripcion": "",
+     "codigo": ""
+    },
+    {
+     "grupo": "FUNCIONES Y RESPONSABILIDADES DEL CARGO",
+     "tema": "Revisión de Pedidos, Ofertas y Contratos",
+     "descripcion": "",
+     "codigo": "COM-PRO-01"
+    },
+    {
+     "grupo": "EQUIPOS, HERRAMIENTAS Y SOFTWARE",
+     "tema": "Equipos o instrumentos asignados al cargo (inventario de equipos)",
+     "descripcion": "",
+     "codigo": ""
+    },
+    {
+     "grupo": "EQUIPOS, HERRAMIENTAS Y SOFTWARE",
+     "tema": "Software o sistemas de información utilizados (ERP, correo, etc.)",
+     "descripcion": "",
+     "codigo": ""
+    },
+    {
+     "grupo": "EQUIPOS, HERRAMIENTAS Y SOFTWARE",
+     "tema": "Procedimiento de control, mantenimiento y reporte de fallas de equipos informaticos",
+     "descripcion": "",
+     "codigo": "SIG-PRO-21"
+    },
+    {
+     "grupo": "ÁREA: ADMINISTRACIÓN / RR. HH. / CONTABILIDAD / FACTURACIÓN",
+     "tema": "Manejo de documentos legales, contratos y expedientes del personal",
+     "descripcion": "",
+     "codigo": ""
+    },
+    {
+     "grupo": "ÁREA: ADMINISTRACIÓN / RR. HH. / CONTABILIDAD / FACTURACIÓN",
+     "tema": "Proceso de facturación, control de cobros y conciliación contable",
+     "descripcion": "",
+     "codigo": ""
+    },
+    {
+     "grupo": "ÁREA: ADMINISTRACIÓN / RR. HH. / CONTABILIDAD / FACTURACIÓN",
+     "tema": "Políticas de compras, pagos a proveedores y control presupuestario",
+     "descripcion": "",
+     "codigo": ""
+    },
+    {
+     "grupo": "ÁREA: CRÉDITOS Y COBRANZAS",
+     "tema": "Política de crédito: límites, plazos y clasificación de clientes",
+     "descripcion": "",
+     "codigo": ""
+    },
+    {
+     "grupo": "ÁREA: CRÉDITOS Y COBRANZAS",
+     "tema": "Procedimiento de gestión de cobranza y seguimiento de cartera vencida",
+     "descripcion": "",
+     "codigo": ""
+    },
+    {
+     "grupo": "ÁREA: CRÉDITOS Y COBRANZAS",
+     "tema": "Proceso de emisión y control de notas de crédito / débito",
+     "descripcion": "",
+     "codigo": ""
+    },
+    {
+     "grupo": "ÁREA: METROLOGÍA",
+     "tema": "Control de las Instalaciones y Condiciones Ambientales",
+     "descripcion": "",
+     "codigo": "MET-PRO-02"
+    },
+    {
+     "grupo": "ÁREA: METROLOGÍA",
+     "tema": "Control del Equipamiento",
+     "descripcion": "",
+     "codigo": "MET-PRO-04"
+    },
+    {
+     "grupo": "ÁREA: METROLOGÍA",
+     "tema": "Trazabilidad metrológica, incertidumbre y expresión de resultados",
+     "descripcion": "",
+     "codigo": "NTP-ISO/IEC 17025"
+    },
+    {
+     "grupo": "ÁREA: METROLOGÍA",
+     "tema": "Procedimientos de calibración especificos al laboratorio asignado",
+     "descripcion": "",
+     "codigo": ""
+    },
+    {
+     "grupo": "ÁREA: METROLOGÍA",
+     "tema": "Elaboración y Emisión de Certificado de Calibración",
+     "descripcion": "",
+     "codigo": "MET-PRO-05"
+    },
+    {
+     "grupo": "ÁREA: METROLOGÍA",
+     "tema": "Manipulacion del Ítem de Calibración",
+     "descripcion": "",
+     "codigo": "MET-PRO-08"
+    },
+    {
+     "grupo": "ÁREA: SIG",
+     "tema": "Gestión de Documentos",
+     "descripcion": "",
+     "codigo": "SIG-PRO-01"
+    },
+    {
+     "grupo": "ÁREA: SIG",
+     "tema": "Identificación, Acceso y Evaluación de Requisitos Legales y Otros",
+     "descripcion": "",
+     "codigo": "SIG-PRO-09"
+    },
+    {
+     "grupo": "ÁREA: SIG",
+     "tema": "Gestión de No Conformidades y Acciones Correctivas",
+     "descripcion": "",
+     "codigo": "SIG-PRO-11"
+    },
+    {
+     "grupo": "ÁREA: SIG",
+     "tema": "Auditoría Interna",
+     "descripcion": "",
+     "codigo": "SIG-PRO-16"
+    },
+    {
+     "grupo": "ÁREA: LOGÍSTICA",
+     "tema": "Gestión de Compras y Proveedores",
+     "descripcion": "",
+     "codigo": "LOG-PRO-01"
+    },
+    {
+     "grupo": "ÁREA: LOGÍSTICA",
+     "tema": "Manipulacion del Ítem de Calibración",
+     "descripcion": "",
+     "codigo": "MET-PRO-08"
+    },
+    {
+     "grupo": "ÁREA: LOGÍSTICA",
+     "tema": "Manipulación, Transporte, Almacenamiento, Uso y Mantenimiento Planificado de los Patrones y Equipos Auxiliares",
+     "descripcion": "",
+     "codigo": "MET-INS-01"
+    },
+    {
+     "grupo": "ÁREA: COMERCIAL / MARKETING",
+     "tema": "Revisión de Pedidos, Ofertas y Contratos",
+     "descripcion": "",
+     "codigo": "COM-PRO-01"
+    },
+    {
+     "grupo": "ÁREA: COMERCIAL / MARKETING",
+     "tema": "Satisfacción del Cliente",
+     "descripcion": "",
+     "codigo": "COM-PRO-02"
+    },
+    {
+     "grupo": "ÁREA: COMERCIAL / MARKETING",
+     "tema": "Gestión de Quejas",
+     "descripcion": "",
+     "codigo": "SIG-PRO-04"
+    },
+    {
+     "grupo": "ÁREA: COMERCIAL / MARKETING",
+     "tema": "Ejecucion de servicio de metrologia",
+     "descripcion": "",
+     "codigo": "MET-PRO-01"
+    },
+    {
+     "grupo": "ÁREA: COMERCIAL / MARKETING",
+     "tema": "Estrategia de comunicación, medios y gestión de redes/contenido",
+     "descripcion": "",
+     "codigo": ""
+    }
+   ],
+   "documentos": [],
+   "preguntas": [
+    {
+     "pregunta": "1. ¿Cuáles son sus funciones principales según el Manual de Organización y Funciones?",
+     "puntos": 3
+    },
+    {
+     "pregunta": "2. ¿Qué procedimientos aplican directamente a su cargo y cómo accede a ellos?",
+     "puntos": 3
+    },
+    {
+     "pregunta": "3. Describa el flujo del proceso en el que participa e identifique las interfaces con otras áreas.",
+     "puntos": 3
+    },
+    {
+     "pregunta": "4. ¿Qué registros debe completar en el ejercicio de su cargo y cuál es el criterio de aceptación?",
+     "puntos": 3
+    },
+    {
+     "pregunta": "5. ¿Cuáles son los equipos, herramientas o sistemas que utilizará y cómo los reporta si fallan?",
+     "puntos": 3
+    },
+    {
+     "pregunta": "6. ¿Cuáles son los principales riesgos de su puesto y qué controles debe aplicar?",
+     "puntos": 3
+    },
+    {
+     "pregunta": "7. ¿Qué acción debe tomar ante una situación o resultado que no cumpla con los criterios establecidos?",
+     "puntos": 3
+    },
+    {
+     "pregunta": "8. ¿Cómo contribuye su cargo al logro de los objetivos del área y del SIG?",
+     "puntos": 3
+    },
+    {
+     "pregunta": "9. (Pregunta adicional — definir por el responsable de área)",
+     "puntos": 3
+    },
+    {
+     "pregunta": "10. (Pregunta adicional — definir por el responsable de área)",
+     "puntos": 3
+    }
+   ],
+   "evaluacion_url": ""
+  }
+ }
+}

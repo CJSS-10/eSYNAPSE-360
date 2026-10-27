@@ -202,7 +202,14 @@ class PruebasInspeccion(BaseInspecciones):
             self.assertEqual(self.client.get(self._url(i, 'pdf')).status_code, 200, pl.nombre)
 
     def test_programa_de_inspecciones(self):
-        self._responder_todo(self._crear(self.ext), 'C')
+        ins = self._crear(self.ext)
+        self._responder_todo(ins, 'C')
+        r = self.client.get('/api/sst-inspecciones/programa/')
+        fila = next(f for f in r.data['filas'] if f['plantilla'] == self.ext.pk)
+        mes = fila['meses'][timezone.localdate().month - 1]
+        self.assertNotEqual(mes['situacion'], 'realizado', 'sin firma no cuenta como realizada')
+        self.assertEqual(self.client.post(self._url(ins, 'firmar'), {'password': CLAVE}, format='json').status_code,
+                         200)
         r = self.client.get('/api/sst-inspecciones/programa/')
         fila = next(f for f in r.data['filas'] if f['plantilla'] == self.ext.pk)
         mes = fila['meses'][timezone.localdate().month - 1]

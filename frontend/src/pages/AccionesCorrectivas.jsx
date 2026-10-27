@@ -13,6 +13,7 @@ import { fecha } from '../lib/fecha.js'
 import EncabezadoModulo from '../components/ui/EncabezadoModulo.jsx'
 import EtapaMini from '../components/ui/EtapaMini.jsx'
 import { Vistas } from '../components/NavModulo.jsx'
+import { useAbrirDesdeEnlace } from '../lib/enlaces.js'
 
 const FUENTES = [
   ['auditoria_interna', 'Auditoría interna'], ['auditoria_externa', 'Auditoría externa'],
@@ -336,7 +337,7 @@ export default function AccionesCorrectivas() {
               {acc.estado === 'completada' && acc.verificacion && <p className="text-emerald-600 dark:text-emerald-400">Verificación: {acc.verificacion}</p>}
               {(acc.reaperturas || []).map((r, i) => (
                 <p key={i} className="text-[11px] text-violet-600 dark:text-violet-400">
-                  Reabierta el {(r.fecha || '').slice(0, 10)} por {r.usuario}: {r.motivo}
+                  Reabierta el {fecha(r.fecha)} por {r.usuario}: {r.motivo}
                 </p>
               ))}
               {/* Reabrir una acción completada por error (antes de verificar la eficacia) */}
@@ -447,6 +448,8 @@ export default function AccionesCorrectivas() {
   })()
 
   const esAuditoria = form.fuente.startsWith('auditoria')
+
+  useAbrirDesdeEnlace(abrirDetalle)   // enlace directo ?abrir=<id> (búsqueda, Mis tareas, campana)
 
   return (
     <div className="space-y-4">
@@ -769,7 +772,7 @@ export default function AccionesCorrectivas() {
                 <p className="font-semibold text-violet-600 dark:text-violet-400">Ciclos anteriores (verificados como no eficaces)</p>
                 {detalle.ciclos_anteriores.map((c) => (
                   <div key={c.ciclo} className="text-slate-600 dark:text-slate-300">
-                    <p><strong>Ciclo {c.ciclo}</strong> · verificado el {(c.fecha || '').slice(0, 10)} por {c.verificado_por}</p>
+                    <p><strong>Ciclo {c.ciclo}</strong> · verificado el {fecha(c.fecha)} por {c.verificado_por}</p>
                     {(c.porques || []).length > 0 && (
                       <ol className="list-inside list-decimal text-slate-500 dark:text-slate-400">
                         {c.porques.map(aPar).map((p, i) => <li key={i}>{p.pregunta && <strong className="text-slate-600 dark:text-slate-300">{p.pregunta} </strong>}{p.respuesta}</li>)}
@@ -834,7 +837,7 @@ export default function AccionesCorrectivas() {
                   <tbody>
                     {(detalle.ciclos_anteriores || []).map((c) => (
                       <tr key={`c${c.ciclo}`} className="border-t border-slate-200 dark:border-slate-800">
-                        <td className="py-1">(Ciclo {c.ciclo}, no eficaz) {c.evaluacion}</td><td className="py-1 text-right">{(c.fecha || '').slice(0, 10)}</td><td className="py-1">{c.verificado_por}</td>
+                        <td className="py-1">(Ciclo {c.ciclo}, no eficaz) {c.evaluacion}</td><td className="py-1 text-right">{fecha(c.fecha)}</td><td className="py-1">{c.verificado_por}</td>
                       </tr>
                     ))}
                     {detalle.estado === 'cerrada_conforme' && detalle.evaluacion_eficacia && (

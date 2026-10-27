@@ -8,6 +8,9 @@ import Sidebar from './Sidebar.jsx'
 import { api } from '../lib/api.js'
 import { useAuth } from '../context/AuthContext.jsx'
 import { useConfig } from '../context/ConfigContext.jsx'
+import BuscadorGlobal from './BuscadorGlobal.jsx'
+import Avisos from './Avisos.jsx'
+import { rutaRegistro } from '../lib/enlaces.js'
 
 const ICONO_MODULO = {
   'Hallazgos': AlertOctagon, 'Acciones Correctivas': Wrench, 'Documentos': FileText, 'Auditorías': ClipboardList, 'Equipos': Ruler,
@@ -86,8 +89,9 @@ export default function Layout() {
       <Sidebar />
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="flex h-14 shrink-0 items-center justify-end gap-3 border-b border-slate-200 bg-white px-4 dark:border-slate-800 dark:bg-slate-900">
+          <BuscadorGlobal />
           {config.modo_pruebas && (
-            <span className="mr-auto rounded-md border border-amber-500/40 bg-amber-500/15 px-2.5 py-1 text-xs font-bold tracking-wide text-amber-700 dark:text-amber-300"
+            <span className="rounded-md border border-amber-500/40 bg-amber-500/15 px-2.5 py-1 text-xs font-bold tracking-wide text-amber-700 dark:text-amber-300"
               title="Copia de la base: lo que se registre aquí no afecta los datos reales">
               MODO PRUEBAS · copia de la base
             </span>
@@ -125,7 +129,7 @@ export default function Layout() {
                       const Ico = ICONO_MODULO[t.modulo] || Bell
                       return (
                         <li key={i}>
-                          <button onClick={() => irA(t.ruta, t)} className="flex w-full items-start gap-2.5 px-3 py-2 text-left transition hover:bg-slate-50 dark:hover:bg-slate-800/60">
+                          <button onClick={() => irA(rutaRegistro(t.ruta, t.id), t)} className="flex w-full items-start gap-2.5 px-3 py-2 text-left transition hover:bg-slate-50 dark:hover:bg-slate-800/60">
                             <Ico className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" />
                             <span className="min-w-0 flex-1">
                               <span className="block truncate text-xs font-medium">{t.codigo} <span className="font-normal text-slate-400">· {t.estado}</span></span>
@@ -189,6 +193,7 @@ export default function Layout() {
             </AnimatePresence>
           </MotionConfig>
         </main>
+        <Avisos />
       </div>
     </div>
   )

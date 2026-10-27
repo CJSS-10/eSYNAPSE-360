@@ -78,3 +78,33 @@ class PruebasFirmaControlada(CasoBase):
         Autorizacion.objects.create(usuario=self.encargado, metodo=self.metodo, funciones=['ejecutar'],
                                     alcance_firma='todos', estado='vigente')
         self.assertFalse(esta_autorizado(self.encargado, funcion='firmar', laboratorio='Masa'))
+
+
+class PruebasReautorizacionTrasSuspension(CasoBase):
+    """Una suspensión exige re-entrenamiento posterior por cualquier camino (revisión 2026-10-23)."""
+
+    def setUp(self):
+        self.tecnico = self.crear_usuario('tecnico2', laboratorio='Masa')
+        self.metodo = MetodoCalibracion.objects.create(nombre='Calibración de pesas', magnitud='Masa')
+        from esynapse_sig.models import ProcesoEntrenamiento
+        # Entrenamiento inicial superado (antes de la suspensión): no basta para reautorizar.
+        ProcesoEntrenamiento.objects.create(usuario=self.tecnico, metodo=self.metodo, estado='completado',
+                                            created_by=self.tecnico)
+        self.a = Autorizacion.objects.create(usuario=self.tecnico, metodo=self.metodo, magnitud='Masa',
+                                             funciones=['ejecutar'], estado='suspendida')
+
+    def _valido(self, inst, **datos):
+        from django.utils import timezone
+        from esynapse_sig.serializers import AutorizacionSerializer
+        base = {'usuario': self.tecnico.pk, 'metodo': self.metodo.pk, 'magnitud': 'Masa', 'funciones': ['ejecutar'],
+                'fecha_autorizacion': str(timezone.localdate())}
+        s = AutorizacionSerializer(inst, data={**base, **datos}, partial=inst is not None)
+        return s.is_valid()
+
+    def test_pasar_por_en_entrenamiento_no_salta_el_reentrenamiento(self):
+        self.a.estado = 'en_entrenamiento'
+        self.a.save()
+        self.assertFalse(self._valido(self.a, estado='vigente'))
+
+    def test_autorizacion_nueva_tampoco(self):
+        self.assertFalse(self._valido(None, estado='vigente'))

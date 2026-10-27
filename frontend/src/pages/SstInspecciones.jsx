@@ -4,7 +4,7 @@ import Modal from '../components/Modal.jsx'
 import { Vistas as Sub } from '../components/NavModulo.jsx'
 import CampoAmpliable from '../components/CampoAmpliable.jsx'
 import { api } from '../lib/api.js'
-import { fecha, fechaHora } from '../lib/fecha.js'
+import { fecha, fechaHora, hoy as hoyLocal } from '../lib/fecha.js'
 import { useUltimaRespuesta } from '../lib/useUltimaRespuesta.js'
 
 const inp = 'input-esynapse'
@@ -67,7 +67,7 @@ export function Inspecciones(props) {
   )
 }
 
-const NUEVA = { plantilla: '', fecha: new Date().toISOString().slice(0, 10), hora: '', tipo_inspeccion: 'planeada', tipo_detalle: '', area: '', lugar: '', responsable_area: '', objetivo: '', elemento: '', conductor: '', km: '', trabajadores: [] }
+const NUEVA = { plantilla: '', fecha: hoyLocal(), hora: '', tipo_inspeccion: 'planeada', tipo_detalle: '', area: '', lugar: '', responsable_area: '', objetivo: '', elemento: '', conductor: '', km: '', trabajadores: [] }
 
 function ListaInspecciones({ areasOrg, confirmar, setError, abrirPdf, puedeCrear, puedeEditar, puedeEliminar, alCambiar }) {
   const [items, setItems] = useState([])
@@ -747,7 +747,7 @@ function ProgramaMonitoreos({ cat: _c, confirmar, setError, abrirPdf, puedeEdita
   )
 }
 
-const MON_VACIO = { area_monitoreada: '', fecha: new Date().toISOString().slice(0, 10), frecuencia: 'anual', programados: [], tipo_riesgo: '', n_expuestos: '', organizacion: '', resultados: [], causas_desviacion: '', conclusiones: '' }
+const MON_VACIO = { area_monitoreada: '', fecha: hoyLocal(), frecuencia: 'anual', programados: [], tipo_riesgo: '', n_expuestos: '', organizacion: '', resultados: [], causas_desviacion: '', conclusiones: '' }
 
 function RegistrosMonitoreo({ confirmar, setError, abrirPdf, puedeCrear, puedeEditar, puedeEliminar }) {
   const [items, setItems] = useState([])

@@ -138,15 +138,17 @@ def generar_programa_ssoma_pdf(p) -> bytes:
     cab2 = _tabla([[P('OBJETIVOS', THL), Paragraph(obj_txt, TDL)],
                    [P('FECHA', THL), P(_solo_fecha(p.fecha.isoformat()) if p.fecha else '', TDL)],
                    [P('RECURSOS', THL), P(p.recursos, TDL)]], [4, 30], W)
-    firmas_ap = '<br/>'.join(esc_pdf(f'{a.get("nombre", "")} · {a.get("cargo", "")} · {_solo_fecha((a.get("fecha") or "")[:10])}')
-                             for a in p.aprobado or [])
+    from .comite_pdf import bloque_firmas_comite
     el, rv = p.elaborado or {}, p.revisado or {}
-    pie = _tabla([[P('Elaborado por', TH), P('Revisado por', TH), P('Aprobado por', TH), P('Fecha de actualización', TH)],
-                  [P(esc_pdf(f'{el.get("nombre", "")} · {el.get("cargo", "")} · {_solo_fecha((el.get("fecha") or "")[:10])}')),
-                   P(esc_pdf(f'{rv.get("nombre", "")} · {rv.get("cargo", "")} · {_solo_fecha((rv.get("fecha") or "")[:10])}')),
-                   Paragraph(firmas_ap or '', TD),
-                   P(_solo_fecha(p.fecha_actualizacion.isoformat()) if p.fecha_actualizacion else '')]],
-                 [10, 10, 14, 5], W, cabeceras=[0])
+    pie = [_tabla([[P('Elaborado por', TH), P('Revisado por', TH), P('Fecha de actualización', TH)],
+                   [P(esc_pdf(f'{el.get("nombre", "")} · {el.get("cargo", "")} · {_solo_fecha(el.get("fecha") or "")}')),
+                    P(esc_pdf(f'{rv.get("nombre", "")} · {rv.get("cargo", "")} · {_solo_fecha(rv.get("fecha") or "")}')),
+                    P(_solo_fecha(p.fecha_actualizacion.isoformat()) if p.fecha_actualizacion else '')]],
+                  [10, 10, 5], W, cabeceras=[0]), Spacer(1, 3)]
+    if p.estado == 'aprobado':
+        pie += bloque_firmas_comite(W, p.aprobado or [], fecha=p.fecha_actualizacion)
+    else:
+        pie += bloque_firmas_comite(W, nota=f'PENDIENTE DE APROBACIÓN DEL COMITÉ DE SST (versión {p.version}).')
     story = [_cabecera(W, cw, 'PROGRAMA ANUAL DE SEGURIDAD, SALUD OCUPACIONAL Y MEDIO AMBIENTE', COD_PROGRAMA, cfg, 12,
                        7, 11, 4, 18), Spacer(1, 4), datos, Spacer(1, 3), cab2, Spacer(1, 4),
              _tabla(filas, [1.6, 16, 6, 3.6] + [1.3] * 12 + [2.6], W, extra=extra, cabeceras=[0, 1]), Spacer(1, 4),

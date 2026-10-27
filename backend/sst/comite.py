@@ -51,8 +51,14 @@ class ComiteSST(AuditableModel):
         hoy = timezone.localdate()
         return self.is_active and self.fecha_instalacion <= hoy <= self.fecha_fin
 
-    def titulares(self):
-        return self.miembros.filter(is_active=True, fecha_baja__isnull=True, condicion='titular')
+    def titulares(self, fecha=None):
+        """Titulares en funciones en la fecha (hoy por omisión): sin baja anterior a esa fecha y que no hayan cesado
+        en la empresa antes de ella."""
+        from django.db.models import Q
+        f = fecha or timezone.localdate()
+        return (self.miembros.filter(is_active=True, condicion='titular')
+                .filter(Q(fecha_baja__isnull=True) | Q(fecha_baja__gt=f))
+                .filter(Q(trabajador__estado='activo') | Q(trabajador__fecha_cese__gt=f)))
 
 
 class MiembroComite(AuditableModel):
@@ -110,8 +116,9 @@ class ReunionComite(AuditableModel):
 
     def quorum(self):
         """Mitad más uno de los miembros titulares (art. 69 del reglamento de la ley de SST)."""
-        titulares = self.comite.titulares().count()
-        presentes = self.asistentes.filter(condicion='titular').count()
+        en_funciones = self.comite.titulares(self.fecha)
+        titulares = en_funciones.count()
+        presentes = self.asistentes.filter(pk__in=en_funciones.values('pk')).count()
         requerido = titulares // 2 + 1 if titulares else 0
         return {'titulares': titulares, 'presentes': presentes, 'requerido': requerido,
                 'hay_quorum': bool(titulares) and presentes >= requerido}
@@ -153,6 +160,8 @@ class ProgramaSSOMA(AuditableModel):
     elaborado = models.JSONField('Elaborado por', default=dict, blank=True)
     revisado = models.JSONField('Revisado por', default=dict, blank=True)
     aprobado = models.JSONField('Aprobado por', default=list, blank=True)
+    acta_aprobacion = models.FileField('Acta de aprobación firmada (papel)', upload_to='sst/comite/programa/%Y/',
+                                       null=True, blank=True)
     reunion_aprobacion = models.ForeignKey(ReunionComite, verbose_name='Reunión del Comité que lo aprobó',
                                            on_delete=models.PROTECT, null=True, blank=True,
                                            related_name='programas_aprobados')

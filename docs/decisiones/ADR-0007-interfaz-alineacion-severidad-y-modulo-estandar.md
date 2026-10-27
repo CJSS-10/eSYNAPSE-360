@@ -47,3 +47,7 @@ César aprobó también el resto de la maqueta («dale con todo»), implementado
 - **Ficha de registro en panel ancho de altura completa** (`Modal` con `panel`) en lugar de ventana centrada, y **barra de etapas común** (`BarraPasos`): etapas cerradas con candado, la actual destacada, las futuras punteadas, fija bajo el título. Se eligió panel y no página aparte para conservar la lista detrás y no rehacer la navegación de cada módulo.
 - **Tablero del SIG**: vencimientos por módulo (vencido, 7, 30, 60 y 90 días), estado por módulo y pendientes de la persona.
 - **Título estándar** (`TituloModulo`) y tabla principal `tabla-sig` en los módulos.
+
+## Ampliación (César, 2026-10-24)
+
+- **Encabezados de columna centrados** horizontal y verticalmente en todas las tablas del sistema (regla global en `frontend/src/index.css`, gana sobre las clases de alineación de cada columna). La alineación por tipo de dato aplica solo a las celdas de datos.

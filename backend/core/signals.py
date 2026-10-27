@@ -14,6 +14,7 @@ from django.contrib.auth.signals import (
     user_logged_out,
     user_login_failed,
 )
+from django.db import transaction
 from django.db.models.signals import post_save, pre_delete, pre_save
 from django.dispatch import receiver
 from django.forms.models import model_to_dict
@@ -60,8 +61,15 @@ ENTIDAD_MODULO = {
     'Trabajador': 'organizacion',
 }
 
+# Apps auditadas y módulo por defecto de sus entidades (regla 4: log en cada acción del sistema)
+APP_MODULO = {
+    'core': '', 'esynapse_sig': '', 'organizacion': 'organizacion', 'quejas': 'quejas', 'procesos': 'procesos',
+    'cambios': 'cambios', 'riesgos': 'riesgos', 'legal': 'legal', 'sst': 'sst', 'capacitacion': 'capacitacion', 'ambiente': 'medio_ambiente',
+    'revision': 'revision_direccion', 'tnc': 'trabajo_no_conforme', 'cumplimiento': 'cumplimiento',
+}
+
 # Campos que nunca se registran en el log (sensibles o ruido)
-CAMPOS_EXCLUIDOS = {'password', 'last_login', 'updated_at', 'created_at', 'created_by', 'updated_by'}
+CAMPOS_EXCLUIDOS = {'password', 'pin', 'last_login', 'updated_at', 'created_at', 'created_by', 'updated_by'}
 
 # Cache temporal de valores anteriores por instancia (pre_save → post_save)
 _valores_anteriores = {}
@@ -71,11 +79,22 @@ def _log_model():
     return apps.get_model('core', 'LogAuditoria')
 
 
+def _crear_log(**datos):
+    """Registra en el log dentro de su propio punto de guardado: si falla, no deja abortada la transacción de la
+    operación principal (PostgreSQL)."""
+    with transaction.atomic():
+        _log_model().objects.create(**datos)
+
+
+def _modulo(instance):
+    return ENTIDAD_MODULO.get(instance.__class__.__name__) or APP_MODULO.get(instance._meta.app_label, '')
+
+
 def _es_auditable(instance) -> bool:
     """Solo se auditan modelos de las apps del SIGE, nunca el propio log."""
     if instance.__class__.__name__ == 'LogAuditoria':
         return False
-    return instance._meta.app_label in ('core', 'esynapse_sig', 'organizacion')
+    return instance._meta.app_label in APP_MODULO
 
 
 def _datos_usuario():
@@ -121,7 +140,7 @@ def auditoria_pre_save(sender, instance, **kwargs):
     # Capturar valores anteriores para el diff
     if instance.pk is not None:
         try:
-            anterior = sender.objects.get(pk=instance.pk)
+            anterior = sender._base_manager.get(pk=instance.pk)
             _valores_anteriores[(sender.__name__, instance.pk)] = model_to_dict(
                 anterior, exclude=list(CAMPOS_EXCLUIDOS)
             )
@@ -134,11 +153,10 @@ def auditoria_post_save(sender, instance, created, **kwargs):
     if not _es_auditable(instance):
         return
 
-    LogAuditoria = _log_model()
     entidad = sender.__name__
     base = _datos_usuario()
     base.update(
-        modulo=ENTIDAD_MODULO.get(entidad, ''),
+        modulo=_modulo(instance),
         entidad=entidad,
         entidad_id=str(instance.pk),
         referencia=str(instance)[:100],
@@ -146,7 +164,7 @@ def auditoria_post_save(sender, instance, created, **kwargs):
 
     try:
         if created:
-            LogAuditoria.objects.create(
+            _crear_log(
                 accion='CREAR',
                 valor_nuevo=str(model_to_dict(instance, exclude=list(CAMPOS_EXCLUIDOS)))[:2000],
                 **base,
@@ -156,7 +174,7 @@ def auditoria_post_save(sender, instance, created, **kwargs):
         # Edición: registrar una entrada por cada campo modificado
         anterior = _valores_anteriores.pop((entidad, instance.pk), None)
         if anterior is None:
-            LogAuditoria.objects.create(accion='EDITAR', **base)
+            _crear_log(accion='EDITAR', **base)
             return
 
         actual = model_to_dict(instance, exclude=list(CAMPOS_EXCLUIDOS))
@@ -167,11 +185,11 @@ def auditoria_post_save(sender, instance, created, **kwargs):
                 # Soft delete detectado: is_active pasó de True a False
                 if campo in ('is_active', 'estado') and valor_anterior and not valor_nuevo:
                     accion = 'ELIMINAR'
-                LogAuditoria.objects.create(
+                _crear_log(
                     accion=accion,
                     campo=campo,
-                    valor_anterior=_serializar(valor_anterior),
-                    valor_nuevo=_serializar(valor_nuevo),
+                    valor_anterior=(_serializar(valor_anterior) or '')[:4000] if valor_anterior is not None else None,
+                    valor_nuevo=(_serializar(valor_nuevo) or '')[:4000] if valor_nuevo is not None else None,
                     **base,
                 )
     except Exception:
@@ -183,12 +201,11 @@ def auditoria_post_save(sender, instance, created, **kwargs):
 def auditoria_pre_delete(sender, instance, **kwargs):
     if not _es_auditable(instance):
         return
-    LogAuditoria = _log_model()
     base = _datos_usuario()
     try:
-        LogAuditoria.objects.create(
+        _crear_log(
             accion='ELIMINAR',
-            modulo=ENTIDAD_MODULO.get(sender.__name__, ''),
+            modulo=_modulo(instance),
             entidad=sender.__name__,
             entidad_id=str(instance.pk),
             valor_anterior=str(model_to_dict(instance, exclude=list(CAMPOS_EXCLUIDOS)))[:2000],
@@ -201,9 +218,8 @@ def auditoria_pre_delete(sender, instance, **kwargs):
 
 @receiver(user_logged_in)
 def auditoria_login(sender, request, user, **kwargs):
-    LogAuditoria = _log_model()
     try:
-        LogAuditoria.objects.create(
+        _crear_log(
             accion='LOGIN',
             usuario=user,
             usuario_nombre=user.get_full_name() or user.username,
@@ -218,9 +234,8 @@ def auditoria_login(sender, request, user, **kwargs):
 
 @receiver(user_logged_out)
 def auditoria_logout(sender, request, user, **kwargs):
-    LogAuditoria = _log_model()
     try:
-        LogAuditoria.objects.create(
+        _crear_log(
             accion='LOGOUT',
             usuario=user,
             usuario_nombre=(user.get_full_name() or user.username) if user else 'Desconocido',
@@ -235,9 +250,8 @@ def auditoria_logout(sender, request, user, **kwargs):
 
 @receiver(user_login_failed)
 def auditoria_login_fallido(sender, credentials, request=None, **kwargs):
-    LogAuditoria = _log_model()
     try:
-        LogAuditoria.objects.create(
+        _crear_log(
             accion='LOGIN_FALLIDO',
             usuario_nombre=credentials.get('username', 'Desconocido'),
             ip=get_client_ip(request),

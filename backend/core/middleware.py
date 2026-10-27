@@ -29,11 +29,13 @@ def get_current_user():
 
 
 def get_client_ip(request):
-    """Obtiene la IP real del cliente considerando proxies."""
+    """IP del cliente. La cabecera X-Forwarded-For la puede inventar cualquiera: solo se usa si el sistema está detrás
+    de un proxy de confianza declarado (settings.PROXY_CONFIABLE = True); si no, REMOTE_ADDR."""
     if request is None:
         return None
+    from django.conf import settings
     x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
-    if x_forwarded_for:
+    if x_forwarded_for and getattr(settings, 'PROXY_CONFIABLE', False):
         return x_forwarded_for.split(',')[0].strip()
     return request.META.get('REMOTE_ADDR')
 

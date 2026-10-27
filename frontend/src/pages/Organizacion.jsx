@@ -1,13 +1,14 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Briefcase, Building2, History, Network, Pencil, Plus, RotateCcw, Search, UserMinus, UserPlus, Users, X } from 'lucide-react'
+import { Briefcase, Building2, Gauge, History, Layers, MapPin, Network, Pencil, Plus, RotateCcw, Search, UserMinus, UserPlus, Users, X } from 'lucide-react'
 import Modal from '../components/Modal.jsx'
+import SelectorUbigeo from '../components/SelectorUbigeo.jsx'
 import CampoAmpliable from '../components/CampoAmpliable.jsx'
 import { useCatalogoProcesos } from '../components/SelectorProceso.jsx'
 import { api } from '../lib/api.js'
 import { useAuth } from '../context/AuthContext.jsx'
 import { useConfirm } from '../context/ConfirmContext.jsx'
 import { useConfig } from '../context/ConfigContext.jsx'
-import { fecha } from '../lib/fecha.js'
+import { fecha, hoy as hoyLocal } from '../lib/fecha.js'
 import { sev } from '../lib/severidad.js'
 import { useUltimaRespuesta } from '../lib/useUltimaRespuesta.js'
 import TituloModulo from '../components/ui/TituloModulo.jsx'
@@ -58,24 +59,26 @@ export default function Organizacion() {
   const [pestana, setPestana] = useState('trabajadores')
   const [areas, setAreas] = useState([])
   const [puestos, setPuestos] = useState([])
+  const [sedes, setSedes] = useState([])
   const [error, setError] = useState('')
   const cargarBase = useCallback(async () => {
-    const [a, p] = await Promise.all([api.org.areas('?todos=1'), api.org.puestos('?todos=1')])
-    setAreas(a); setPuestos(p)
+    const [a, p, s] = await Promise.all([api.org.areas('?todos=1'), api.org.puestos('?todos=1'), api.org.sedes('?todos=1')])
+    setAreas(a); setPuestos(p); setSedes(s)
   }, [])
   useEffect(() => { cargarBase().catch((e) => setError(e.message)) }, [cargarBase])
   const permisos = { puedeCrear: tienePermiso('organizacion', 'crear'), puedeEditar: tienePermiso('organizacion', 'editar'), puedeEliminar: tienePermiso('organizacion', 'eliminar') }
   const { config } = useConfig()
   const verRiesgos = tienePermiso('sst', 'leer') && (config.modulos_habilitados || []).includes('sst')
-  const comun = { areas, puestos, procesos: procesos.filter((p) => p.is_active && !p.padre), confirmar, setError, cargarBase, verRiesgos, ...permisos }
+  const comun = { areas, puestos, sedes, procesos: procesos.filter((p) => p.is_active && !p.padre), confirmar, setError, cargarBase, verRiesgos, ...permisos }
 
   return (
     <div className="space-y-4">
       <div className="space-y-3">
-        <TituloModulo seccion="Administración" titulo="Organización y personal" descripcion="Áreas, puestos y trabajadores comunes a todo el sistema. Cada módulo los usa; aquí se mantienen." />
-        <Pestanas opciones={[['trabajadores', 'Trabajadores', Users], ['puestos', 'Puestos', Briefcase], ['areas', 'Áreas', Building2]]} valor={pestana} onChange={setPestana} />
+        <TituloModulo seccion="Administración" titulo="Organización y personal" descripcion="Sedes, áreas, puestos y trabajadores comunes a todo el sistema. Cada módulo los usa; aquí se mantienen." />
+        <Pestanas opciones={[['trabajadores', 'Trabajadores', Users], ['puestos', 'Puestos', Briefcase], ['areas', 'Áreas', Building2], ['sedes', 'Sedes', MapPin]]} valor={pestana} onChange={setPestana} />
       </div>
       {error && <p className="rounded-lg bg-red-500/10 p-3 text-sm text-red-600 dark:text-red-400">{error}</p>}
+      {pestana === 'sedes' && <Sedes {...comun} />}
       {pestana === 'areas' && <Areas {...comun} />}
       {pestana === 'puestos' && <Puestos {...comun} />}
       {pestana === 'trabajadores' && <Trabajadores {...comun} />}
@@ -83,17 +86,162 @@ export default function Organizacion() {
   )
 }
 
-/* ------------------------------------------------------------------ Áreas */
-const AREA_VACIA = { nombre: '', tipo: 'area', padre: '', proceso: '', sede: '', piso: '', responsable: '', descripcion: '', orden: 0 }
+/* ------------------------------------------------------------------ Sedes */
+const GRIS = 'bg-slate-500/15 text-slate-600 dark:text-slate-300'
+const AMBAR = 'bg-amber-500/15 text-amber-600 dark:text-amber-400'
+const TENENCIA = { propia: ['Propia', GRIS], alquilada: ['Alquilada', AMBAR] }
+const SEDE_VACIA = { nombre: '', codigo: '', direccion: '', ubigeo: '', tenencia: 'propia', principal: false, responsable: '', descripcion: '' }
+const SUM_VACIO = { sede: '', nivel: '', tipo: 'energia', modalidad: 'lectura', numero: '', empresa_prestadora: '', ubicacion: '', responsable: '' }
+const TIPO_SUM = [['energia', 'Energía eléctrica'], ['agua', 'Agua']]
+const MODALIDAD = [['lectura', 'Lectura del medidor'], ['recibo', 'Recibo de la empresa prestadora']]
 
-function Areas({ areas, puestos, procesos, confirmar, setError, cargarBase, puedeCrear, puedeEditar, puedeEliminar }) {
+function Sedes({ sedes, puestos, confirmar, setError, cargarBase, puedeCrear, puedeEditar, puedeEliminar }) {
+  const [form, setForm] = useState(null)
+  const [sum, setSum] = useState(null)
+  const [nivel, setNivel] = useState(null)
+  const [verInactivas, setVerInactivas] = useState(false)
+  const [err, setErr] = useState('')
+  const lista = sedes.filter((s) => verInactivas || s.is_active)
+  const propios = puestos.filter((p) => p.is_active && p.tipo === 'propio')
+  const ejecutar = async (fn) => { try { await fn(); await cargarBase() } catch (e) { setError(e.message) } }
+  const guardar = async (accion, cerrar) => { setErr(''); try { await accion(); cerrar(); await cargarBase() } catch (e) { setErr(e.message) } }
+  const guardarSede = () => guardar(() => { const d = { ...form, responsable: form.responsable || null, ubigeo: form.ubigeo || null }; return form.id ? api.org.editarSede(form.id, d) : api.org.crearSede(d) }, () => setForm(null))
+  const guardarSum = () => guardar(() => { const d = { ...sum, nivel: sum.nivel || null, responsable: sum.responsable || null }; return sum.id ? api.org.editarSuministro(sum.id, d) : api.org.crearSuministro(d) }, () => setSum(null))
+  const guardarNivel = () => guardar(() => (nivel.id ? api.org.editarNivel(nivel.id, { nombre: nivel.nombre, orden: nivel.orden }) : api.org.crearNivel(nivel)), () => setNivel(null))
+  const baja = async (titulo, mensaje, fn) => { if (await confirmar({ titulo, mensaje, textoConfirmar: 'Desactivar', peligro: true })) ejecutar(fn) }
+  const f = (k) => ({ value: form[k] ?? '', onChange: (e) => setForm({ ...form, [k]: e.target.value }) })
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center gap-3">
+        <p className="text-xs text-slate-500">Locales donde opera la organización. Consumos, residuos, inspecciones y requisitos del inmueble se registran por sede; las áreas indican la suya.</p>
+        <label className="ml-auto flex shrink-0 items-center gap-1 text-xs text-slate-500"><input type="checkbox" className="accent-esynapse-600" checked={verInactivas} onChange={(e) => setVerInactivas(e.target.checked)} /> Mostrar desactivadas</label>
+        {puedeCrear && <button className="btn-primary shrink-0" onClick={() => { setErr(''); setForm({ ...SEDE_VACIA }) }}><Plus className="h-4 w-4" /> Nueva sede</button>}
+      </div>
+      {!lista.length && <p className="card-esynapse p-6 text-center text-sm text-slate-500">No hay sedes registradas.</p>}
+      {lista.map((s) => (
+        <div key={s.id} className={`card-esynapse space-y-3 p-4 ${s.is_active ? '' : 'opacity-60'}`}>
+          <div className="flex flex-wrap items-center gap-2">
+            <MapPin className="h-4 w-4 text-esynapse-600" />
+            <h3 className="font-semibold">{s.nombre}{s.codigo ? <span className="ml-1 font-mono text-xs text-slate-500">({s.codigo})</span> : null}</h3>
+            <Chip par={TENENCIA[s.tenencia]} />
+            {s.principal && <Chip par={['Sede principal', 'bg-blue-500/15 text-blue-600 dark:text-blue-400']} />}
+            {!s.is_active && <Chip par={['Desactivada', GRIS]} />}
+            <div className="ml-auto flex gap-1">
+              {puedeEditar && s.is_active && <button className="p-1" title="Corregir" onClick={() => { setErr(''); setForm({ ...Object.fromEntries(Object.keys(SEDE_VACIA).map((k) => [k, s[k] ?? SEDE_VACIA[k]])), id: s.id, historial: s.historial }) }}><Pencil className="h-3.5 w-3.5" /></button>}
+              {puedeEliminar && s.is_active && <button className="p-1 text-red-500" title="Desactivar" onClick={() => baja('Desactivar la sede', `«${s.nombre}» deja de ofrecerse; sus registros la conservan.`, () => api.org.desactivarSede(s.id))}><X className="h-3.5 w-3.5" /></button>}
+              {puedeEditar && !s.is_active && <button className="p-1" title="Reactivar" onClick={() => ejecutar(() => api.org.reactivar('sedes', s.id))}><RotateCcw className="h-3.5 w-3.5" /></button>}
+            </div>
+          </div>
+          <div className="grid gap-2 text-xs md:grid-cols-3">
+            <div><span className="text-slate-500">Dirección: </span>{[s.direccion, s.distrito, s.provincia, s.departamento].filter(Boolean).join(', ') || '—'}{s.ubigeo ? <span className="ml-1 font-mono text-[10px] text-slate-400">({s.ubigeo})</span> : null}</div>
+            <div><span className="text-slate-500">Responsable: </span>{s.responsable_nombre || '—'} <span className="text-slate-500">· Áreas: </span>{s.n_areas}</div>
+          </div>
+          <div className="flex flex-wrap items-center gap-1.5 text-xs">
+            <span className="flex items-center gap-1 text-slate-500"><Layers className="h-3.5 w-3.5" /> Niveles:</span>
+            {s.niveles.filter((n) => verInactivas || n.is_active).map((n) => (
+              <span key={n.id} className={`inline-flex items-center gap-1 rounded border border-slate-200 px-1.5 py-0.5 dark:border-slate-700 ${n.is_active ? '' : 'opacity-50 line-through'}`}>
+                {n.nombre}{n.n_areas ? <span className="text-slate-400">· {n.n_areas} área{n.n_areas > 1 ? 's' : ''}</span> : null}
+                {puedeEditar && n.is_active && <button title="Renombrar" onClick={() => { setErr(''); setNivel({ id: n.id, sede: s.id, nombre: n.nombre, orden: n.orden }) }}><Pencil className="h-3 w-3" /></button>}
+                {puedeEliminar && n.is_active && <button className="text-red-500" title="Desactivar" onClick={() => baja('Desactivar el nivel', `«${n.nombre}» deja de ofrecerse.`, () => api.org.desactivarNivel(n.id))}><X className="h-3 w-3" /></button>}
+                {puedeEditar && !n.is_active && <button title="Reactivar" onClick={() => ejecutar(() => api.org.reactivar('niveles', n.id))}><RotateCcw className="h-3 w-3" /></button>}
+              </span>
+            ))}
+            {!s.niveles.length && <span className="text-slate-400">ninguno (la sede es un solo ambiente)</span>}
+            {puedeCrear && s.is_active && <button className="btn-secondary !px-2 !py-0.5 text-xs" onClick={() => { setErr(''); setNivel({ sede: s.id, nombre: '', orden: s.niveles.length + 1 }) }}><Plus className="h-3 w-3" /> Nivel</button>}
+          </div>
+          <div>
+            <div className="mb-1 flex items-center gap-2 text-xs"><span className="flex items-center gap-1 text-slate-500"><Gauge className="h-3.5 w-3.5" /> Suministros de energía y agua, y sus medidores</span>
+              {puedeCrear && s.is_active && <button className="btn-secondary ml-auto !px-2 !py-0.5 text-xs" onClick={() => { setErr(''); setSum({ ...SUM_VACIO, sede: s.id }) }}><Plus className="h-3 w-3" /> Suministro</button>}
+            </div>
+            {s.suministros.filter((x) => verInactivas || x.is_active).length ? (
+              <table className="tabla-sig text-xs">
+                <thead><tr><th>Servicio</th><th>Nivel</th><th>N° de suministro / medidor</th><th>Cómo se registra el consumo</th><th>Empresa prestadora</th><th>Responsable del registro</th><th /></tr></thead>
+                <tbody>{s.suministros.filter((x) => verInactivas || x.is_active).map((x) => (
+                  <tr key={x.id} className={x.is_active ? '' : 'opacity-50'}>
+                    <td>{x.tipo_display} <span className="text-slate-400">({x.unidad})</span></td><td>{x.nivel_nombre || 'Toda la sede'}</td><td className="font-mono">{x.numero || '—'}</td>
+                    <td className="text-center">{x.modalidad_display}</td><td>{x.empresa_prestadora || '—'}</td><td>{x.responsable_nombre || (s.responsable_nombre ? `${s.responsable_nombre} (de la sede)` : '—')}</td>
+                    <td className="whitespace-nowrap">
+                      {puedeEditar && x.is_active && <button className="p-1" title="Corregir" onClick={() => { setErr(''); setSum({ ...Object.fromEntries(Object.keys(SUM_VACIO).map((k) => [k, x[k] ?? SUM_VACIO[k]])), id: x.id }) }}><Pencil className="h-3.5 w-3.5" /></button>}
+                      {puedeEliminar && x.is_active && <button className="p-1 text-red-500" title="Desactivar" onClick={() => baja('Desactivar el suministro', 'Deja de pedir el registro mensual; los consumos registrados se conservan.', () => api.org.desactivarSuministro(x.id))}><X className="h-3.5 w-3.5" /></button>}
+                      {puedeEditar && !x.is_active && <button className="p-1" title="Reactivar" onClick={() => ejecutar(() => api.org.reactivar('suministros', x.id))}><RotateCcw className="h-3.5 w-3.5" /></button>}
+                    </td>
+                  </tr>
+                ))}</tbody>
+              </table>
+            ) : <p className="text-xs text-slate-400">Sin suministros registrados.</p>}
+          </div>
+        </div>
+      ))}
+
+      <Modal abierto={Boolean(form)} titulo={form?.id ? 'Corregir la sede' : 'Nueva sede'} onCerrar={() => setForm(null)} ancho="max-w-3xl">
+        {form && (
+          <div className="space-y-3 text-sm">
+            <div className="grid gap-3 md:grid-cols-4">
+              <div className="md:col-span-2"><label className={lbl}>Nombre</label><input className={inp} {...f('nombre')} /></div>
+              <div><label className={lbl}>Código corto</label><input className={inp} maxLength={12} {...f('codigo')} /></div>
+              <div><label className={lbl}>Instalaciones</label><select className={inp} {...f('tenencia')}>{Object.entries(TENENCIA).map(([k, [n]]) => <option key={k} value={k}>{n}</option>)}</select></div>
+            </div>
+            <div className="grid gap-3 md:grid-cols-4">
+              <div className="md:col-span-4"><label className={lbl}>Dirección</label><input className={inp} {...f('direccion')} /></div>
+              <SelectorUbigeo valor={form.ubigeo} onChange={(v) => setForm({ ...form, ubigeo: v })} />
+              <div><label className={lbl}>Puesto responsable</label><select className={inp} value={String(form.responsable || '')} onChange={(e) => setForm({ ...form, responsable: e.target.value ? Number(e.target.value) : '' })}><option value="">—</option>{propios.map((p) => <option key={p.id} value={p.id}>{p.nombre}</option>)}</select></div>
+            </div>
+            <label className="flex items-center gap-2 text-xs"><input type="checkbox" className="accent-esynapse-600" checked={Boolean(form.principal)} onChange={(e) => setForm({ ...form, principal: e.target.checked })} /> Sede principal (domicilio fiscal); al marcarla, deja de serlo la anterior</label>
+            <div><label className={lbl}>Descripción / observaciones</label><CampoAmpliable multilinea rows={2} value={form.descripcion} onChange={(v) => setForm({ ...form, descripcion: v })} /></div>
+            <Historial items={form.historial} />
+            {err && <Aviso texto={err} />}
+            <div className="flex justify-end gap-2"><button className="btn-secondary" onClick={() => setForm(null)}>Cancelar</button><button className="btn-primary" disabled={!form.nombre.trim()} onClick={guardarSede}>Guardar</button></div>
+          </div>
+        )}
+      </Modal>
+
+      <Modal abierto={Boolean(nivel)} titulo={nivel?.id ? 'Renombrar el nivel' : 'Nuevo nivel'} onCerrar={() => setNivel(null)} ancho="max-w-md">
+        {nivel && (
+          <div className="space-y-3 text-sm">
+            <div className="grid grid-cols-3 gap-3">
+              <div className="col-span-2"><label className={lbl}>Nombre (Piso 4, Sótano, Bloque B…)</label><input className={inp} autoFocus value={nivel.nombre} onChange={(e) => setNivel({ ...nivel, nombre: e.target.value })} /></div>
+              <div><label className={lbl}>Orden</label><input className={inp} type="number" value={nivel.orden} onChange={(e) => setNivel({ ...nivel, orden: Number(e.target.value) })} /></div>
+            </div>
+            {err && <Aviso texto={err} />}
+            <div className="flex justify-end gap-2"><button className="btn-secondary" onClick={() => setNivel(null)}>Cancelar</button><button className="btn-primary" disabled={!nivel.nombre.trim()} onClick={guardarNivel}>Guardar</button></div>
+          </div>
+        )}
+      </Modal>
+
+      <Modal abierto={Boolean(sum)} titulo={sum?.id ? 'Corregir el suministro' : 'Nuevo suministro'} onCerrar={() => setSum(null)} ancho="max-w-2xl">
+        {sum && (
+          <div className="space-y-3 text-sm">
+            <p className="text-xs text-slate-500">Sede: <strong>{sedes.find((s) => s.id === sum.sede)?.nombre}</strong></p>
+            <div className="grid gap-3 md:grid-cols-3">
+              <div><label className={lbl}>Servicio</label><select className={inp} value={sum.tipo} onChange={(e) => setSum({ ...sum, tipo: e.target.value })}>{TIPO_SUM.map(([k, n]) => <option key={k} value={k}>{n}</option>)}</select></div>
+              <div><label className={lbl}>Nivel</label><select className={inp} value={String(sum.nivel || '')} onChange={(e) => setSum({ ...sum, nivel: e.target.value ? Number(e.target.value) : '' })}><option value="">Toda la sede</option>{(sedes.find((s) => s.id === sum.sede)?.niveles || []).filter((n) => n.is_active || n.id === sum.nivel).map((n) => <option key={n.id} value={n.id}>{n.nombre}</option>)}</select></div>
+              <div><label className={lbl}>Cómo se obtiene el consumo</label><select className={inp} value={sum.modalidad} onChange={(e) => setSum({ ...sum, modalidad: e.target.value })}>{MODALIDAD.map(([k, n]) => <option key={k} value={k}>{n}</option>)}</select></div>
+              <div><label className={lbl}>N° de suministro / medidor</label><input className={inp} value={sum.numero} onChange={(e) => setSum({ ...sum, numero: e.target.value })} /></div>
+              <div><label className={lbl}>Empresa prestadora</label><input className={inp} placeholder="Distribuidora eléctrica, empresa de agua…" value={sum.empresa_prestadora} onChange={(e) => setSum({ ...sum, empresa_prestadora: e.target.value })} /></div>
+              <div><label className={lbl}>Ubicación del medidor</label><input className={inp} value={sum.ubicacion} onChange={(e) => setSum({ ...sum, ubicacion: e.target.value })} /></div>
+              <div className="md:col-span-2"><label className={lbl}>Responsable del registro mensual (vacío: el de la sede)</label><select className={inp} value={String(sum.responsable || '')} onChange={(e) => setSum({ ...sum, responsable: e.target.value ? Number(e.target.value) : '' })}><option value="">—</option>{propios.map((p) => <option key={p.id} value={p.id}>{p.nombre}</option>)}</select></div>
+            </div>
+            <p className="text-xs text-slate-500">Con «lectura del medidor», cada mes se registra la lectura y el sistema calcula el consumo; el responsable lo ve en Mis tareas hasta el día 5 del mes siguiente.</p>
+            {err && <Aviso texto={err} />}
+            <div className="flex justify-end gap-2"><button className="btn-secondary" onClick={() => setSum(null)}>Cancelar</button><button className="btn-primary" onClick={guardarSum}>Guardar</button></div>
+          </div>
+        )}
+      </Modal>
+    </div>
+  )
+}
+
+/* ------------------------------------------------------------------ Áreas */
+const AREA_VACIA = { nombre: '', tipo: 'area', padre: '', proceso: '', sede: '', nivel: '', responsable: '', descripcion: '', orden: 0 }
+
+function Areas({ areas, puestos, sedes, procesos, confirmar, setError, cargarBase, puedeCrear, puedeEditar, puedeEliminar }) {
   const [form, setForm] = useState(null)
   const [verInactivas, setVerInactivas] = useState(false)
   const [err, setErr] = useState('')
   const arbol = useMemo(() => enArbol(areas.filter((a) => verInactivas || a.is_active)), [areas, verInactivas])
   const guardar = async () => {
     setErr('')
-    const datos = { ...form, padre: form.padre || null, proceso: form.proceso || null, responsable: form.responsable || null }
+    const datos = { ...form, padre: form.padre || null, proceso: form.proceso || null, responsable: form.responsable || null, sede: form.sede || null, nivel: form.nivel || null }
     try { if (form.id) await api.org.editarArea(form.id, datos); else await api.org.crearArea(datos); setForm(null); await cargarBase() } catch (e) { setErr(e.message) }
   }
   const desactivar = async (a) => {
@@ -115,7 +263,7 @@ function Areas({ areas, puestos, procesos, confirmar, setError, cargarBase, pued
               <tr key={a.id} className={`border-b border-slate-100 dark:border-slate-800/60 ${a.is_active ? '' : 'opacity-50'}`}>
                 <td className="px-2 py-1.5"><span style={{ paddingLeft: `${a.nivel * 1.25}rem` }} className={a.nivel ? '' : 'font-semibold'}>{a.nivel ? '↳ ' : ''}{a.nombre}</span></td>
                 <td className="px-2 text-center"><Chip par={TIPO_AREA[a.tipo]} /></td><td className="px-2">{a.proceso_nombre || '—'}</td>
-                <td className="px-2">{[a.sede, a.piso ? `piso ${a.piso}` : ''].filter(Boolean).join(' · ') || '—'}</td>
+                <td className="px-2">{[a.sede_nombre, a.nivel_nombre].filter(Boolean).join(' · ') || '—'}</td>
                 <td className="px-2">{a.responsable_nombre || '—'}</td><td className="px-2">{a.n_puestos}</td><td className="px-2 text-right">{a.n_trabajadores}</td>
                 <td className="whitespace-nowrap px-2">
                   {puedeEditar && a.is_active && <button className="p-1" title="Corregir" onClick={() => { setErr(''); setForm({ ...Object.fromEntries(Object.keys(AREA_VACIA).map((k) => [k, a[k] ?? AREA_VACIA[k]])), id: a.id, historial: a.historial }) }}><Pencil className="h-3.5 w-3.5" /></button>}
@@ -139,8 +287,8 @@ function Areas({ areas, puestos, procesos, confirmar, setError, cargarBase, pued
               <div><label className={lbl}>Proceso principal</label><select className={inp} value={String(form.proceso || '')} onChange={(e) => setForm({ ...form, proceso: e.target.value ? Number(e.target.value) : '' })}><option value="">—</option>{procesos.map((p) => <option key={p.id} value={p.id}>{p.nombre}</option>)}</select></div>
             </div>
             <div className="grid gap-3 md:grid-cols-3">
-              <div><label className={lbl}>Sede</label><input className={inp} placeholder="Operativa / Administrativa" value={form.sede} onChange={(e) => setForm({ ...form, sede: e.target.value })} /></div>
-              <div><label className={lbl}>Piso</label><input className={inp} value={form.piso} onChange={(e) => setForm({ ...form, piso: e.target.value })} /></div>
+              <div><label className={lbl}>Sede</label><select className={inp} value={String(form.sede || '')} onChange={(e) => setForm({ ...form, sede: e.target.value ? Number(e.target.value) : '', nivel: '' })}><option value="">—</option>{sedes.filter((s) => s.is_active || s.id === form.sede).map((s) => <option key={s.id} value={s.id}>{s.nombre}</option>)}</select></div>
+              <div><label className={lbl}>Nivel / piso</label><select className={inp} disabled={!form.sede} value={String(form.nivel || '')} onChange={(e) => setForm({ ...form, nivel: e.target.value ? Number(e.target.value) : '' })}><option value="">— (toda la sede)</option>{(sedes.find((s) => s.id === form.sede)?.niveles || []).filter((n) => n.is_active || n.id === form.nivel).map((n) => <option key={n.id} value={n.id}>{n.nombre}</option>)}</select></div>
               <div><label className={lbl}>Puesto responsable</label><select className={inp} value={String(form.responsable || '')} onChange={(e) => setForm({ ...form, responsable: e.target.value ? Number(e.target.value) : '' })}><option value="">—</option>{puestos.filter((p) => p.is_active && p.tipo === 'propio').map((p) => <option key={p.id} value={p.id}>{p.nombre}</option>)}</select></div>
             </div>
             <div><label className={lbl}>Descripción</label><input className={inp} value={form.descripcion} onChange={(e) => setForm({ ...form, descripcion: e.target.value })} /></div>
@@ -287,7 +435,7 @@ function Trabajadores({ areas, puestos, confirmar, setError, cargarBase, puedeCr
     try { if (form.id) await api.org.editarTrabajador(form.id, datos); else await api.org.crearTrabajador(datos); setForm(null); await cargar(); await cargarBase() } catch (e) { setErr(e.message) }
   }
   const cesar = async () => {
-    const f = await confirmar({ titulo: 'Registrar el cese', mensaje: `${form.nombres} ${form.apellidos} deja de figurar como activo.${form.usuario_username ? ` Su usuario del sistema (${form.usuario_username}) se desactiva.` : ''}`, textoConfirmar: 'Siguiente', entrada: { etiqueta: 'Fecha de cese (AAAA-MM-DD)', obligatorio: true, valorInicial: new Date().toISOString().slice(0, 10) } })
+    const f = await confirmar({ titulo: 'Registrar el cese', mensaje: `${form.nombres} ${form.apellidos} deja de figurar como activo.${form.usuario_username ? ` Su usuario del sistema (${form.usuario_username}) se desactiva.` : ''}`, textoConfirmar: 'Siguiente', entrada: { etiqueta: 'Fecha de cese (AAAA-MM-DD)', obligatorio: true, valorInicial: hoyLocal() } })
     if (f === null) return
     const m = await confirmar({ titulo: 'Motivo del cese', mensaje: 'Queda en el historial del trabajador.', textoConfirmar: 'Registrar', peligro: true, entrada: { etiqueta: 'Motivo (renuncia, término de contrato…)', obligatorio: true } })
     if (m === null) return
@@ -295,7 +443,7 @@ function Trabajadores({ areas, puestos, confirmar, setError, cargarBase, puedeCr
     try { await api.org.accionTrabajador(form.id, 'cesar', { fecha: f, motivo: m }); setForm(null); await cargar(); await cargarBase() } catch (e) { setErr(e.message) }
   }
   const reingresar = async () => {
-    const f = await confirmar({ titulo: 'Reingreso', mensaje: 'El trabajador vuelve a figurar como activo. Su usuario del sistema, si lo tenía, se reactiva desde Usuarios.', textoConfirmar: 'Registrar', entrada: { etiqueta: 'Fecha de reingreso (AAAA-MM-DD)', obligatorio: true, valorInicial: new Date().toISOString().slice(0, 10) } })
+    const f = await confirmar({ titulo: 'Reingreso', mensaje: 'El trabajador vuelve a figurar como activo. Su usuario del sistema, si lo tenía, se reactiva desde Usuarios.', textoConfirmar: 'Registrar', entrada: { etiqueta: 'Fecha de reingreso (AAAA-MM-DD)', obligatorio: true, valorInicial: hoyLocal() } })
     if (f === null) return
     try { await api.org.accionTrabajador(form.id, 'reingresar', { fecha: f }); setForm(null); await cargar() } catch (e) { setErr(e.message) }
   }

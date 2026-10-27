@@ -63,7 +63,7 @@ Procedimientos detallados: `docs/03_operacion_en_pc.md`.
 
 ```bash
 cd backend
-python manage.py test core esynapse_sig quejas procesos cambios riesgos legal sst organizacion
+python manage.py test core esynapse_sig quejas procesos cambios riesgos legal sst organizacion capacitacion ambiente revision tnc cumplimiento
 ```
 
 ## Endpoints principales

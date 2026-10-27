@@ -15,7 +15,7 @@ import NavModulo, { Vistas } from '../components/NavModulo.jsx'
 import { api } from '../lib/api.js'
 import { useAuth } from '../context/AuthContext.jsx'
 import { useConfirm } from '../context/ConfirmContext.jsx'
-import { fecha, fechaHora } from '../lib/fecha.js'
+import { fecha, fechaHora, hoy as hoyLocal } from '../lib/fecha.js'
 import { sev } from '../lib/severidad.js'
 import TituloModulo from '../components/ui/TituloModulo.jsx'
 
@@ -185,7 +185,7 @@ function AprobacionComite({ abierto, datos, area, onCerrar, alAprobar }) {
     if (!abierto || !datos) return
     setErr(''); setOk('')
     const marcadas = datos.areas.filter((x) => x.estado !== 'aprobada' || x.area === area).map((x) => x.area)
-    setF({ areas: marcadas, fecha: new Date().toISOString().slice(0, 10), reunion: '', modo: 'pantalla', observaciones: '', archivo: null, password: '',
+    setF({ areas: marcadas, fecha: hoyLocal(), reunion: '', modo: 'pantalla', observaciones: '', archivo: null, password: '',
       firmas: Object.fromEntries(datos.titulares.map((t) => [t.id, { firma: true, clave: '', pin: '', pin_nuevo: '', pin_confirmacion: '' }])) })
     api.sst.reuniones().then(setReuniones).catch(() => {})
   }, [abierto]) // eslint-disable-line react-hooks/exhaustive-deps
@@ -430,7 +430,7 @@ function Iperc({ cat, puestos, areasOrg, procesos, confirmar, setError, abrirPdf
             <Seccion titulo="Evaluación del riesgo residual" extra={res.n && <span className="text-[11px] text-slate-500">{ACCION[res.n]}</span>}>
               <Indices form={form} setForm={setForm} pre="r_" editable={editable} />
             </Seccion>
-            {d?.historial?.length > 0 && <Seccion titulo="Historial">{d.historial.slice().reverse().map((h, i) => <p key={i}>{(h.fecha || '').slice(0, 10)} · {h.usuario} · <strong>{h.accion}</strong>{h.campos ? `: ${h.campos}` : ''}{h.de ? ` (nivel ${h.de} → ${h.a})` : ''}{h.residual ? ` (residual ${h.residual})` : ''}{h.motivo ? `: ${h.motivo}` : ''}</p>)}</Seccion>}
+            {d?.historial?.length > 0 && <Seccion titulo="Historial">{d.historial.slice().reverse().map((h, i) => <p key={i}>{fecha(h.fecha)} · {h.usuario} · <strong>{h.accion}</strong>{h.campos ? `: ${h.campos}` : ''}{h.de ? ` (nivel ${h.de} → ${h.a})` : ''}{h.residual ? ` (residual ${h.residual})` : ''}{h.motivo ? `: ${h.motivo}` : ''}</p>)}</Seccion>}
             {editable && (
               <div className="flex justify-end gap-2">
                 {d && <button className="btn-secondary mr-auto text-red-500" onClick={retirar}><Trash2 className="h-4 w-4" /> Retirar</button>}
@@ -446,7 +446,7 @@ function Iperc({ cat, puestos, areasOrg, procesos, confirmar, setError, abrirPdf
 }
 
 /* ---------------------------------------------------------------------- ATS */
-const ATS_VACIO = { lugar_ejecucion: 'instalaciones', formato: 'metrindust', cliente: '', ats_tipo: '', zona: '', fecha: new Date().toISOString().slice(0, 10), hora_inicio: '', hora_fin: '', tarea: '', lugar: '', orden_trabajo: '', empresa: 'METRINDUST S.A.C.', planificado: 'si', tipos_trabajo: [], tipo_otro: '', proceso: '', filas_iperc: [], ejecutantes: [], comentarios: '', equipos: [], responsable_cliente: '', ssoma_cliente: '' }
+const ATS_VACIO = { lugar_ejecucion: 'instalaciones', formato: 'metrindust', cliente: '', ats_tipo: '', zona: '', fecha: hoyLocal(), hora_inicio: '', hora_fin: '', tarea: '', lugar: '', orden_trabajo: '', empresa: 'METRINDUST S.A.C.', planificado: 'si', tipos_trabajo: [], tipo_otro: '', proceso: '', filas_iperc: [], ejecutantes: [], comentarios: '', equipos: [], responsable_cliente: '', ssoma_cliente: '' }
 const PASO_VACIO = { etapa: '', peligros: '', riesgos: '', severidad: '', probabilidad: '', medidas: '', r_severidad: '', r_probabilidad: '' }
 // Datos que se pueden transcribir mientras el ATS está en campo.
 const CAMPOS_EN_CAMPO = ['ejecutantes', 'comentarios', 'equipos', 'fecha', 'hora_inicio', 'hora_fin', 'responsable_cliente', 'ssoma_cliente', 'filas_iperc']
@@ -881,6 +881,25 @@ function Puestos({ puestos }) {
 }
 
 /* ------------------------------------------------------------------ Resumen */
+/* Capacitación en SST (registro obligatorio de inducción, capacitación, entrenamiento y simulacros): se gestiona en
+   el módulo de Capacitación e inducción; aquí, sus indicadores para SST. */
+function ResumenCapacitacion() {
+  const [r, setR] = useState(null)
+  useEffect(() => { api.capacitacion.resumen(new Date().getFullYear()).then(setR).catch(() => {}) }, [])
+  if (!r?.indicadores) return null
+  const i = r.indicadores
+  return (
+    <div className="card-esynapse flex flex-wrap items-center gap-3 p-3 text-xs">
+      <p className="font-semibold">Capacitación {r.anio}</p>
+      <span className={i.sst_realizadas >= 4 ? 'text-emerald-600' : 'text-amber-600'}>{i.sst_realizadas} capacitaciones de SST realizadas (mínimo legal 4)</span>
+      <span className="text-slate-500">· programa {i.realizadas}/{i.programadas} ({i.avance ?? 0} %)</span>
+      {r.sin_induccion.length > 0 && <span className="text-red-600">· {r.sin_induccion.length} trabajador(es) sin inducción completa</span>}
+      {r.eficacia.length > 0 && <span className="text-amber-600">· {r.eficacia.length} evaluación(es) de eficacia por vencer o vencidas</span>}
+      <Link to="/capacitacion" className="ml-auto text-esynapse-500 underline">Ir a Capacitación e inducción</Link>
+    </div>
+  )
+}
+
 function Resumen() {
   const [r, setR] = useState(null)
   const [ra, setRa] = useState(null)
@@ -890,6 +909,7 @@ function Resumen() {
   const niveles = tot('niveles'); const sit = tot('situacion')
   return (
     <div className="space-y-4">
+      <ResumenCapacitacion />
       <div className="grid gap-3 md:grid-cols-5">
         {Object.entries(SITUACION).map(([k, [n, c]]) => <div key={k} className="card-esynapse p-3"><p className="text-xs text-slate-500 dark:text-slate-400">{n}</p><p className={`text-2xl font-bold ${c.split(' ').filter((x) => x.startsWith('text-')).join(' ')}`}>{sit[k] || 0}</p></div>)}
         <div className="card-esynapse p-3"><p className="text-xs text-slate-500 dark:text-slate-400">Filas vigentes</p><p className="text-2xl font-bold">{r.total}</p></div>

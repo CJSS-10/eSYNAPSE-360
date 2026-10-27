@@ -9,13 +9,13 @@ import { useCatalogoProcesos } from '../components/SelectorProceso.jsx'
 import { api } from '../lib/api.js'
 import { useAuth } from '../context/AuthContext.jsx'
 import { useConfirm } from '../context/ConfirmContext.jsx'
-import { fecha, fechaHora } from '../lib/fecha.js'
+import { fecha, fechaHora, hoy as hoyLocal } from '../lib/fecha.js'
 import TituloModulo from '../components/ui/TituloModulo.jsx'
 import Pestanas from '../components/ui/Pestanas.jsx'
 
 const inp = 'input-esynapse'
 const lbl = 'mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300'
-const hoy = () => new Date().toISOString().slice(0, 10)
+const hoy = () => hoyLocal()
 
 // Etiquetas de norma (regla 9): SST rojo · Medio Ambiente verde · acreditación ámbar; los demás, neutros.
 const COLOR_AMBITO = {
@@ -213,7 +213,7 @@ function Requisitos({ ambito, cat, procesos, confirmar, setError, abrirPdf, carg
               {d.comunicaciones.length === 0 && <p className="text-slate-400">Sin comunicaciones registradas.</p>}
               {d.comunicaciones.map((c) => <p key={c.id}>{fecha(c.fecha)} · {c.medio_display} · {c.destinatarios}: {c.resumen}</p>)}
             </Seccion>
-            {d.historial.length > 0 && <Seccion titulo="Historial">{d.historial.slice().reverse().map((h, i) => <p key={i}>{(h.fecha || '').slice(0, 10)} · {h.usuario} · <strong>{h.accion}</strong>{h.descripcion ? `: ${h.descripcion}` : ''}{h.motivo ? `: ${h.motivo}` : ''}{h.cambio ? ` (${h.cambio})` : ''}</p>)}</Seccion>}
+            {d.historial.length > 0 && <Seccion titulo="Historial">{d.historial.slice().reverse().map((h, i) => <p key={i}>{fecha(h.fecha)} · {h.usuario} · <strong>{h.accion}</strong>{h.descripcion ? `: ${h.descripcion}` : ''}{h.motivo ? `: ${h.motivo}` : ''}{h.cambio ? ` (${h.cambio})` : ''}</p>)}</Seccion>}
             {vigente && puedeEditar && <BarraEtapa titulo="Norma vigente" nota="Registre los cambios normativos, comuníquela a las áreas o abra una solicitud de cambio para adecuarse." botones={[
               ...(puedeEliminar && d.obligaciones.length === 0 ? [{ texto: 'Anular', accion: anular, secundario: true }] : []),
               { texto: 'Derogar', accion: derogar, secundario: true },

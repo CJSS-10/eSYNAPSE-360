@@ -27,6 +27,26 @@ def _datos_trabajador(t):
     return {'puesto': t.puesto.nombre if t.puesto_id else '', 'area': a.nombre if a else ''}
 
 
+INTENTOS_CLAVE_FIRMA = 5
+BLOQUEO_CLAVE_FIRMA = 15 * 60  # segundos
+
+
+def _clave_firma_bloqueada(u):
+    from django.core.cache import cache
+    return (cache.get(f'firma-fallos-{u.pk}') or 0) >= INTENTOS_CLAVE_FIRMA
+
+
+def _clave_firma_fallo(u):
+    from django.core.cache import cache
+    k = f'firma-fallos-{u.pk}'
+    cache.add(k, 0, BLOQUEO_CLAVE_FIRMA)
+    try:
+        return cache.incr(k)
+    except ValueError:
+        cache.set(k, 1, BLOQUEO_CLAVE_FIRMA)
+        return 1
+
+
 def firma_persona(request, t, datos=None, clave='clave_trabajador', crear_pin=True):
     """Firma presencial de una persona. Regla del sistema: quien tiene usuario firma con la contraseña de su usuario;
     quien no lo tiene (personal sin acceso, terceros) firma con su PIN personal, que crea en su primera firma.
@@ -38,14 +58,30 @@ def firma_persona(request, t, datos=None, clave='clave_trabajador', crear_pin=Tr
     def err(texto, **extra):
         return None, Response({'detail': texto, **extra}, status=status.HTTP_400_BAD_REQUEST)
     base = {'trabajador_id': t.pk, 'nombre': t.nombre_completo, 'documento': t.documento,
-            'fecha': timezone.now().isoformat(timespec='seconds'), 'ip': get_client_ip(request)}
+            'fecha': timezone.localtime().isoformat(timespec='seconds'), 'ip': get_client_ip(request)}
     u = t.usuario if t.usuario_id and t.usuario.is_active else None
     if u:
         pw = str(datos.get(clave) or '')
         if not pw:
             return err(f'{t.nombre_completo} debe firmar con la contraseña de su usuario.')
+        # La contraseña de un tercero no se puede probar sin límite desde las pantallas de firma.
+        if _clave_firma_bloqueada(u):
+            return err(f'La firma de {t.nombre_completo} está bloqueada 15 minutos por intentos fallidos.')
         if not u.check_password(pw):
-            return err(f'Contraseña incorrecta de {t.nombre_completo}.')
+            n = _clave_firma_fallo(u)
+            try:
+                from core.models import LogAuditoria
+                LogAuditoria.objects.create(usuario=request.user, usuario_nombre=_nombre(request.user),
+                                            accion='ACCESO_BLOQUEADO', modulo='sst', entidad='Firma',
+                                            entidad_id=str(u.pk), ip=get_client_ip(request),
+                                            valor_nuevo=f'Contraseña de firma incorrecta de {u.username} ({n})')
+            except Exception:
+                pass
+            quedan = max(0, INTENTOS_CLAVE_FIRMA - n)
+            return err(f'Contraseña incorrecta de {t.nombre_completo}.'
+                       + (f' Quedan {quedan} intento(s).' if quedan else ' Firma bloqueada 15 minutos.'))
+        from django.core.cache import cache
+        cache.delete(f'firma-fallos-{u.pk}')
         return {**base, 'metodo': 'usuario', 'usuario_id': u.pk}, None
     reg = PinTrabajador.objects.filter(trabajador=t).first()
     if not reg or not reg.pin:
@@ -468,7 +504,7 @@ class EntregaEPPViewSet(_Base, viewsets.ModelViewSet):
         e.cargo_papel = request.FILES['archivo']
         t = e.trabajador
         return self._cerrar(e, request, {'trabajador_id': t.pk, 'nombre': t.nombre_completo, 'documento': t.documento,
-                                         'metodo': 'papel', 'fecha': timezone.now().isoformat(timespec='seconds')})
+                                         'metodo': 'papel', 'fecha': timezone.localtime().isoformat(timespec='seconds')})
     firmar_papel.operacion = 'editar'
 
     @action(detail=False, methods=['post'])
@@ -818,7 +854,7 @@ class EvaluacionMedicaViewSet(_Base, viewsets.ModelViewSet):
             return error
         r.cargo_resultados = request.FILES['archivo']
         r.entrega_resultados = {'trabajador_id': r.trabajador_id, 'nombre': r.trabajador.nombre_completo,
-                                'metodo': 'papel', 'fecha': timezone.now().isoformat(timespec='seconds'),
+                                'metodo': 'papel', 'fecha': timezone.localtime().isoformat(timespec='seconds'),
                                 'registrado_por': _firma(request)}
         r.save(update_fields=['entrega_resultados', 'cargo_resultados'])
         _hist(ev, request, 'Entrega de resultados (cargo en papel)', trabajador=r.trabajador.nombre_completo)
@@ -901,6 +937,8 @@ class EvaluacionMedicaViewSet(_Base, viewsets.ModelViewSet):
                           'aptitud': r.aptitud if r else None, 'aptitud_display': r.get_aptitud_display() if r else None,
                           'restricciones': r.restricciones if r else '',
                           'proximo': r.fecha_proximo.isoformat() if r and r.fecha_proximo else None,
-                          'estado': ('sin_examen' if not r else estado_fecha(r.fecha_proximo, hoy) or 'vigente')})
+                          # Sin fecha del próximo examen (p. ej. último resultado «no apto») no es «vigente»: se
+                          # muestra para que se programe.
+                          'estado': ('sin_examen' if not r else estado_fecha(r.fecha_proximo, hoy) or 'sin_proximo')})
         return Response(filas)
     vigilancia.operacion = 'leer'

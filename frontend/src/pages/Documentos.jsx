@@ -11,6 +11,7 @@ import { useAuth } from '../context/AuthContext.jsx'
 import { useConfig } from '../context/ConfigContext.jsx'
 import { fecha, fechaHora } from '../lib/fecha.js'
 import TituloModulo from '../components/ui/TituloModulo.jsx'
+import { useAbrirDesdeEnlace } from '../lib/enlaces.js'
 
 const TIPOS = [
   ['politica', 'Política'], ['manual', 'Manual'], ['reglamento', 'Reglamento'],
@@ -251,6 +252,8 @@ export default function Documentos() {
         onChange={(e) => setForm({ ...form, [clave]: e.target.value })} {...props} />
     </div>
   )
+
+  useAbrirDesdeEnlace(abrirDetalle)   // enlace directo ?abrir=<id> (búsqueda, Mis tareas, campana)
 
   return (
     <div className="space-y-4">
@@ -1056,6 +1059,14 @@ export default function Documentos() {
                         <p className="text-emerald-600 dark:text-emerald-400">
                           ✓ Firmas: {v.firmas.map((fi) => `${fi.rol_display} (${fi.firmante})`).join(' · ')}
                         </p>
+                      )}
+                      {(v.firmas_anuladas || []).length > 0 && (
+                        <details className="text-xs text-slate-400">
+                          <summary className="cursor-pointer">Mostrar firmas anuladas ({v.firmas_anuladas.length})</summary>
+                          {v.firmas_anuladas.map((fi) => (
+                            <p key={fi.id}><span className="line-through">{fi.rol_display} ({fi.firmante}, {fechaHora(fi.created_at)})</span> · anulada el {fechaHora(fi.anulada_en)}: {fi.motivo_anulacion}</p>
+                          ))}
+                        </details>
                       )}
                       {(v.historial_archivos || []).length > 0 && (
                         <div className="mt-1 rounded-lg bg-slate-100 p-2 dark:bg-slate-800/60">

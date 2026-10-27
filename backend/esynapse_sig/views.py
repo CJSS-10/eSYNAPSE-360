@@ -42,6 +42,20 @@ class DocumentoViewSet(viewsets.ModelViewSet):
             return DocumentoListaSerializer
         return DocumentoSerializer
 
+    def update(self, request, *args, **kwargs):
+        """La edición directa solo cambia el código (corrección); el resto de la ficha se edita con «editar_ficha»,
+        que pide contraseña. Un documento archivado no se modifica."""
+        doc = self.get_object()
+        if doc.archivado:
+            return Response({'detail': f'El documento {doc.codigo} está archivado: desarchívelo para volver a '
+                                       f'trabajar con él.'}, status=status.HTTP_400_BAD_REQUEST)
+        otros = set(request.data.keys()) - {'codigo'}
+        if otros:
+            return Response({'detail': 'Los datos de la ficha se editan con «Editar ficha» (con contraseña).'},
+                            status=status.HTTP_400_BAD_REQUEST)
+        kwargs['partial'] = True
+        return super().update(request, *args, **kwargs)
+
     def get_queryset(self):
         qs = super().get_queryset()
         p = self.request.query_params
@@ -309,8 +323,9 @@ class DocumentoViewSet(viewsets.ModelViewSet):
             v.resumen_cambios = request.data['resumen_cambios']
         # Se adjuntó el corregido: se libera el candado de etapa.
         v.requiere_recarga = False
-        # El archivo cambió: las firmas previas de esta versión ya no aplican
-        v.firmas.all().delete()
+        # El archivo cambió: las firmas previas de esta versión ya no aplican (quedan anuladas, no se borran)
+        for f in v.firmas.all():
+            f.anular('Se reemplazó el archivo de la versión', request.user)
         v.save()
         self._bitacora(v, contenido, nombre, 'correccion')
         return Response(VersionDocumentoSerializer(v, context={'request': request}).data)
@@ -361,7 +376,8 @@ class DocumentoViewSet(viewsets.ModelViewSet):
         v, err = self._version_o_error(doc, ['en_revision'], 'No hay versión en revisión.')
         if err:
             return err
-        if v.elaborado_por_id == request.user.id and not request.user.is_superuser:
+        firmo_elaborado = v.firmas.filter(rol='elaborado', usuario=request.user).exists()
+        if (v.elaborado_por_id == request.user.id or firmo_elaborado) and not request.user.is_superuser:
             return Response(
                 {'detail': 'Quien elabora no puede revisar su propia versión.'},
                 status=status.HTTP_400_BAD_REQUEST,
@@ -398,6 +414,9 @@ class DocumentoViewSet(viewsets.ModelViewSet):
         v, err = self._version_o_error(doc, ['en_aprobacion'], 'No hay versión pendiente de aprobación.')
         if err:
             return err
+        if v.firmas.filter(rol='elaborado', usuario=request.user).exists() and not request.user.is_superuser:
+            return Response({'detail': 'Quien elaboró la versión no puede aprobarla.'},
+                            status=status.HTTP_400_BAD_REQUEST)
         err = self._firmar(request, v, 'aprobado')
         if err:
             return err
@@ -415,7 +434,8 @@ class DocumentoViewSet(viewsets.ModelViewSet):
                 extension = '.' + nombre_archivo.rsplit('.', 1)[-1] if '.' in nombre_archivo else '.docx'
                 pdf_base = convertir_a_pdf(contenido, extension)
                 if pdf_base is None:
-                    FirmaVersion.objects.filter(version=v, rol='aprobado').delete()
+                    for f in FirmaVersion.objects.filter(version=v, rol='aprobado'):
+                        f.anular('No se pudo publicar: archivo editable sin conversión a PDF', request.user)
                     return Response(
                         {'detail': 'El archivo es editable (Word/Excel) y no hay LibreOffice para '
                                    'convertirlo. Adjunte el PDF exportado en el campo archivo_pdf, '
@@ -448,7 +468,8 @@ class DocumentoViewSet(viewsets.ModelViewSet):
             try:
                 pdf_final, _ = generar_pdf_firmado(pdf_base, doc, v, firmas, con_sellos=True)
             except Exception:
-                FirmaVersion.objects.filter(version=v, rol='aprobado').delete()
+                for f in FirmaVersion.objects.filter(version=v, rol='aprobado'):
+                    f.anular('No se pudo publicar: el PDF de la versión no es válido', request.user)
                 return Response(
                     {'detail': 'El archivo de esta versión no es un PDF válido o está dañado. '
                                'Reemplácelo con un PDF correcto antes de aprobar.'},
@@ -457,7 +478,7 @@ class DocumentoViewSet(viewsets.ModelViewSet):
         from django.core.files.base import ContentFile
         # La versión vigente anterior pasa a Obsoleto (se conserva el historial)
         doc.versiones.filter(estado='vigente').update(estado='obsoleto')
-        hoy = timezone.now().date()
+        hoy = timezone.localdate()
         v.estado = 'vigente'
         v.aprobado_por = request.user
         v.fecha_aprobacion = timezone.now()
@@ -565,7 +586,7 @@ class DocumentoViewSet(viewsets.ModelViewSet):
                 archivo=archivo,
                 resumen_cambios=request.data.get('resumen_cambios', ''),
                 estado='vigente',
-                fecha_vigencia=timezone.now().date(),
+                fecha_vigencia=timezone.localdate(),
                 elaborado_por=request.user,
             )
             v.archivo.open('rb'); _cont = v.archivo.read(); v.archivo.close()
@@ -606,7 +627,7 @@ class DocumentoViewSet(viewsets.ModelViewSet):
                             status=status.HTTP_400_BAD_REQUEST)
         verificacion = VerificacionExterna.objects.create(
             documento=doc,
-            vigente=bool(request.data.get('vigente', True)),
+            vigente=self._es_si(request.data.get('vigente'), True),
             observaciones=request.data.get('observaciones', ''),
         )
         doc.ultima_verificacion = timezone.now()
@@ -617,7 +638,7 @@ class DocumentoViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def externos_por_verificar(self, request):
         """Documentos externos cuya verificación de vigencia está pendiente o vencida."""
-        ahora = timezone.now()
+        ahora = timezone.localtime()
         data = []
         for doc in Documento.objects.filter(origen='externo', is_active=True):
             limite = doc.ultima_verificacion + timedelta(days=doc.dias_verificacion) if doc.ultima_verificacion else None
@@ -636,7 +657,7 @@ class DocumentoViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def por_vencer(self, request):
         """Documentos vigentes con próxima revisión en los próximos 30 días o vencida."""
-        limite = timezone.now().date() + timedelta(days=30)
+        limite = timezone.localdate() + timedelta(days=30)
         versiones = VersionDocumento.objects.filter(
             estado='vigente', documento__is_active=True,
             fecha_proxima_revision__lte=limite,
@@ -647,7 +668,7 @@ class DocumentoViewSet(viewsets.ModelViewSet):
             'titulo': v.documento.titulo,
             'version': v.version,
             'fecha_proxima_revision': v.fecha_proxima_revision,
-            'vencido': v.fecha_proxima_revision < timezone.now().date(),
+            'vencido': v.fecha_proxima_revision < timezone.localdate(),
         } for v in versiones]
         return Response(data)
     por_vencer.operacion = 'leer'
@@ -754,7 +775,7 @@ class HallazgoViewSet(viewsets.ModelViewSet):
         if PREFIJOS_HALLAZGO.get(tipo) != PREFIJOS_HALLAZGO.get(h.tipo):
             h.codigo = Hallazgo.generar_codigo(tipo, h.anio_codigo())
         h.reclasificaciones = list(h.reclasificaciones or []) + [{
-            'fecha': timezone.now().isoformat(timespec='minutes'),
+            'fecha': timezone.localtime().isoformat(timespec='minutes'),
             'usuario': request.user.get_full_name() or request.user.username,
             'de': h.get_tipo_display(), 'a': dict(TIPOS_HALLAZGO_CHOICES)[tipo],
             'codigo_anterior': anterior, 'motivo': motivo,
@@ -901,9 +922,20 @@ class SolicitudACViewSet(viewsets.ModelViewSet):
         return qs
 
     def destroy(self, request, *args, **kwargs):
+        """Desactiva una solicitud registrada por error. Solo antes del análisis de causa; la No Conformidad que
+        trataba vuelve a «registrado» para poder tratarse en otra solicitud."""
         sac = self.get_object()
+        if sac.estado != 'registrada':
+            return Response({'detail': 'La solicitud ya avanzó del registro: no se desactiva; ciérrela según su '
+                                       'flujo.'}, status=status.HTTP_400_BAD_REQUEST)
         sac.is_active = False
         sac.save()
+        from .models import Hallazgo
+        for h in Hallazgo.objects.filter(sac=sac):
+            h.sac = None
+            if h.estado == 'en_tratamiento':
+                h.estado = 'registrado'
+            h.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     _FUENTE_HALLAZGO = {'auditoria_interna': 'auditoria_interna', 'auditoria_externa': 'auditoria_externa',
@@ -947,7 +979,7 @@ class SolicitudACViewSet(viewsets.ModelViewSet):
                 requisito=ser.validated_data.get('requisito_auditado', ''),
                 lugar=(datos.get('lugar') or '').strip(),
                 fecha_deteccion=(datos.get('fecha_deteccion') or ser.validated_data.get('fecha_registro')
-                                 or timezone.now().date()),
+                                 or timezone.localdate()),
                 responsable=ser.validated_data.get('responsable'), created_by=request.user)
         sac = ser.save(hallazgo=h)
         h.sac = sac
@@ -1178,7 +1210,7 @@ class SolicitudACViewSet(viewsets.ModelViewSet):
         if not (request.data.get('verificacion') or '').strip():
             return self._error('Describa la verificación de lo ejecutado antes de completar la acción.')
         accion.estado = 'completada'
-        accion.fecha_completada = timezone.now().date()
+        accion.fecha_completada = timezone.localdate()
         accion.verificacion = request.data.get('verificacion', '')
         if request.FILES.get('evidencia'):
             accion.evidencia = request.FILES['evidencia']
@@ -1216,7 +1248,7 @@ class SolicitudACViewSet(viewsets.ModelViewSet):
         if not motivo:
             return self._error('Indique el motivo de la reapertura.')
         accion.reaperturas = list(accion.reaperturas or []) + [{
-            'fecha': timezone.now().isoformat(timespec='minutes'),
+            'fecha': timezone.localtime().isoformat(timespec='minutes'),
             'usuario': request.user.get_full_name() or request.user.username,
             'motivo': motivo, 'verificacion': accion.verificacion,
             'fecha_completada': str(accion.fecha_completada or ''),
@@ -1267,7 +1299,7 @@ class SolicitudACViewSet(viewsets.ModelViewSet):
             # la solicitud y sus hallazgos siguen abiertos. El ciclo no eficaz
             # queda en el historial (no se sobrescribe).
             sac.ciclos_anteriores = list(sac.ciclos_anteriores or []) + [{
-                'ciclo': sac.ciclo, 'fecha': timezone.now().isoformat(timespec='minutes'),
+                'ciclo': sac.ciclo, 'fecha': timezone.localtime().isoformat(timespec='minutes'),
                 'porques': list(sac.porques or []), 'causa_raiz': sac.causa_raiz,
                 'evaluacion': evaluacion,
                 'verificado_por': request.user.get_full_name() or request.user.username,
@@ -1594,7 +1626,7 @@ class AuditoriaViewSet(viewsets.ModelViewSet):
         a.fecha_aprobacion_plan = timezone.now()
         if not a.fecha_elaboracion_plan:
             from datetime import date
-            a.fecha_elaboracion_plan = date.today()
+            a.fecha_elaboracion_plan = timezone.localdate()
         a.save()
         return self._data(a, request)
     planificar.operacion = 'editar'
@@ -1607,7 +1639,7 @@ class AuditoriaViewSet(viewsets.ModelViewSet):
             return self._error('Solo se inicia una auditoría con el plan aprobado.')
         a.estado = 'apertura'
         if not a.fecha_inicio:
-            a.fecha_inicio = timezone.now().date()
+            a.fecha_inicio = timezone.localdate()
         a.save()
         return self._data(a, request)
     iniciar.operacion = 'editar'
@@ -1683,10 +1715,31 @@ class AuditoriaViewSet(viewsets.ModelViewSet):
         a = self.get_object()
         if (err := self._exigir_etapa(a, 'plan')):
             return err
-        EquipoAuditoria.objects.filter(auditoria=a, pk=request.data.get('integrante_id')).delete()
+        for integrante in EquipoAuditoria.objects.filter(auditoria=a, pk=request.data.get('integrante_id')):
+            integrante.is_active = False  # baja lógica: queda como registro de quién integró el equipo
+            integrante.updated_by = request.user
+            integrante.save()
         a.sincronizar_lider()
         return self._data(a, request)
     quitar_integrante.operacion = 'editar'
+
+    @action(detail=True, methods=['post'])
+    def restaurar_integrante(self, request, pk=None):
+        """Vuelve al equipo auditor a un integrante dado de baja (mientras el plan esté abierto)."""
+        a = self.get_object()
+        if (err := self._exigir_etapa(a, 'plan')):
+            return err
+        m = EquipoAuditoria.todos.filter(auditoria=a, pk=request.data.get('integrante_id'), is_active=False).first()
+        if not m:
+            return self._error('Integrante dado de baja no encontrado.')
+        if m.rol == 'lider' and a.equipo.filter(rol='lider').exists():
+            return self._error('Ya hay un auditor líder en el equipo.')
+        m.is_active = True
+        m.updated_by = request.user
+        m.save()
+        a.sincronizar_lider()
+        return self._data(a, request)
+    restaurar_integrante.operacion = 'editar'
 
     @action(detail=True, methods=['post'])
     def registrar_acta(self, request, pk=None):
@@ -1725,11 +1778,11 @@ class AuditoriaViewSet(viewsets.ModelViewSet):
         if tipo == 'apertura':
             a.estado = 'en_ejecucion'
             if not a.fecha_inicio:
-                a.fecha_inicio = timezone.now().date()
+                a.fecha_inicio = timezone.localdate()
         else:
             a.estado = 'en_informe'
             if not a.fecha_fin:
-                a.fecha_fin = timezone.now().date()
+                a.fecha_fin = timezone.localdate()
         a.save()
         return self._data(a, request)
     registrar_acta.operacion = 'editar'
@@ -1814,7 +1867,7 @@ class AuditoriaViewSet(viewsets.ModelViewSet):
             descripcion=descripcion,
             requisito=request.data.get('requisito', ''),
             lugar=request.data.get('lugar', ''),
-            fecha_deteccion=timezone.now().date(),
+            fecha_deteccion=timezone.localdate(),
             auditoria=a,
             requiere_ac=(tipo in ('nc_mayor', 'nc_menor')),
         )
@@ -2184,16 +2237,20 @@ def aplicar_matriz_intervalo(eq_id, celdas, usuario):
             'incertidumbre': float(c.get('incertidumbre') or 0),
             'emp': float(c.get('emp') or 0),
         }
+    # Incluye los dados de baja: un punto y año tiene un solo registro (se reactiva si vuelve a tener datos).
     existentes = {(r.punto_id, r.anio): r for r in
-                  ResultadoIntervalo.objects.filter(punto_id__in=puntos_validos)}
-    a_borrar = [r.id for k, r in existentes.items() if k not in entrantes]
-    if a_borrar:
-        ResultadoIntervalo.objects.filter(id__in=a_borrar).delete()
+                  ResultadoIntervalo.todos.filter(punto_id__in=puntos_validos)}
+    for k, r in existentes.items():
+        if k not in entrantes and r.is_active:
+            r.is_active = False  # celda vaciada: baja lógica
+            r.updated_by = usuario
+            r.save()
     for (pid, anio), vals in entrantes.items():
         r = existentes.get((pid, anio))
         if r:
             r.resultado = vals['resultado']; r.incertidumbre = vals['incertidumbre']
             r.emp = vals['emp']; r.updated_by = usuario
+            r.is_active = True
             r.save()
         else:
             ResultadoIntervalo.objects.create(
@@ -2231,13 +2288,13 @@ class EquipoViewSet(viewsets.ModelViewSet):
                 qs = qs.filter(laboratorio__icontains=p['laboratorio'])
             if p.get('vencidos') == '1':
                 qs = qs.filter(requiere_calibracion=True,
-                               fecha_proxima_calibracion__lt=timezone.now().date())
+                               fecha_proxima_calibracion__lt=timezone.localdate())
             if p.get('por_vencer'):
                 try:
                     dias = int(p['por_vencer'])
                 except ValueError:
                     dias = 30
-                hoy = timezone.now().date()
+                hoy = timezone.localdate()
                 qs = qs.filter(requiere_calibracion=True,
                                fecha_proxima_calibracion__gte=hoy,
                                fecha_proxima_calibracion__lte=hoy + _timedelta(days=dias))
@@ -2341,10 +2398,15 @@ class EquipoViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'])
     def registrar_calibracion(self, request, pk=None):
-        """Registra la calibración: certificado, fecha y próxima (regla patrón vigente)."""
+        """Registra la calibración: certificado, fecha y próxima (regla patrón vigente). Cambia la vigencia del patrón
+        sin bitácora: solo quien aprueba en Equipos; el resto registra la calibración en la hoja de vida (pendiente de
+        aprobación)."""
         eq = self.get_object()
         if (err := self._baja(eq)):
             return err
+        if not _puede_aprobar_equipos(request):
+            return Response({'detail': 'Registre la calibración en la hoja de vida (pestaña Calibración): queda '
+                                       'pendiente de aprobación.'}, status=status.HTTP_403_FORBIDDEN)
         from datetime import date as _d
         try:
             f_ult = _d.fromisoformat(str(request.data.get('fecha_ultima_calibracion'))[:10]) \
@@ -2440,12 +2502,57 @@ class EquipoViewSet(viewsets.ModelViewSet):
             reg = eq.registros.get(pk=request.data.get('registro_id'))
         except (RegistroEquipo.DoesNotExist, ValueError, TypeError):
             return self._error('Registro no encontrado.')
+        if (err := self._baja(eq)):
+            return err
+        # Control de cambios: quitar una fila de la hoja de vida (p. ej. una calibración) sin permiso de aprobar queda
+        # pendiente; al aprobarse, el registro eliminado queda íntegro en el log de auditoría.
+        if not _puede_aprobar_equipos(request):
+            return _crear_solicitud_equipo(
+                request, entidad='registro', operacion='eliminar', equipo=eq, entidad_id=reg.pk,
+                payload={'tipo': reg.tipo, 'numero_documento': reg.numero_documento,
+                         'fecha': str(reg.fecha or '')},
+                resumen=f'Quitar de la hoja de vida de {eq.codigo}: {reg.get_tipo_display()} '
+                        f'{reg.numero_documento or ""} ({reg.fecha or "sin fecha"})')
         era_calibracion = reg.tipo == 'calibracion'
-        reg.delete()
+        reg.is_active = False  # baja lógica: el registro se conserva
+        reg.updated_by = request.user
+        reg.save()
         if era_calibracion:
             eq.actualizar_calibracion()
         return self._data(eq, request)
     eliminar_registro.operacion = 'eliminar'
+
+    @action(detail=True, methods=['post'])
+    def restaurar(self, request, pk=None):
+        """Restaura una fila de la hoja de vida o una actividad del programa dadas de baja. Body: {entidad: registro |
+        actividad, id}. Es un cambio de la hoja de vida: lo hace quien aprueba en Equipos."""
+        eq = self.get_object()
+        if (err := self._baja(eq)):
+            return err
+        if not _puede_aprobar_equipos(request):
+            return Response({'detail': 'Restaurar requiere el permiso de aprobar en Equipos.'},
+                            status=status.HTTP_403_FORBIDDEN)
+        entidad, oid = request.data.get('entidad'), request.data.get('id')
+        if entidad == 'registro':
+            reg = RegistroEquipo.todos.filter(equipo=eq, pk=oid, is_active=False).first()
+            if not reg:
+                return self._error('Registro dado de baja no encontrado.')
+            reg.is_active, reg.updated_by = True, request.user
+            reg.save()
+            if reg.tipo == 'calibracion':
+                eq.actualizar_calibracion()
+        elif entidad == 'actividad':
+            act = ActividadPrograma.todos.filter(equipo=eq, pk=oid, is_active=False).first()
+            if not act:
+                return self._error('Actividad dada de baja no encontrada.')
+            if ActividadPrograma.objects.filter(equipo=eq, tipo=act.tipo, anio=act.anio).exists():
+                return self._error(f'Ya hay una actividad vigente de {act.get_tipo_display().lower()} en {act.anio}.')
+            act.is_active, act.updated_by = True, request.user
+            act.save()
+        else:
+            return self._error('Indique qué se restaura.')
+        return self._data(eq, request)
+    restaurar.operacion = 'aprobar'
 
     @action(detail=True, methods=['post'])
     def marcar_inoperativo(self, request, pk=None):
@@ -2458,7 +2565,7 @@ class EquipoViewSet(viewsets.ModelViewSet):
             return self._error('Indique el motivo por el que el equipo queda fuera de servicio.')
         eq.estado = 'inoperativo'
         eq.motivo_inoperativo = motivo
-        eq.fecha_fuera_servicio = timezone.now().date()
+        eq.fecha_fuera_servicio = timezone.localdate()
         eq.save()
         return self._data(eq, request)
     marcar_inoperativo.operacion = 'editar'
@@ -2470,6 +2577,10 @@ class EquipoViewSet(viewsets.ModelViewSet):
             return err
         if eq.estado != 'inoperativo':
             return self._error('Solo se reactiva un equipo fuera de servicio.')
+        # Sacar un equipo de servicio es inmediato (seguridad); devolverlo al servicio lo decide quien aprueba.
+        if not _puede_aprobar_equipos(request):
+            return Response({'detail': 'Devolver el equipo al servicio requiere el permiso de aprobar en Equipos.'},
+                            status=status.HTTP_403_FORBIDDEN)
         eq.estado = 'operativo'
         eq.motivo_inoperativo = ''
         eq.fecha_fuera_servicio = None
@@ -2502,7 +2613,15 @@ class EquipoViewSet(viewsets.ModelViewSet):
         if p.get('laboratorio'):
             qs = qs.filter(laboratorio__icontains=p['laboratorio'])
         if p.get('vencidos') == '1':
-            qs = qs.filter(requiere_calibracion=True, fecha_proxima_calibracion__lt=timezone.now().date())
+            qs = qs.filter(requiere_calibracion=True, fecha_proxima_calibracion__lt=timezone.localdate())
+        if p.get('por_vencer'):   # mismo filtro que la lista: vence dentro de N días
+            try:
+                dias = int(p['por_vencer'])
+            except ValueError:
+                dias = 30
+            hoy = timezone.localdate()
+            qs = qs.filter(requiere_calibracion=True, fecha_proxima_calibracion__gte=hoy,
+                           fecha_proxima_calibracion__lte=hoy + _timedelta(days=dias))
         if p.get('buscar'):
             from django.db.models import Q
             b = p['buscar']
@@ -2541,7 +2660,7 @@ class EquipoViewSet(viewsets.ModelViewSet):
             except ValueError:
                 meses = []
         ActividadPrograma.objects.create(
-            equipo=eq, tipo=tipo, anio=int(request.data.get('anio') or timezone.now().year),
+            equipo=eq, tipo=tipo, anio=int(request.data.get('anio') or timezone.localdate().year),
             frecuencia=request.data.get('frecuencia', ''), meses=meses)
         return self._data(eq, request)
     agregar_actividad.operacion = 'editar'
@@ -2555,7 +2674,7 @@ class EquipoViewSet(viewsets.ModelViewSet):
         tipo = request.data.get('tipo')
         if tipo not in dict(ActividadPrograma._meta.get_field('tipo').choices):
             return self._error('Tipo de actividad no válido.')
-        anio = int(request.data.get('anio') or timezone.now().year)
+        anio = int(request.data.get('anio') or timezone.localdate().year)
         meses = request.data.get('meses', [])
         if isinstance(meses, str):
             import json as _json
@@ -2566,7 +2685,10 @@ class EquipoViewSet(viewsets.ModelViewSet):
         meses = [int(m) for m in meses if str(m).isdigit() and 1 <= int(m) <= 12]
         frecuencia = (request.data.get('frecuencia') or '').strip()
         if not meses and not frecuencia:
-            ActividadPrograma.objects.filter(equipo=eq, tipo=tipo, anio=anio).delete()
+            for act in ActividadPrograma.objects.filter(equipo=eq, tipo=tipo, anio=anio):
+                act.is_active = False  # se retira del programa (baja lógica)
+                act.updated_by = request.user
+                act.save()
         else:
             ActividadPrograma.objects.update_or_create(
                 equipo=eq, tipo=tipo, anio=anio,
@@ -2577,7 +2699,7 @@ class EquipoViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def programa(self, request):
         """Programa Anual consolidado: equipos (de un laboratorio) con sus actividades del año."""
-        anio = int(request.query_params.get('anio') or timezone.now().year)
+        anio = int(request.query_params.get('anio') or timezone.localdate().year)
         lab = request.query_params.get('laboratorio', '')
         # El equipamiento auxiliar no entra al programa anual (solo patrones y equipos de medición)
         qs = Equipo.objects.filter(is_active=True).exclude(clasificacion__icontains='auxiliar')
@@ -2599,7 +2721,7 @@ class EquipoViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def programa_pdf(self, request):
         """PDF del Programa Anual por año y laboratorio."""
-        anio = int(request.query_params.get('anio') or timezone.now().year)
+        anio = int(request.query_params.get('anio') or timezone.localdate().year)
         lab = request.query_params.get('laboratorio', '')
         # El equipamiento auxiliar no entra al programa anual (solo patrones y equipos de medición)
         qs = Equipo.objects.filter(is_active=True).exclude(clasificacion__icontains='auxiliar')
@@ -2696,7 +2818,7 @@ class EquipoViewSet(viewsets.ModelViewSet):
     def resumen(self, request):
         from django.db.models import Count
         qs = Equipo.objects.filter(is_active=True)
-        hoy = timezone.now().date()
+        hoy = timezone.localdate()
         return Response({
             'por_estado': dict(qs.values_list('estado').annotate(c=Count('id'))),
             'vencidos': qs.filter(requiere_calibracion=True,
@@ -2709,12 +2831,14 @@ class EquipoViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['get'])
     def ficha_pdf(self, request, pk=None):
-        """Genera el PDF de la Ficha Técnica (Hoja de Vida — página 1)."""
+        """PDF de la Ficha Técnica (solo esa pestaña). ?completa=1: la Hoja de Vida entera con sus bitácoras."""
         eq = self.get_object()
         from .ficha_pdf import generar_ficha_pdf
-        pdf = generar_ficha_pdf(eq)
+        completa = request.query_params.get('completa') == '1'
+        pdf = generar_ficha_pdf(eq, completa=completa)
         resp = HttpResponse(pdf, content_type='application/pdf')
-        resp['Content-Disposition'] = f'inline; filename="Hoja de Vida {eq.codigo}.pdf"'
+        nombre = 'Hoja de Vida' if completa else 'Ficha Tecnica'
+        resp['Content-Disposition'] = f'inline; filename="{nombre} {eq.codigo}.pdf"'
         return resp
     ficha_pdf.operacion = 'leer'
 
@@ -2759,7 +2883,7 @@ class CartaTrazabilidadViewSet(viewsets.ModelViewSet):
         ult_nodo = carta.nodos.filter(is_active=True).aggregate(m=Max('updated_at'))['m']
         candidatas = [d for d in (carta.updated_at, ult_nodo) if d]
         if candidatas:
-            carta.fecha_actualizacion = max(candidatas).date()
+            carta.fecha_actualizacion = timezone.localtime(max(candidatas)).date()
         nodos = []
         for n in carta.nodos.filter(is_active=True).order_by('orden', 'id').prefetch_related('padres'):
             nodos.append({
@@ -3075,6 +3199,16 @@ class SolicitudCambioEquipoViewSet(viewsets.ReadOnlyModelViewSet):
             if reg.tipo == 'calibracion':
                 eq.actualizar_calibracion()
             return
+        if ent == 'registro' and op == 'eliminar':
+            reg = RegistroEquipo.objects.filter(pk=sol.entidad_id, equipo=sol.equipo).first()
+            if reg:
+                era_calibracion = reg.tipo == 'calibracion'
+                reg.is_active = False  # baja lógica
+                reg.updated_by = user
+                reg.save()
+                if era_calibracion:
+                    sol.equipo.actualizar_calibracion()
+            return
 
         # --- Intervalo de calibración: guardar matriz ---
         if ent == 'intervalo':
@@ -3185,15 +3319,8 @@ class SolicitudCambioEquipoViewSet(viewsets.ReadOnlyModelViewSet):
                 if ev:
                     ev.is_active = False; ev.updated_by = user; ev.save(update_fields=['is_active', 'updated_at'])
                 return
-            if ev and ev.autorizacion:
-                a = ev.autorizacion
-                if ev.fecha:
-                    a.fecha_ultimo_seguimiento = ev.fecha
-                if ev.decision == 'suspender':
-                    a.estado = 'suspendida'
-                elif ev.decision == 'reautorizar':
-                    a.estado = 'vigente'
-                a.updated_by = user; a.save()
+            if ev:
+                aplicar_decision_seguimiento(ev, user)
             return
 
 
@@ -3267,8 +3394,9 @@ class PuntoIntervaloViewSet(viewsets.ModelViewSet):
     intervalo_pdf.operacion = 'leer'
 
 
-class ResultadoIntervaloViewSet(viewsets.ModelViewSet):
-    """Resultados anuales de un punto de intervalo de calibración."""
+class ResultadoIntervaloViewSet(viewsets.ReadOnlyModelViewSet):
+    """Resultados anuales de un punto de intervalo de calibración (consulta). Se modifican con «guardar_matriz» de los
+    puntos, que pasa por el control de cambios."""
     queryset = ResultadoIntervalo.objects.all()
     serializer_class = ResultadoIntervaloSerializer
     permission_classes = [PermisoModular]
@@ -3465,6 +3593,27 @@ class ProcesoEntrenamientoViewSet(_GateCompetencia, _CompetenciaViewSet):
     subir_adjunto.operacion = 'editar'
 
 
+def aplicar_decision_seguimiento(ev, usuario):
+    """El seguimiento mueve la fecha de último seguimiento y puede suspender/reautorizar. Solo el seguimiento más
+    reciente decide: corregir uno antiguo no vuelve a aplicar su decisión ni retrocede la fecha."""
+    from .models import EvaluacionSeguimiento
+    a = ev.autorizacion
+    if not a:
+        return
+    seguimientos = EvaluacionSeguimiento.objects.filter(autorizacion=a, is_active=True)
+    ultimo = seguimientos.order_by('-fecha', '-id').first()
+    fechas = [f for f in seguimientos.values_list('fecha', flat=True) if f]
+    if fechas:
+        a.fecha_ultimo_seguimiento = max(fechas)
+    if ultimo is not None and ultimo.pk == ev.pk:
+        if ev.decision == 'suspender':
+            a.estado = 'suspendida'
+        elif ev.decision == 'reautorizar':
+            a.estado = 'vigente'
+    a.updated_by = usuario
+    a.save()
+
+
 class EvaluacionSeguimientoViewSet(_GateCompetencia, _CompetenciaViewSet):
     """Seguimiento de la competencia (entrevistas / controles de validez) con decisión."""
     entidad_solicitud = 'seguimiento'
@@ -3489,18 +3638,7 @@ class EvaluacionSeguimientoViewSet(_GateCompetencia, _CompetenciaViewSet):
         self._aplicar_decision(ev)
 
     def _aplicar_decision(self, ev):
-        """El seguimiento mueve la fecha de último seguimiento y puede suspender/reautorizar."""
-        a = ev.autorizacion
-        if not a:
-            return
-        if ev.fecha:
-            a.fecha_ultimo_seguimiento = ev.fecha
-        if ev.decision == 'suspender':
-            a.estado = 'suspendida'
-        elif ev.decision == 'reautorizar':
-            a.estado = 'vigente'
-        a.updated_by = self.request.user
-        a.save()
+        aplicar_decision_seguimiento(ev, self.request.user)
 
     @action(detail=True, methods=['get'])
     def seguimiento_pdf(self, request, pk=None):

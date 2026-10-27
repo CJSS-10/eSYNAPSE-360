@@ -46,6 +46,14 @@ class CambioViewSet(viewsets.ModelViewSet):
     modulo = 'cambios'
     parser_classes = [JSONParser, MultiPartParser, FormParser]
 
+
+    def get_object(self):
+        """Un registro anulado se consulta, pero no avanza en el flujo ni se modifica."""
+        obj = super().get_object()
+        if self.request.method not in ('GET', 'HEAD', 'OPTIONS') and not getattr(obj, 'is_active', True):
+            from rest_framework.exceptions import ValidationError
+            raise ValidationError({'detail': f'{obj.codigo} está anulado: no se modifica.'})
+        return obj
     def get_serializer_class(self):
         return CambioListaSerializer if self.action in ('list',) else CambioSerializer
 
@@ -193,7 +201,7 @@ class CambioViewSet(viewsets.ModelViewSet):
             return self._error('Confirme con su contraseña para firmar la resolución.')
         if not request.user.check_password(password):
             return self._error('Contraseña incorrecta. La resolución no se registró.')
-        u, ahora = request.user, timezone.now()
+        u, ahora = request.user, timezone.localtime()
         c.resultado = 'aprobado' if aprobado else 'rechazado'
         c.resuelto_por = u
         c.fecha_resolucion = ahora
@@ -227,7 +235,7 @@ class CambioViewSet(viewsets.ModelViewSet):
         if not motivo:
             return self._error('Indique qué se ajusta para la reevaluación.')
         c.historial = list(c.historial or []) + [{
-            'fecha': timezone.now().isoformat(timespec='minutes'),
+            'fecha': timezone.localtime().isoformat(timespec='minutes'),
             'usuario': request.user.get_full_name() or request.user.username, 'accion': 'Reevaluación',
             'motivo': motivo}]
         c.estado, c.resultado = 'en_evaluacion', ''
@@ -246,7 +254,7 @@ class CambioViewSet(viewsets.ModelViewSet):
         if not motivo:
             return self._error('Indique el motivo del archivo.')
         c.historial = list(c.historial or []) + [{
-            'fecha': timezone.now().isoformat(timespec='minutes'),
+            'fecha': timezone.localtime().isoformat(timespec='minutes'),
             'usuario': request.user.get_full_name() or request.user.username, 'accion': 'Archivado',
             'motivo': motivo}]
         c.estado = 'archivado'
@@ -422,7 +430,7 @@ class CambioViewSet(viewsets.ModelViewSet):
                                + '. La versión anterior rige hasta que se apruebe la nueva.')
         if c.sac_derivada_id and not (c.sac_derivada.estado or '').startswith('cerrada'):
             return self._error(f'La acción correctiva derivada {c.sac_derivada.codigo} aún no está cerrada.')
-        u, ahora = request.user, timezone.now()
+        u, ahora = request.user, timezone.localtime()
         c.verificado_por = c.verificado_por or u
         c.fecha_verificacion = c.fecha_verificacion or ahora
         if c.queda_en_vigor:
@@ -457,7 +465,7 @@ class CambioViewSet(viewsets.ModelViewSet):
             return self._error('Confirme con su contraseña para firmar la prórroga.')
         if not request.user.check_password(password):
             return self._error('Contraseña incorrecta. La prórroga no se registró.')
-        u, ahora = request.user, timezone.now()
+        u, ahora = request.user, timezone.localtime()
         c.prorrogas = list(c.prorrogas or []) + [{
             'fecha': ahora.isoformat(timespec='seconds'), 'usuario_id': u.pk,
             'usuario': u.get_full_name() or u.username, 'sigla': u.sigla_cargo, 'ip': get_client_ip(request),
@@ -485,7 +493,7 @@ class CambioViewSet(viewsets.ModelViewSet):
         detalle = (request.data.get('detalle') or '').strip()
         if not detalle:
             return self._error('Describa qué se restituyó al terminar el cambio temporal.')
-        u, ahora = request.user, timezone.now()
+        u, ahora = request.user, timezone.localtime()
         c.fin_temporal_fecha, c.fin_temporal_detalle, c.fin_temporal_por = fecha, detalle, u
         if request.FILES.get('evidencia'):
             c.fin_temporal_evidencia = request.FILES['evidencia']
@@ -522,7 +530,7 @@ class CambioViewSet(viewsets.ModelViewSet):
         if not motivo:
             return self._error('Indique el motivo de la reapertura.')
         c.reaperturas = list(c.reaperturas or []) + [{
-            'fecha': timezone.now().isoformat(timespec='minutes'),
+            'fecha': timezone.localtime().isoformat(timespec='minutes'),
             'usuario': request.user.get_full_name() or request.user.username, 'motivo': motivo,
             'cerrado_por': c.cerrado_por.get_full_name() if c.cerrado_por_id else '',
             'fecha_cierre': c.fecha_cierre.isoformat(timespec='minutes') if c.fecha_cierre else '',

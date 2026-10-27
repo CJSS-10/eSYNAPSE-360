@@ -32,6 +32,14 @@ class QuejaViewSet(viewsets.ModelViewSet):
     modulo = 'quejas'
     parser_classes = [JSONParser, MultiPartParser, FormParser]
 
+
+    def get_object(self):
+        """Un registro anulado se consulta, pero no avanza en el flujo ni se modifica."""
+        obj = super().get_object()
+        if self.request.method not in ('GET', 'HEAD', 'OPTIONS') and not getattr(obj, 'is_active', True):
+            from rest_framework.exceptions import ValidationError
+            raise ValidationError({'detail': f'{obj.codigo} está anulado: no se modifica.'})
+        return obj
     def get_serializer_class(self):
         return QuejaListaSerializer if self.action == 'list' else QuejaSerializer
 
@@ -87,7 +95,7 @@ class QuejaViewSet(viewsets.ModelViewSet):
     def destroy(self, request, *args, **kwargs):
         """Anula (baja lógica) una queja registrada por error, antes de validarla."""
         q = self.get_object()
-        if q.estado != 'recibida':
+        if q.estado != 'recibida' or q.fecha_validacion or q.reaperturas:
             return self._error('Solo se anula una queja aún no validada; después se trata hasta su cierre.')
         q.is_active = False
         q.updated_by = request.user
@@ -244,7 +252,7 @@ class QuejaViewSet(viewsets.ModelViewSet):
         if q.involucrados.filter(pk=notificador.pk).exists():
             return self._error(f'{notificador.get_full_name() or notificador.username} está involucrado en el origen '
                                'de la queja: la notifica alguien del Área SIG o Comercial no involucrado.')
-        ahora = timezone.now()
+        ahora = timezone.localtime()
         ComunicacionQueja.objects.create(
             queja=q, tipo='resultado' if q.resultado == 'procedente' else 'no_procede', fecha=ahora, medio=medio,
             resumen=texto, created_by=request.user, updated_by=request.user)
@@ -270,7 +278,7 @@ class QuejaViewSet(viewsets.ModelViewSet):
         if not motivo:
             return self._error('Indique el motivo de la reapertura.')
         q.reaperturas = list(q.reaperturas or []) + [{
-            'fecha': timezone.now().isoformat(timespec='minutes'),
+            'fecha': timezone.localtime().isoformat(timespec='minutes'),
             'usuario': request.user.get_full_name() or request.user.username, 'motivo': motivo,
             'resultado': q.resultado, 'comunicacion_cliente': q.comunicacion_cliente,
             'conformidad_cliente': q.conformidad_cliente,

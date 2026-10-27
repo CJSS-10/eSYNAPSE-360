@@ -197,7 +197,7 @@ def generar_emo_pdf(ev) -> bytes:
         KeepTogether(_tabla([[P('RESPONSABLE DEL REGISTRO', TH), ''],
                              [P('Nombre:', THL), P(f.get('nombre', ''), TDL)],
                              [P('Cargo:', THL), P(f.get('cargo', ''), TDL)],
-                             [P('Fecha:', THL), P(_solo_fecha((f.get('fecha') or '')[:10]), TDL)],
+                             [P('Fecha:', THL), P(_solo_fecha(f.get('fecha') or ''), TDL)],
                              [P('Firma:', THL), P('Firmado electrónicamente' if f else '', TDL)]],
                             [8, 30], W * 0.6, extra=[('SPAN', (0, 0), (1, 0))], cabeceras=[0], izquierda=True)),
     ]

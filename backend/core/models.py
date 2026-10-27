@@ -209,6 +209,12 @@ class LogAuditoria(models.Model):
     def save(self, *args, **kwargs):
         if self.pk is not None:
             raise PermissionError('El log de auditoría es inmutable: no se puede editar una entrada.')
+        # Textos recortados a su longitud: PostgreSQL rechaza lo que SQLite acepta en silencio.
+        for f in self._meta.fields:
+            if isinstance(f, models.CharField) and f.max_length:
+                v = getattr(self, f.attname)
+                if isinstance(v, str) and len(v) > f.max_length:
+                    setattr(self, f.attname, v[:f.max_length])
         super().save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
@@ -317,3 +323,21 @@ class OpcionCatalogo(models.Model):
 
     def __str__(self):
         return f'{self.get_tipo_display()}: {self.nombre}'
+
+
+class Ubigeo(models.Model):
+    """Ubicación geográfica del Perú (codificación INEI): departamento, provincia y distrito. Catálogo de referencia
+    común a todo el sistema (sedes, y más adelante clientes y proveedores); se carga completo y no se edita a mano."""
+    codigo = models.CharField('Ubigeo', max_length=6, primary_key=True)
+    departamento = models.CharField('Departamento', max_length=60)
+    provincia = models.CharField('Provincia', max_length=80)
+    distrito = models.CharField('Distrito', max_length=80)
+    is_active = models.BooleanField('Vigente', default=True)
+
+    class Meta:
+        verbose_name = 'Ubigeo'
+        verbose_name_plural = 'Ubigeos'
+        ordering = ['codigo']
+
+    def __str__(self):
+        return f'{self.distrito}, {self.provincia}, {self.departamento}'
